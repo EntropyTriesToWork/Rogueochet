@@ -6,9 +6,8 @@ public class EnemyManager : MonoBehaviour
     public static EnemyManager Instance { get; private set; }
 
     [Header("Enemy Prefabs")]
-    public GameObject EnemySquarePrefab;
-    public GameObject EnemyTrianglePrefab;
-    public GameObject EnemyCirclePrefab;
+    [Tooltip("Optional fallback prefab used only by the procedural fallback wave generator.")]
+    public GameObject FallbackEnemyPrefab;
 
     [Header("Grid Layout — Horizontal")]
     [Tooltip("X position of the rightmost column (right side of screen).")]
@@ -131,25 +130,27 @@ public class EnemyManager : MonoBehaviour
 
         EnemySpawnInfo info = _spawnQueue.Dequeue();
 
-        // Place in the next available column slot, applying any advance offset
+        if (info.Prefab == null)
+        {
+            Debug.LogWarning("[EnemyManager] EnemySpawnInfo has no Prefab assigned — skipping.");
+            return;
+        }
+
         int col = _nextSpawnCol % _waveColumns;
         int row = (_nextSpawnCol / _waveColumns) % _waveRows;
         _nextSpawnCol++;
 
         Vector3 pos = new Vector3(
-            StartX - col * SpacingX + _totalAdvanceX,   // respect current advance
+            StartX - col * SpacingX + _totalAdvanceX,
             _gridTopY - row * SpacingY,
             0f
         );
 
-        GameObject prefab = GetPrefabForShape(info.Shape);
-        if (prefab == null) return;
-
-        GameObject go = Instantiate(prefab, pos, Quaternion.identity);
+        GameObject go = Instantiate(info.Prefab, pos, Quaternion.identity);
         Enemy enemy = go.GetComponent<Enemy>();
         if (enemy != null)
         {
-            enemy.Initialize(info.HP, info.EssenceReward);
+            enemy.Initialize(info.BaseHP, info.EssenceReward);
             _activeEnemies.Add(enemy);
         }
     }
@@ -208,9 +209,9 @@ public class EnemyManager : MonoBehaviour
 
     WaveData GenerateFallbackWave(int waveNumber)
     {
-        WaveData fallback       = ScriptableObject.CreateInstance<WaveData>();
-        fallback.Rows           = 3;
-        fallback.Columns        = 4;
+        WaveData fallback         = ScriptableObject.CreateInstance<WaveData>();
+        fallback.Rows             = 3;
+        fallback.Columns          = 4;
         fallback.MaxActiveEnemies = 5;
 
         int total = fallback.Rows * fallback.Columns;
@@ -219,22 +220,11 @@ public class EnemyManager : MonoBehaviour
         {
             fallback.Enemies[i] = new EnemySpawnInfo
             {
-                HP            = waveNumber + 1,
-                EssenceReward = waveNumber,
-                Shape         = EnemyShape.Square
+                Prefab        = FallbackEnemyPrefab,
+                BaseHP        = waveNumber + 1,
+                EssenceReward = waveNumber
             };
         }
         return fallback;
-    }
-
-    GameObject GetPrefabForShape(EnemyShape shape)
-    {
-        return shape switch
-        {
-            EnemyShape.Square   => EnemySquarePrefab,
-            EnemyShape.Triangle => EnemyTrianglePrefab,
-            EnemyShape.Circle   => EnemyCirclePrefab,
-            _                   => EnemySquarePrefab
-        };
     }
 }

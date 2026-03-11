@@ -12,22 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2905832cb133299499008f9d40b8d883, type: 3}
   m_Name: WaveData
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
-  Rows: 5
+  Rows: 2
   Columns: 1
   MaxActiveEnemies: 0
   Enemies:
-  - Shape: 0
-    HP: 2
-    EssenceReward: 0
-  - Shape: 0
-    HP: 2
+  - Prefab: {fileID: 3882468849211464338, guid: 484960dd994c3f044ac039f7134dbf47, type: 3}
+    BaseHP: 2
     EssenceReward: 1
-  - Shape: 0
-    HP: 2
-    EssenceReward: 1
-  - Shape: 0
-    HP: 2
-    EssenceReward: 1
-  - Shape: 0
-    HP: 2
+  - Prefab: {fileID: 3882468849211464338, guid: 484960dd994c3f044ac039f7134dbf47, type: 3}
+    BaseHP: 2
     EssenceReward: 1

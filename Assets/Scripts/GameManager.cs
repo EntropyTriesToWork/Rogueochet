@@ -64,6 +64,7 @@ public class GameManager : MonoBehaviour
     {
         AddEssence(essenceReward);
         _remainingEnemies = Mathf.Max(0, _remainingEnemies - 1);
+        if (AllEnemiesCleared()) { ChangeState(GameState.RoundEnd); }
     }
 
     void HandleEnemyReachedPaddle(Enemy enemy)

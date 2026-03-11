@@ -6,11 +6,11 @@ public class Ball : MonoBehaviour
 {
     [Header("Damage")]
     public int Damage = 1;
-    public float InitialSpeed = 5;
+    public float InitialSpeed = 5f;
 
-    [Header("Ball HP")]
-    public int MaxHP = 5;
-    public int CurrentHP { get; private set; }
+    [Header("Ball Durability")]
+    public int MaxDurability = 5;
+    public int CurrentDurability { get; private set; }
 
     [Header("Physics Correction")]
     [Tooltip("Minimum horizontal speed to prevent vertical-lock bouncing.")]
@@ -19,8 +19,8 @@ public class Ball : MonoBehaviour
     public float PaddleDeflectionRandomRange = 3f;
 
     [Header("Speed Ramp")]
-    [Tooltip("Target speed when the ramp timer fires (5x the launch speed is set by BallManager).")]
-    public float MaxRampSpeed = 50f;
+    [Tooltip("Target timeScale to ramp up to. Set by BallManager.")]
+    public float MaxRampSpeed = 50f;     // kept for SpawnExtraBall compatibility; unused when using timeScale ramp
     [Tooltip("How quickly the ball accelerates toward MaxRampSpeed after the ramp triggers.")]
     public float RampAcceleration = 20f;
 
@@ -30,7 +30,6 @@ public class Ball : MonoBehaviour
 
     private Rigidbody2D _rb;
     private bool _launched = false;
-    private bool _rampActive = false;
     private bool _isDead = false;
 
     void Awake()
@@ -41,23 +40,12 @@ public class Ball : MonoBehaviour
         _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         _rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
-
-    void OnEnable()
-    {
-        GameEvents.OnBallSpeedRampTriggered += HandleSpeedRamp;
-    }
-
-    void OnDisable()
-    {
-        GameEvents.OnBallSpeedRampTriggered -= HandleSpeedRamp;
-    }
-
     public void Launch(Vector2 direction)
     {
-        CurrentHP = MaxHP;
-        _rb.linearVelocity = direction * InitialSpeed;
+        CurrentDurability = MaxDurability;
+        _rb.linearVelocity = direction.normalized * InitialSpeed;
         _launched = true;
-        GameEvents.BallHPChanged(this, CurrentHP, MaxHP);
+        GameEvents.BallDurabilityChanged(this, CurrentDurability, MaxDurability);
     }
 
     void Update()
@@ -69,17 +57,6 @@ public class Ball : MonoBehaviour
             Die(lost: true);
             return;
         }
-
-        // Gradually ramp speed up to MaxRampSpeed once triggered
-        if (_rampActive && _rb.linearVelocity.sqrMagnitude > 0)
-        {
-            float current = _rb.linearVelocity.magnitude;
-            if (current < MaxRampSpeed)
-            {
-                float newSpeed = Mathf.MoveTowards(current, MaxRampSpeed, RampAcceleration * Time.deltaTime);
-                _rb.linearVelocity = _rb.linearVelocity.normalized * newSpeed;
-            }
-        }
     }
 
     void OnCollisionEnter2D(Collision2D col)
@@ -89,25 +66,27 @@ public class Ball : MonoBehaviour
         if (col.gameObject.TryGetComponent<Enemy>(out Enemy enemy))
         {
             enemy.TakeDamage(Damage);
-            TakeHPDamage(5);  // hitting an enemy costs the ball 2 hp
+            LoseDurability(5);      // hitting an enemy costs more durability
         }
         else if (col.gameObject.TryGetComponent<PaddleController>(out _))
         {
             ApplyPaddleDeflection();
         }
-        else //Wall
+        else
         {
-            TakeHPDamage(1);
+            // Wall hit
+            LoseDurability(1);
         }
 
         CorrectHorizontalSpeed();
     }
-    void TakeHPDamage(int amt)
-    {
-        CurrentHP -= amt;
-        GameEvents.BallHPChanged(this, CurrentHP, MaxHP);
 
-        if (CurrentHP <= 0)
+    void LoseDurability(int amt)
+    {
+        CurrentDurability -= amt;
+        GameEvents.BallDurabilityChanged(this, CurrentDurability, MaxDurability);
+
+        if (CurrentDurability <= 0)
             Die(lost: false);
     }
 
@@ -117,25 +96,16 @@ public class Ball : MonoBehaviour
         _isDead = true;
 
         if (lost)
-            BallManager.Instance.OnBallLost(this);   // fell behind paddle
+            BallManager.Instance.OnBallLost(this);      // fell behind paddle
         else
-            BallManager.Instance.OnBallDestroyed(this); // ran out of HP
+            BallManager.Instance.OnBallDestroyed(this); // ran out of durability
     }
-    void ApplyPaddleDeflection() // Adds a small random Y component on paddle bounce so the ball never gets locked into a perfectly horizontal back-and-forth.
+    void ApplyPaddleDeflection()
     {
         Vector2 vel = _rb.linearVelocity;
         float nudge = Random.Range(-PaddleDeflectionRandomRange, PaddleDeflectionRandomRange);
         vel.y += nudge;
         _rb.linearVelocity = vel.normalized * vel.magnitude;
-    }
-    void HandleSpeedRamp()
-    {
-        _rampActive = true;
-    }
-
-    public void ActivateRamp()
-    {
-        _rampActive = true;
     }
 
     void CorrectHorizontalSpeed()

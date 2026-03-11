@@ -2,11 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Manages all UI screens and HUD elements.
-/// Subscribes to GameEvents exclusively — no polling, no direct manager calls except
-/// for reading read-only state (wave number, max health) from GameManager.
-/// </summary>
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
@@ -49,9 +44,6 @@ public class UIManager : MonoBehaviour
     {
         UnsubscribeFromEvents();
     }
-
-    // ── Event Wiring ───────────────────────────────────────────────
-
     public void SubscribeToEvents()
     {
         GameEvents.OnPlayerHealthChanged  += OnHealthChanged;
@@ -111,7 +103,7 @@ public class UIManager : MonoBehaviour
         if (TimerLabel != null)
         {
             TimerLabel.text  = Utils.FormatTimeToMinutes(0f);
-            TimerLabel.color = Color.white;
+            TimerLabel.color = Color.black;
         }
     }
 
@@ -141,16 +133,12 @@ public class UIManager : MonoBehaviour
         if (TimerLabel != null)
             TimerLabel.text = Utils.FormatTimeToMinutes(elapsed);
     }
-
     void OnSpeedRamp()
     {
         if (TimerLabel != null)
             TimerLabel.color = Color.red;
         SetStatus("SPEED RAMP!");
     }
-
-    // ── Helpers ────────────────────────────────────────────────────
-
     public void SetStatus(string message)
     {
         if (StatusLabel != null)

@@ -4,8 +4,8 @@ using TMPro;
 public class Enemy : MonoBehaviour
 {
     [Header("Stats")]
-    public int MaxHP = 3;
-    public int CurrentHP { get; private set; }
+    public int MaxHP {  get; protected set; }
+    public int CurrentHP { get; protected set; }
     public int EssenceReward = 1;
 
     [Header("UI")]
@@ -27,18 +27,15 @@ public class Enemy : MonoBehaviour
     {
         if (SpriteRenderer == null)
             SpriteRenderer = GetComponent<SpriteRenderer>();
-
         if (SpriteRenderer != null)
             _originalColor = SpriteRenderer.color;
 
-        if (usesLabel) { HPLabel.gameObject.SetActive(true); } else { HPLabel.gameObject.SetActive(false); }
+        if (usesLabel)  { HPLabel.gameObject.SetActive(true);  } else { HPLabel.gameObject.SetActive(false);  }
         if (usesVisual) { HPVisual.gameObject.SetActive(true); } else { HPVisual.gameObject.SetActive(false); }
     }
-
     void Update()
     {
         if (!_isFlashing) return;
-
         _flashTimer -= Time.deltaTime;
         if (_flashTimer <= 0f)
         {
@@ -47,7 +44,6 @@ public class Enemy : MonoBehaviour
                 SpriteRenderer.color = _originalColor;
         }
     }
-
     public void Initialize(int baseHP, int essenceReward)
     {
         MaxHP         = EnemyStats.ComputeMaxHP(baseHP);
@@ -55,37 +51,31 @@ public class Enemy : MonoBehaviour
         EssenceReward = essenceReward;
         UpdateHPVisual();
     }
-
     public void TakeDamage(int damage)
     {
         if (CurrentHP <= 0) return;
-
         CurrentHP -= damage;
         UpdateHPVisual();
         FlashDamage();
-
         GameEvents.EnemyDamaged(this, damage, CurrentHP);
         Debug.Log($"[Enemy] {name} took {damage}. HP: {CurrentHP}/{MaxHP}");
-
         if (CurrentHP <= 0)
             Die();
     }
-
     void Die()
     {
         GameEvents.EnemyDied(this, EssenceReward);
-        EnemyManager.Instance.OnEnemyDied(this);
         Destroy(gameObject);
     }
-
     public void OnReachedPaddle()
     {
         EnemyManager.Instance.OnEnemyDied(this);
         Destroy(gameObject);
     }
+
     void UpdateHPVisual()
     {
-        if (HPLabel != null && usesLabel) HPLabel.text = CurrentHP.ToString();
+        if (HPLabel  != null && usesLabel)  HPLabel.text = CurrentHP.ToString();
         if (HPVisual != null && usesVisual) HPVisual.localScale = Vector3.one * ((float)CurrentHP / MaxHP);
     }
 
@@ -93,7 +83,8 @@ public class Enemy : MonoBehaviour
     {
         if (SpriteRenderer == null) return;
         SpriteRenderer.color = DamageFlashColor;
-        _flashTimer  = FlashDuration;
-        _isFlashing  = true;
+        _flashTimer = FlashDuration;
+        _isFlashing = true;
     }
 }
+
