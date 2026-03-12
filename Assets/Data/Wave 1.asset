@@ -17,7 +17,7 @@ MonoBehaviour:
   EmptyCellChance: 0
   MaxActiveEnemies: 10
   MaxSpawnedEnemies: 10
-  BaseHP: 10
+  BaseHP: 11
   WaveHPMultiplier: 1
   EnemyPool:
   - Prefab: {fileID: 3882468849211464338, guid: 484960dd994c3f044ac039f7134dbf47, type: 3}
