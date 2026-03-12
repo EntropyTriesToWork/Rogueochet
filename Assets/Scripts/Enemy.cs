@@ -4,7 +4,7 @@ using TMPro;
 public class Enemy : MonoBehaviour
 {
     [Header("Stats")]
-    public int MaxHP {  get; protected set; }
+    public int MaxHP { get; protected set; }
     public int CurrentHP { get; protected set; }
     public int EssenceReward = 1;
 
@@ -30,9 +30,10 @@ public class Enemy : MonoBehaviour
         if (SpriteRenderer != null)
             _originalColor = SpriteRenderer.color;
 
-        if (usesLabel)  { HPLabel.gameObject.SetActive(true);  } else { HPLabel.gameObject.SetActive(false);  }
-        if (usesVisual) { HPVisual.gameObject.SetActive(true); } else { HPVisual.gameObject.SetActive(false); }
+        if (usesLabel) HPLabel.gameObject.SetActive(true); else HPLabel.gameObject.SetActive(false);
+        if (usesVisual) HPVisual.gameObject.SetActive(true); else HPVisual.gameObject.SetActive(false);
     }
+
     void Update()
     {
         if (!_isFlashing) return;
@@ -44,13 +45,14 @@ public class Enemy : MonoBehaviour
                 SpriteRenderer.color = _originalColor;
         }
     }
-    public void Initialize(int baseHP, int essenceReward)
+    public void Initialize(int resolvedHP, int essenceReward)
     {
-        MaxHP         = EnemyStats.ComputeMaxHP(baseHP);
-        CurrentHP     = MaxHP;
+        MaxHP = EnemyStats.ComputeMaxHP(resolvedHP);
+        CurrentHP = MaxHP;
         EssenceReward = essenceReward;
         UpdateHPVisual();
     }
+
     public void TakeDamage(int damage)
     {
         if (CurrentHP <= 0) return;
@@ -62,11 +64,13 @@ public class Enemy : MonoBehaviour
         if (CurrentHP <= 0)
             Die();
     }
+
     void Die()
     {
         GameEvents.EnemyDied(this, EssenceReward);
         Destroy(gameObject);
     }
+
     public void OnReachedPaddle()
     {
         EnemyManager.Instance.OnEnemyDied(this);
@@ -75,7 +79,7 @@ public class Enemy : MonoBehaviour
 
     void UpdateHPVisual()
     {
-        if (HPLabel  != null && usesLabel)  HPLabel.text = CurrentHP.ToString();
+        if (HPLabel != null && usesLabel) HPLabel.text = CurrentHP.ToString();
         if (HPVisual != null && usesVisual) HPVisual.localScale = Vector3.one * ((float)CurrentHP / MaxHP);
     }
 
@@ -87,4 +91,3 @@ public class Enemy : MonoBehaviour
         _isFlashing = true;
     }
 }
-

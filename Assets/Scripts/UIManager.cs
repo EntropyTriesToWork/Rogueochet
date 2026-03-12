@@ -103,7 +103,7 @@ public class UIManager : MonoBehaviour
         if (TimerLabel != null)
         {
             TimerLabel.text  = Utils.FormatTimeToMinutes(0f);
-            TimerLabel.color = Color.black;
+            TimerLabel.color = Color.white;
         }
     }
 

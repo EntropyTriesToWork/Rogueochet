@@ -1,0 +1,1764 @@
+fileFormatVersion: 2
+guid: 6552ac2b6a2d68d429eb1a21ed724362
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5258132437829971901
+    second: UI books & more_0
+  - first:
+      213: -7389965578554813547
+    second: UI books & more_1
+  - first:
+      213: 8621789924122858652
+    second: UI books & more_2
+  - first:
+      213: -7969449517761152452
+    second: UI books & more_3
+  - first:
+      213: -2844071771128460039
+    second: UI books & more_4
+  - first:
+      213: -1983533664188709143
+    second: UI books & more_5
+  - first:
+      213: 2097378981269995227
+    second: UI books & more_6
+  - first:
+      213: -1480758496604107063
+    second: UI books & more_7
+  - first:
+      213: 3136016307045954798
+    second: UI books & more_8
+  - first:
+      213: 772928226838273668
+    second: UI books & more_9
+  - first:
+      213: 3753526078364807342
+    second: UI books & more_10
+  - first:
+      213: -8399763048273731415
+    second: UI books & more_11
+  - first:
+      213: 7331560371064398680
+    second: UI books & more_12
+  - first:
+      213: -2775540862943082245
+    second: UI books & more_13
+  - first:
+      213: -7199870867709024975
+    second: UI books & more_14
+  - first:
+      213: 8559967888716000545
+    second: UI books & more_15
+  - first:
+      213: 386286977431675425
+    second: UI books & more_16
+  - first:
+      213: 6795588727444399678
+    second: UI books & more_17
+  - first:
+      213: -1009361758164908051
+    second: UI books & more_18
+  - first:
+      213: 3894893087002250117
+    second: UI books & more_19
+  - first:
+      213: -6545197753736430578
+    second: UI books & more_20
+  - first:
+      213: 1481357427042568723
+    second: UI books & more_21
+  - first:
+      213: -2353526848844238307
+    second: UI books & more_22
+  - first:
+      213: 2230185814778447186
+    second: UI books & more_23
+  - first:
+      213: 3783645329634328529
+    second: UI books & more_24
+  - first:
+      213: 8309000872551644823
+    second: UI books & more_25
+  - first:
+      213: 526508308369210386
+    second: UI books & more_26
+  - first:
+      213: 159131790719937036
+    second: UI books & more_27
+  - first:
+      213: -441437913772124587
+    second: UI books & more_28
+  - first:
+      213: -3898119315359276772
+    second: UI books & more_29
+  - first:
+      213: 2590381481844359254
+    second: UI books & more_30
+  - first:
+      213: -4170607679083526149
+    second: UI books & more_31
+  - first:
+      213: -2121557900372677122
+    second: UI books & more_32
+  - first:
+      213: -1654875548751983693
+    second: UI books & more_33
+  - first:
+      213: -4692083674096995432
+    second: UI books & more_34
+  - first:
+      213: -4055492453468482379
+    second: UI books & more_35
+  - first:
+      213: 9035297808423477395
+    second: UI books & more_36
+  - first:
+      213: 2619554048971415842
+    second: UI books & more_37
+  - first:
+      213: -2204527734594248259
+    second: UI books & more_38
+  - first:
+      213: -1304260315744694724
+    second: UI books & more_39
+  - first:
+      213: 2843788215629751549
+    second: UI books & more_40
+  - first:
+      213: -4078776599635825284
+    second: UI books & more_41
+  - first:
+      213: -4835812231388611713
+    second: UI books & more_42
+  - first:
+      213: -4128262561444959546
+    second: UI books & more_43
+  - first:
+      213: -1951980920401348687
+    second: UI books & more_44
+  - first:
+      213: 2304837704982891359
+    second: UI books & more_45
+  - first:
+      213: -4904210715455956028
+    second: UI books & more_46
+  - first:
+      213: 8898348960371703912
+    second: UI books & more_47
+  - first:
+      213: -1795502987866008327
+    second: UI books & more_48
+  - first:
+      213: -8319236643493697860
+    second: UI books & more_49
+  - first:
+      213: 6402001219358911698
+    second: UI books & more_50
+  - first:
+      213: 1065197286458462964
+    second: UI books & more_51
+  - first:
+      213: -1323994456668542664
+    second: UI books & more_52
+  - first:
+      213: -6123595850289118788
+    second: UI books & more_53
+  - first:
+      213: 8434811791994195836
+    second: UI books & more_54
+  - first:
+      213: -107390913977004630
+    second: UI books & more_55
+  - first:
+      213: -2446744727746141505
+    second: UI books & more_56
+  - first:
+      213: 3371098629753146293
+    second: UI books & more_57
+  - first:
+      213: -4792393150133718712
+    second: UI books & more_58
+  - first:
+      213: 1654468490791628367
+    second: UI books & more_59
+  - first:
+      213: 3574922675190073455
+    second: UI books & more_60
+  - first:
+      213: 1550211762727366643
+    second: UI books & more_61
+  - first:
+      213: -3916080638858816288
+    second: UI books & more_62
+  - first:
+      213: -2942268742260284929
+    second: UI books & more_63
+  - first:
+      213: -6235990007123159517
+    second: UI books & more_64
+  - first:
+      213: -578336378378842696
+    second: UI books & more_65
+  - first:
+      213: 6536957260594621399
+    second: UI books & more_66
+  - first:
+      213: 1025494644773370982
+    second: UI books & more_67
+  - first:
+      213: 5067317257638565689
+    second: UI books & more_68
+  - first:
+      213: -6495758069129680295
+    second: UI books & more_69
+  - first:
+      213: -8341515013737208070
+    second: UI books & more_70
+  - first:
+      213: -778557295044447464
+    second: UI books & more_71
+  - first:
+      213: 9045513247881426664
+    second: UI books & more_72
+  - first:
+      213: -4118578088667131618
+    second: UI books & more_73
+  - first:
+      213: 6942198719307348239
+    second: UI books & more_74
+  - first:
+      213: 966708068957566461
+    second: UI books & more_75
+  - first:
+      213: 8575142301195893229
+    second: UI books & more_76
+  - first:
+      213: 264150479479901694
+    second: UI books & more_77
+  - first:
+      213: 3818106972110932130
+    second: UI books & more_78
+  - first:
+      213: 791677276758404187
+    second: UI books & more_79
+  - first:
+      213: 6328467073942022083
+    second: UI books & more_80
+  - first:
+      213: -9051410147622956773
+    second: UI books & more_81
+  - first:
+      213: 1528082072937983485
+    second: UI books & more_82
+  - first:
+      213: 2279893490021834700
+    second: UI books & more_83
+  - first:
+      213: -2320190114573181840
+    second: UI books & more_84
+  - first:
+      213: -4378483411037288885
+    second: UI books & more_85
+  - first:
+      213: 1055186483872569569
+    second: UI books & more_86
+  - first:
+      213: -5104572135885859008
+    second: UI books & more_87
+  - first:
+      213: 6405703114277812924
+    second: UI books & more_88
+  - first:
+      213: -5134312846325314214
+    second: UI books & more_89
+  - first:
+      213: -2712321978071333851
+    second: UI books & more_90
+  - first:
+      213: 8583923992376683793
+    second: UI books & more_91
+  - first:
+      213: -8540858092471713661
+    second: UI books & more_92
+  - first:
+      213: 3028294325138079445
+    second: UI books & more_93
+  - first:
+      213: -7215691709308257685
+    second: UI books & more_94
+  - first:
+      213: 4180538570168681909
+    second: UI books & more_95
+  - first:
+      213: -5916957552040872278
+    second: UI books & more_96
+  - first:
+      213: -3354186203942271719
+    second: UI books & more_97
+  - first:
+      213: 4977379303211936881
+    second: UI books & more_98
+  - first:
+      213: -3335054082253386983
+    second: UI books & more_99
+  - first:
+      213: 4298452406557050187
+    second: UI books & more_100
+  - first:
+      213: 736655097875576158
+    second: UI books & more_101
+  - first:
+      213: 7715510816245770629
+    second: UI books & more_102
+  - first:
+      213: -8942067681991957206
+    second: UI books & more_103
+  - first:
+      213: 5646173258807337041
+    second: UI books & more_104
+  - first:
+      213: -8137957728234642961
+    second: UI books & more_105
+  - first:
+      213: 6709754415377538009
+    second: UI books & more_106
+  - first:
+      213: -9071037568994468872
+    second: UI books & more_107
+  - first:
+      213: -608986742551797729
+    second: UI books & more_108
+  - first:
+      213: -1353940158493842356
+    second: UI books & more_109
+  - first:
+      213: 339884748618520257
+    second: UI books & more_110
+  - first:
+      213: 5024601196164840979
+    second: UI books & more_111
+  - first:
+      213: 2599226629532371242
+    second: UI books & more_112
+  - first:
+      213: 7661256150929144589
+    second: UI books & more_113
+  - first:
+      213: 4622496822143911329
+    second: UI books & more_114
+  - first:
+      213: -679815604087006955
+    second: UI books & more_115
+  - first:
+      213: 8285626067320957074
+    second: UI books & more_116
+  - first:
+      213: -6889208719005538722
+    second: UI books & more_117
+  - first:
+      213: -4950075745126534172
+    second: UI books & more_118
+  - first:
+      213: -6089076821679848933
+    second: UI books & more_119
+  - first:
+      213: -5614571327843084481
+    second: UI books & more_120
+  - first:
+      213: 3447787347156926206
+    second: UI books & more_121
+  - first:
+      213: 5492195013782186591
+    second: UI books & more_122
+  - first:
+      213: -8322512155731609876
+    second: UI books & more_123
+  - first:
+      213: 4449050228914426690
+    second: UI books & more_124
+  - first:
+      213: -6809163187263301200
+    second: UI books & more_125
+  - first:
+      213: 8723041642211278248
+    second: UI books & more_126
+  - first:
+      213: -8392436768923278058
+    second: UI books & more_127
+  - first:
+      213: -8994329825330952215
+    second: UI books & more_128
+  - first:
+      213: -8050650945399511964
+    second: UI books & more_129
+  - first:
+      213: -5378631553734935822
+    second: UI books & more_130
+  - first:
+      213: 7106475527818282018
+    second: UI books & more_131
+  - first:
+      213: 1053729687274524326
+    second: UI books & more_132
+  - first:
+      213: -771140944301218887
+    second: UI books & more_133
+  - first:
+      213: 2400308884901418163
+    second: UI books & more_134
+  - first:
+      213: -25691591180361859
+    second: UI books & more_135
+  - first:
+      213: 4725380179829376618
+    second: UI books & more_136
+  - first:
+      213: -936211461802301865
+    second: UI books & more_137
+  - first:
+      213: 5741579847443657417
+    second: UI books & more_138
+  - first:
+      213: -6257738241001927431
+    second: UI books & more_139
+  - first:
+      213: -2366469038138756332
+    second: UI books & more_140
+  - first:
+      213: 2905889152858644236
+    second: UI books & more_141
+  - first:
+      213: 3683086194255642916
+    second: UI books & more_142
+  - first:
+      213: -6945318465190424570
+    second: UI books & more_143
+  - first:
+      213: 2101973931612596414
+    second: UI books & more_144
+  - first:
+      213: -8449095925212389364
+    second: UI books & more_145
+  - first:
+      213: -8027232150964226119
+    second: UI books & more_146
+  - first:
+      213: 2651967682052095738
+    second: UI books & more_147
+  - first:
+      213: 18488761761228955
+    second: UI books & more_148
+  - first:
+      213: 1354023899034554214
+    second: UI books & more_149
+  - first:
+      213: 3501822104353459130
+    second: UI books & more_150
+  - first:
+      213: 6913746058554163057
+    second: UI books & more_151
+  - first:
+      213: 7544984025206918518
+    second: UI books & more_152
+  - first:
+      213: -4313483426537845706
+    second: UI books & more_153
+  - first:
+      213: -8707840822545149987
+    second: UI books & more_154
+  - first:
+      213: -5187530595868533282
+    second: UI books & more_155
+  - first:
+      213: -2467046367247711462
+    second: UI books & more_156
+  - first:
+      213: 2007229620558525290
+    second: UI books & more_157
+  - first:
+      213: -8934073986529200635
+    second: UI books & more_158
+  - first:
+      213: 8069319811080253293
+    second: UI books & more_159
+  - first:
+      213: -4835169529663012898
+    second: UI books & more_160
+  - first:
+      213: -5834708284859122996
+    second: UI books & more_161
+  - first:
+      213: -2541634996875966930
+    second: UI books & more_162
+  - first:
+      213: -6339521201175012379
+    second: UI books & more_163
+  - first:
+      213: 3969481933684256153
+    second: UI books & more_164
+  - first:
+      213: 2673980839581045993
+    second: UI books & more_165
+  - first:
+      213: -2626881166278788921
+    second: UI books & more_166
+  - first:
+      213: 6372341189327245850
+    second: UI books & more_167
+  - first:
+      213: -6757122838242371204
+    second: UI books & more_168
+  - first:
+      213: -5147641981979621819
+    second: UI books & more_169
+  - first:
+      213: -596218197937902093
+    second: UI books & more_170
+  - first:
+      213: 406408079896637213
+    second: UI books & more_171
+  - first:
+      213: 8231406989109158672
+    second: UI books & more_172
+  - first:
+      213: -7230378594293758627
+    second: UI books & more_173
+  - first:
+      213: -3418545205330898721
+    second: UI books & more_174
+  - first:
+      213: -235553032036938602
+    second: UI books & more_175
+  - first:
+      213: 2747543908446738315
+    second: UI books & more_176
+  - first:
+      213: 23628824138036624
+    second: UI books & more_177
+  - first:
+      213: -6810964505320052662
+    second: UI books & more_178
+  - first:
+      213: -6805894169414240922
+    second: UI books & more_179
+  - first:
+      213: 2979133580948847783
+    second: UI books & more_180
+  - first:
+      213: 9138995561983924624
+    second: UI books & more_181
+  - first:
+      213: -4549875983242536430
+    second: UI books & more_182
+  - first:
+      213: 219650318145400947
+    second: UI books & more_183
+  - first:
+      213: 3662884538937221150
+    second: UI books & more_184
+  - first:
+      213: 6686393725386284302
+    second: UI books & more_185
+  - first:
+      213: 819923087275058489
+    second: UI books & more_186
+  - first:
+      213: 9056300337051299881
+    second: UI books & more_187
+  - first:
+      213: -1020910508363598653
+    second: UI books & more_188
+  - first:
+      213: -3868303052732873832
+    second: UI books & more_189
+  - first:
+      213: 6294006091602355241
+    second: UI books & more_190
+  - first:
+      213: -3543249468567665630
+    second: UI books & more_191
+  - first:
+      213: 1770843558025869036
+    second: UI books & more_192
+  - first:
+      213: -658856697694525173
+    second: UI books & more_193
+  - first:
+      213: -8215340703738590270
+    second: UI books & more_194
+  - first:
+      213: -4246629322471322174
+    second: UI books & more_195
+  - first:
+      213: -6918876339050374979
+    second: UI books & more_196
+  - first:
+      213: -7949751280914576756
+    second: UI books & more_197
+  - first:
+      213: 6355245346427023886
+    second: UI books & more_198
+  - first:
+      213: -1430812763854341240
+    second: UI books & more_199
+  - first:
+      213: 3232447978615645771
+    second: UI books & more_200
+  - first:
+      213: -5675768865333334456
+    second: UI books & more_201
+  - first:
+      213: -8562119669836858831
+    second: UI books & more_202
+  - first:
+      213: -8089956730929862500
+    second: UI books & more_203
+  - first:
+      213: -619681510992385740
+    second: UI books & more_204
+  - first:
+      213: -7064628749859194984
+    second: UI books & more_205
+  - first:
+      213: 6192961993404072625
+    second: UI books & more_206
+  - first:
+      213: 514369157911299883
+    second: UI books & more_207
+  - first:
+      213: -4565430684929626463
+    second: UI books & more_208
+  - first:
+      213: -4676409713552441973
+    second: UI books & more_209
+  - first:
+      213: -6526702393162675946
+    second: UI books & more_210
+  - first:
+      213: 5785089610709271160
+    second: UI books & more_211
+  - first:
+      213: -3235424380965422647
+    second: UI books & more_212
+  - first:
+      213: 6014944995505192659
+    second: UI books & more_213
+  - first:
+      213: 5386722691232237571
+    second: UI books & more_214
+  - first:
+      213: -6257170365751860902
+    second: UI books & more_215
+  - first:
+      213: 5979617258879763836
+    second: UI books & more_216
+  - first:
+      213: -4446534709096904370
+    second: UI books & more_217
+  - first:
+      213: -4349609557796368991
+    second: UI books & more_218
+  - first:
+      213: -8125687077138676311
+    second: UI books & more_219
+  - first:
+      213: 7829864898507684870
+    second: UI books & more_220
+  - first:
+      213: 7189398623139211837
+    second: UI books & more_221
+  - first:
+      213: -4898731416590593078
+    second: UI books & more_222
+  - first:
+      213: -1090804398580981829
+    second: UI books & more_223
+  - first:
+      213: 7375816014152575589
+    second: UI books & more_224
+  - first:
+      213: -819179377488184039
+    second: UI books & more_225
+  - first:
+      213: 3296795910413070891
+    second: UI books & more_226
+  - first:
+      213: 7256970845127661410
+    second: UI books & more_227
+  - first:
+      213: -3558636632701687568
+    second: UI books & more_228
+  - first:
+      213: 1146559712913518812
+    second: UI books & more_229
+  - first:
+      213: -4884181115953835191
+    second: UI books & more_230
+  - first:
+      213: -4830879419673686838
+    second: UI books & more_231
+  - first:
+      213: 2392522532963775464
+    second: UI books & more_232
+  - first:
+      213: 4303030457301517111
+    second: UI books & more_233
+  - first:
+      213: -6287161290718540323
+    second: UI books & more_234
+  - first:
+      213: 4892949604568578160
+    second: UI books & more_235
+  - first:
+      213: 773777007465472167
+    second: UI books & more_236
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 16
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: selection_small
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 144
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3409f25186c5707b0800000000000000
+      internalID: -5258132437829971901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_5
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 401
+        width: 48
+        height: 62
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 10, y: 6, z: 10, w: 6}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e6c00244a21974e0800000000000000
+      internalID: -1983533664188709143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_6
+      rect:
+        serializedVersion: 2
+        x: 561
+        y: 401
+        width: 46
+        height: 62
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 12, z: 12, w: 12}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdef7f132136b1d10800000000000000
+      internalID: 2097378981269995227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_7
+      rect:
+        serializedVersion: 2
+        x: 608
+        y: 400
+        width: 48
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 10, y: 10, z: 10, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ce45c32ef9437be0800000000000000
+      internalID: -1480758496604107063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_8
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 416
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee47e47473e558b20800000000000000
+      internalID: 3136016307045954798
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_9
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 416
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48e519d802ef9ba00800000000000000
+      internalID: 772928226838273668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_11
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 337
+        width: 48
+        height: 62
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 12, z: 12, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a0213ee20c0e6b80800000000000000
+      internalID: -8399763048273731415
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_12
+      rect:
+        serializedVersion: 2
+        x: 561
+        y: 337
+        width: 46
+        height: 62
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 12, z: 12, w: 12}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 853ef9e205feeb560800000000000000
+      internalID: 7331560371064398680
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_13
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 337
+        width: 48
+        height: 62
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 12, z: 12, w: 12}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf842b46a4c4b79d0800000000000000
+      internalID: -2775540862943082245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_14
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 368
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1352585a79be41c90800000000000000
+      internalID: -7199870867709024975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_15
+      rect:
+        serializedVersion: 2
+        x: 767
+        y: 367
+        width: 50
+        height: 50
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12deaaf217d1bc670800000000000000
+      internalID: 8559967888716000545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_18
+      rect:
+        serializedVersion: 2
+        x: 611
+        y: 339
+        width: 42
+        height: 58
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 20, y: 20, z: 20, w: 20}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de787ba24d60ef1f0800000000000000
+      internalID: -1009361758164908051
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gold
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 288
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aadcb406888728ef0800000000000000
+      internalID: -107390913977004630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gold_selected
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 272
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e6ff0faf5e188d70800000000000000
+      internalID: 9045513247881426664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_84
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 256
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07c1e7932670dcfd0800000000000000
+      internalID: -2320190114573181840
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souls
+      rect:
+        serializedVersion: 2
+        x: 624
+        y: 240
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15065870aac3b5e40800000000000000
+      internalID: 5646173258807337041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: forge
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 240
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe1ed6b109a201f80800000000000000
+      internalID: -8137957728234642961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lock_selected
+      rect:
+        serializedVersion: 2
+        x: 688
+        y: 224
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31e786b9a28fab540800000000000000
+      internalID: 5024601196164840979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lock
+      rect:
+        serializedVersion: 2
+        x: 688
+        y: 240
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a29430829de421420800000000000000
+      internalID: 2599226629532371242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_113
+      rect:
+        serializedVersion: 2
+        x: 769
+        y: 242
+        width: 14
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0b7861d0ef325a60800000000000000
+      internalID: 7661256150929144589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_114
+      rect:
+        serializedVersion: 2
+        x: 785
+        y: 241
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a582436e58662040800000000000000
+      internalID: 4622496822143911329
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: forge_selected
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 224
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b9118d582ef081a0800000000000000
+      internalID: -6809163187263301200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: selection
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 160
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8a4160645fcca190800000000000000
+      internalID: -7949751280914576756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: selection_border
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 128
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c9fae2eaa67913d0800000000000000
+      internalID: -3235424380965422647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_228
+      rect:
+        serializedVersion: 2
+        x: 436
+        y: 32
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f8af1746de2d9ec0800000000000000
+      internalID: -3558636632701687568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_229
+      rect:
+        serializedVersion: 2
+        x: 452
+        y: 33
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd0fbf1fbf569ef00800000000000000
+      internalID: 1146559712913518812
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_0
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 400
+        width: 48
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 12, z: 12, w: 12}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c3e6df1d4a0e6642a578cb3564ab6a5
+      internalID: 62194020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: button_normal
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 177
+        width: 30
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 10, y: 10, z: 10, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 22f235d9fc9ab574484e9794be8c4be6
+      internalID: 375940634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: button_pressed
+      rect:
+        serializedVersion: 2
+        x: 689
+        y: 177
+        width: 30
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 10, y: 10, z: 10, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 04f17d88db7296d4485e8b43c93bdbd7
+      internalID: -757750491
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: button_hover
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 145
+        width: 30
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 10, y: 10, z: 10, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 98eb3e4c0fd568641bd138a757623f9a
+      internalID: 1407360581
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: button_selected
+      rect:
+        serializedVersion: 2
+        x: 689
+        y: 145
+        width: 30
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 10, y: 10, z: 10, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 25a609a843cacf0459bff0b787eb2da4
+      internalID: 1474635535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 0f1faf7e01294494681c5bd2bc43885a
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Souls: 5646173258807337041
+      UI books & more_0: 62194020
+      UI books & more_10: 3753526078364807342
+      UI books & more_100: 4298452406557050187
+      UI books & more_101: 736655097875576158
+      UI books & more_102: 7715510816245770629
+      UI books & more_103: -8942067681991957206
+      UI books & more_106: 6709754415377538009
+      UI books & more_107: -9071037568994468872
+      UI books & more_108: -608986742551797729
+      UI books & more_109: -1353940158493842356
+      UI books & more_11: -8399763048273731415
+      UI books & more_110: 339884748618520257
+      UI books & more_113: 7661256150929144589
+      UI books & more_114: 4622496822143911329
+      UI books & more_115: -679815604087006955
+      UI books & more_116: 8285626067320957074
+      UI books & more_117: -6889208719005538722
+      UI books & more_118: -4950075745126534172
+      UI books & more_119: -6089076821679848933
+      UI books & more_12: 7331560371064398680
+      UI books & more_120: -5614571327843084481
+      UI books & more_121: 3447787347156926206
+      UI books & more_122: 5492195013782186591
+      UI books & more_123: -8322512155731609876
+      UI books & more_124: 4449050228914426690
+      UI books & more_126: 8723041642211278248
+      UI books & more_127: -8392436768923278058
+      UI books & more_128: -8994329825330952215
+      UI books & more_129: -8050650945399511964
+      UI books & more_13: -2775540862943082245
+      UI books & more_130: -5378631553734935822
+      UI books & more_131: 7106475527818282018
+      UI books & more_132: 1053729687274524326
+      UI books & more_133: -771140944301218887
+      UI books & more_134: 2400308884901418163
+      UI books & more_135: -25691591180361859
+      UI books & more_136: 4725380179829376618
+      UI books & more_137: -936211461802301865
+      UI books & more_138: 5741579847443657417
+      UI books & more_139: -6257738241001927431
+      UI books & more_14: -7199870867709024975
+      UI books & more_140: -2366469038138756332
+      UI books & more_141: 2905889152858644236
+      UI books & more_142: 3683086194255642916
+      UI books & more_143: -6945318465190424570
+      UI books & more_144: 2101973931612596414
+      UI books & more_145: -8449095925212389364
+      UI books & more_146: -8027232150964226119
+      UI books & more_147: 2651967682052095738
+      UI books & more_148: 18488761761228955
+      UI books & more_149: 1354023899034554214
+      UI books & more_15: 8559967888716000545
+      UI books & more_150: 3501822104353459130
+      UI books & more_151: 6913746058554163057
+      UI books & more_152: 7544984025206918518
+      UI books & more_153: -4313483426537845706
+      UI books & more_154: -8707840822545149987
+      UI books & more_155: -5187530595868533282
+      UI books & more_156: -2467046367247711462
+      UI books & more_157: 2007229620558525290
+      UI books & more_158: -8934073986529200635
+      UI books & more_159: 8069319811080253293
+      UI books & more_16: 386286977431675425
+      UI books & more_160: -4835169529663012898
+      UI books & more_161: -5834708284859122996
+      UI books & more_162: -2541634996875966930
+      UI books & more_163: -6339521201175012379
+      UI books & more_164: 3969481933684256153
+      UI books & more_165: 2673980839581045993
+      UI books & more_166: -2626881166278788921
+      UI books & more_167: 6372341189327245850
+      UI books & more_168: -6757122838242371204
+      UI books & more_169: -5147641981979621819
+      UI books & more_17: 6795588727444399678
+      UI books & more_170: -596218197937902093
+      UI books & more_171: 406408079896637213
+      UI books & more_172: 8231406989109158672
+      UI books & more_173: -7230378594293758627
+      UI books & more_174: -3418545205330898721
+      UI books & more_175: -235553032036938602
+      UI books & more_176: 2747543908446738315
+      UI books & more_177: 23628824138036624
+      UI books & more_178: -6810964505320052662
+      UI books & more_179: -6805894169414240922
+      UI books & more_18: -1009361758164908051
+      UI books & more_180: 2979133580948847783
+      UI books & more_181: 9138995561983924624
+      UI books & more_182: -4549875983242536430
+      UI books & more_183: 219650318145400947
+      UI books & more_184: 3662884538937221150
+      UI books & more_185: 6686393725386284302
+      UI books & more_186: 819923087275058489
+      UI books & more_187: 9056300337051299881
+      UI books & more_188: -1020910508363598653
+      UI books & more_189: -3868303052732873832
+      UI books & more_19: 3894893087002250117
+      UI books & more_190: 6294006091602355241
+      UI books & more_191: -3543249468567665630
+      UI books & more_192: 1770843558025869036
+      UI books & more_193: -658856697694525173
+      UI books & more_194: -8215340703738590270
+      UI books & more_195: -4246629322471322174
+      UI books & more_196: -6918876339050374979
+      UI books & more_198: 6355245346427023886
+      UI books & more_199: -1430812763854341240
+      UI books & more_2: 8621789924122858652
+      UI books & more_20: -6545197753736430578
+      UI books & more_200: 3232447978615645771
+      UI books & more_201: -5675768865333334456
+      UI books & more_202: -8562119669836858831
+      UI books & more_203: -8089956730929862500
+      UI books & more_204: -619681510992385740
+      UI books & more_205: -7064628749859194984
+      UI books & more_206: 6192961993404072625
+      UI books & more_207: 514369157911299883
+      UI books & more_208: -4565430684929626463
+      UI books & more_209: -4676409713552441973
+      UI books & more_21: 1481357427042568723
+      UI books & more_210: -6526702393162675946
+      UI books & more_211: 5785089610709271160
+      UI books & more_213: 6014944995505192659
+      UI books & more_214: 5386722691232237571
+      UI books & more_215: -6257170365751860902
+      UI books & more_216: 5979617258879763836
+      UI books & more_217: -4446534709096904370
+      UI books & more_218: -4349609557796368991
+      UI books & more_219: -8125687077138676311
+      UI books & more_22: -2353526848844238307
+      UI books & more_220: 7829864898507684870
+      UI books & more_221: 7189398623139211837
+      UI books & more_222: -4898731416590593078
+      UI books & more_223: -1090804398580981829
+      UI books & more_224: 7375816014152575589
+      UI books & more_225: -819179377488184039
+      UI books & more_226: 3296795910413070891
+      UI books & more_227: 7256970845127661410
+      UI books & more_228: -3558636632701687568
+      UI books & more_229: 1146559712913518812
+      UI books & more_23: 2230185814778447186
+      UI books & more_230: -4884181115953835191
+      UI books & more_231: -4830879419673686838
+      UI books & more_232: 2392522532963775464
+      UI books & more_233: 4303030457301517111
+      UI books & more_234: -6287161290718540323
+      UI books & more_235: 4892949604568578160
+      UI books & more_236: 773777007465472167
+      UI books & more_24: 3783645329634328529
+      UI books & more_25: 8309000872551644823
+      UI books & more_26: 526508308369210386
+      UI books & more_27: 159131790719937036
+      UI books & more_28: -441437913772124587
+      UI books & more_29: -3898119315359276772
+      UI books & more_3: -7969449517761152452
+      UI books & more_30: 2590381481844359254
+      UI books & more_31: -4170607679083526149
+      UI books & more_32: -2121557900372677122
+      UI books & more_33: -1654875548751983693
+      UI books & more_34: -4692083674096995432
+      UI books & more_35: -4055492453468482379
+      UI books & more_36: 9035297808423477395
+      UI books & more_37: 2619554048971415842
+      UI books & more_38: -2204527734594248259
+      UI books & more_39: -1304260315744694724
+      UI books & more_4: -2844071771128460039
+      UI books & more_40: 2843788215629751549
+      UI books & more_41: -4078776599635825284
+      UI books & more_42: -4835812231388611713
+      UI books & more_43: -4128262561444959546
+      UI books & more_44: -1951980920401348687
+      UI books & more_45: 2304837704982891359
+      UI books & more_46: -4904210715455956028
+      UI books & more_47: 8898348960371703912
+      UI books & more_48: -1795502987866008327
+      UI books & more_49: -8319236643493697860
+      UI books & more_5: -1983533664188709143
+      UI books & more_50: 6402001219358911698
+      UI books & more_51: 1065197286458462964
+      UI books & more_52: -1323994456668542664
+      UI books & more_53: -6123595850289118788
+      UI books & more_54: 8434811791994195836
+      UI books & more_56: -2446744727746141505
+      UI books & more_57: 3371098629753146293
+      UI books & more_58: -4792393150133718712
+      UI books & more_59: 1654468490791628367
+      UI books & more_6: 2097378981269995227
+      UI books & more_60: 3574922675190073455
+      UI books & more_61: 1550211762727366643
+      UI books & more_62: -3916080638858816288
+      UI books & more_63: -2942268742260284929
+      UI books & more_64: -6235990007123159517
+      UI books & more_65: -578336378378842696
+      UI books & more_66: 6536957260594621399
+      UI books & more_67: 1025494644773370982
+      UI books & more_68: 5067317257638565689
+      UI books & more_69: -6495758069129680295
+      UI books & more_7: -1480758496604107063
+      UI books & more_70: -8341515013737208070
+      UI books & more_71: -778557295044447464
+      UI books & more_73: -4118578088667131618
+      UI books & more_74: 6942198719307348239
+      UI books & more_75: 966708068957566461
+      UI books & more_76: 8575142301195893229
+      UI books & more_77: 264150479479901694
+      UI books & more_78: 3818106972110932130
+      UI books & more_79: 791677276758404187
+      UI books & more_8: 3136016307045954798
+      UI books & more_80: 6328467073942022083
+      UI books & more_81: -9051410147622956773
+      UI books & more_82: 1528082072937983485
+      UI books & more_83: 2279893490021834700
+      UI books & more_84: -2320190114573181840
+      UI books & more_85: -4378483411037288885
+      UI books & more_86: 1055186483872569569
+      UI books & more_87: -5104572135885859008
+      UI books & more_88: 6405703114277812924
+      UI books & more_89: -5134312846325314214
+      UI books & more_9: 772928226838273668
+      UI books & more_90: -2712321978071333851
+      UI books & more_91: 8583923992376683793
+      UI books & more_92: -8540858092471713661
+      UI books & more_93: 3028294325138079445
+      UI books & more_94: -7215691709308257685
+      UI books & more_95: 4180538570168681909
+      UI books & more_96: -5916957552040872278
+      UI books & more_97: -3354186203942271719
+      UI books & more_98: 4977379303211936881
+      UI books & more_99: -3335054082253386983
+      button_hover: 1407360581
+      button_normal: -7389965578554813547
+      button_pressed: -757750491
+      button_selected: 1474635535
+      forge: -8137957728234642961
+      forge_selected: -6809163187263301200
+      gold: -107390913977004630
+      gold_selected: 9045513247881426664
+      lock: 2599226629532371242
+      lock_selected: 5024601196164840979
+      selection: -7949751280914576756
+      selection_border: -3235424380965422647
+      selection_small: -5258132437829971901
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

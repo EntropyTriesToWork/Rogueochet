@@ -6,6 +6,7 @@ public class BallManager : MonoBehaviour
     public static BallManager Instance { get; private set; }
 
     [Header("Ball Settings")]
+    [Tooltip("Default prefab used when PlayerInventory has no balls assigned.")]
     public GameObject BallPrefab;
     public Transform BallSpawnPoint;
 
@@ -17,23 +18,25 @@ public class BallManager : MonoBehaviour
     [Tooltip("How quickly timeScale moves toward RampTargetTimeScale (units per unscaled second).")]
     public float RampAcceleration = 1f;
 
+    [HideInInspector] public float BaseSpeedRampDelay;
+
     private List<Ball> _activeBalls = new List<Ball>();
     private bool _launchEnabled = false;
-    private bool _ballInPlay = false;
-    private float _roundTimer = 0f;      // unscaled time since first launch this round
-    private bool _rampFired = false;
-    private bool _rampActive = false;
+    private bool _ballInPlay    = false;
+    private float _roundTimer   = 0f;
+    private bool _rampFired     = false;
+    private bool _rampActive    = false;
+    private float _timeSinceLastBall = 0f;
 
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        BaseSpeedRampDelay = SpeedRampDelay;
     }
 
     void Start() => SubscribeToEvents();
     void OnDestroy() => UnsubscribeFromEvents();
-
-    // ── Event Wiring ───────────────────────────────────────────────
 
     public void SubscribeToEvents()
     {
@@ -52,16 +55,14 @@ public class BallManager : MonoBehaviour
         GameEvents.OnVictory      -= HandleGameOver;
         GameEvents.OnWaveStarted  -= HandleWaveStarted;
     }
-    private void HandleWaveStarted(int obj)
-    {
-        _roundTimer = 0;
-    }
+
+    void HandleWaveStarted(int _) => _roundTimer = 0f;
 
     void HandleRoundStarted()
     {
         _launchEnabled = true;
-        _rampFired = false;
-        _rampActive = false;
+        _rampFired     = false;
+        _rampActive    = false;
         if (_activeBalls.Count == 0)
             _ballInPlay = false;
     }
@@ -69,8 +70,8 @@ public class BallManager : MonoBehaviour
     void HandleRoundEnded()
     {
         _launchEnabled = false;
-        _rampFired = false;
-        _rampActive = false;
+        _rampFired     = false;
+        _rampActive    = false;
         ResetTimeScale();
     }
 
@@ -79,6 +80,9 @@ public class BallManager : MonoBehaviour
         DestroyAllBalls();
         ResetTimeScale();
     }
+
+    // ── Update ─────────────────────────────────────────────────────
+
     void Update()
     {
         if (_ballInPlay)
@@ -90,59 +94,111 @@ public class BallManager : MonoBehaviour
         if (_launchEnabled && !_ballInPlay)
         {
             if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
-                LaunchBall();
+                LaunchAll();
         }
 
         if (_ballInPlay)
         {
-            if (!_rampFired)
+            if (!_rampFired && Time.time - _timeSinceLastBall >= SpeedRampDelay)
             {
-                if (Time.time - _timeSinceLastBall >= SpeedRampDelay)
-                {
-                    _rampFired = true;
-                    _rampActive = true;
-                    GameEvents.BallSpeedRampTriggered();
-                    Debug.Log($"[BallManager] Speed ramp triggered at {_roundTimer:F1}s → target timeScale {RampTargetTimeScale}");
-                }
+                _rampFired  = true;
+                _rampActive = true;
+                GameEvents.BallSpeedRampTriggered();
+                Debug.Log($"[BallManager] Speed ramp triggered → target timeScale {RampTargetTimeScale}");
             }
+
             if (_rampActive && Time.timeScale < RampTargetTimeScale)
             {
-                Time.timeScale = Mathf.MoveTowards(
-                    Time.timeScale,
-                    RampTargetTimeScale,
-                    RampAcceleration * Time.unscaledDeltaTime
-                );
-                Time.fixedDeltaTime = 0.02f * Time.timeScale; // keep physics stable
+                Time.timeScale      = Mathf.MoveTowards(Time.timeScale, RampTargetTimeScale, RampAcceleration * Time.unscaledDeltaTime);
+                Time.fixedDeltaTime = 0.02f * Time.timeScale;
             }
         }
     }
-    float _timeSinceLastBall = 0f;
-    public void LaunchBall()
+
+    // ── Launch ─────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Launches one ball per occupied inventory slot, applying each slot's stats.
+    /// Falls back to a single default ball if inventory is empty.
+    /// </summary>
+    public void LaunchAll()
     {
-        if (BallPrefab == null)
+        var inv = PlayerInventory.Instance;
+
+        if (inv != null && inv.UsedBallSlots > 0)
         {
-            Debug.LogWarning("[BallManager] BallPrefab not assigned!");
-            return;
+            for (int i = 0; i < inv.UsedBallSlots; i++)
+                LaunchFromSlot(i);
+        }
+        else
+        {
+            LaunchBall();   // legacy single-ball fallback
+        }
+    }
+
+    void LaunchFromSlot(int slotIndex)
+    {
+        var inv      = PlayerInventory.Instance;
+        var instance = inv?.GetBallInstanceForLaunch(slotIndex);
+
+        GameObject prefab = (instance?.BallPrefab != null) ? instance.BallPrefab : BallPrefab;
+        if (prefab == null) { Debug.LogWarning("[BallManager] No prefab for slot " + slotIndex); return; }
+
+        Vector3 spawnPos = BallSpawnPoint != null
+            ? BallSpawnPoint.position + Vector3.up * (slotIndex * 0.3f)   // slight vertical offset per ball
+            : Vector3.zero;
+
+        GameObject go   = Instantiate(prefab, spawnPos, Quaternion.identity);
+        Ball       ball = go.GetComponent<Ball>();
+        if (ball == null) return;
+
+        // Apply per-ball stats
+        instance?.ApplyToBall(ball);
+
+        // Apply global multipliers on top
+        if (inv != null)
+        {
+            ball.Damage        = Mathf.Max(1, Mathf.RoundToInt(ball.Damage * inv.GlobalDamageMultiplier));
+            ball.InitialSpeed  *= inv.GlobalSpeedMultiplier;
+            ball.MaxDurability  = Mathf.Max(1, ball.MaxDurability + inv.GlobalDurabilityBonus);
         }
 
-        Vector3 spawnPos = BallSpawnPoint != null ? BallSpawnPoint.position : Vector3.zero;
-        GameObject go = Instantiate(BallPrefab, spawnPos, Quaternion.identity);
-        Ball ball = go.GetComponent<Ball>();
+        // Launch with a slightly different angle per slot
+        float baseAngle = Random.Range(-30f, 30f);
+        float slotOffset = (slotIndex - (inv.UsedBallSlots - 1) * 0.5f) * 15f;
+        float angle = baseAngle + slotOffset;
+        Vector2 dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+        ball.Launch(dir);
+
+        RegisterBall(ball);
+        _ballInPlay = true;
+        _timeSinceLastBall = Time.time;
+
+        GameEvents.BallLaunched(ball);
+        GameEvents.BallCountChanged(_activeBalls.Count);
+    }
+
+    /// <summary>Legacy single-ball launch used as fallback and by SpawnExtraBall.</summary>
+    public void LaunchBall()
+    {
+        if (BallPrefab == null) { Debug.LogWarning("[BallManager] BallPrefab not assigned!"); return; }
+
+        Vector3    spawnPos = BallSpawnPoint != null ? BallSpawnPoint.position : Vector3.zero;
+        GameObject go       = Instantiate(BallPrefab, spawnPos, Quaternion.identity);
+        Ball       ball     = go.GetComponent<Ball>();
 
         if (ball != null)
         {
-            // Direction only — each Ball uses its own InitialSpeed
-            float angle = Random.Range(-45f, 45f);
-            Vector2 dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+            float   angle = Random.Range(-45f, 45f);
+            Vector2 dir   = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
             ball.Launch(dir);
 
             RegisterBall(ball);
-            _ballInPlay = true;
+            _ballInPlay        = true;
+            _timeSinceLastBall = Time.time;
 
             GameEvents.BallLaunched(ball);
             GameEvents.BallCountChanged(_activeBalls.Count);
-
-            _timeSinceLastBall = Time.time;
         }
     }
 
@@ -150,8 +206,8 @@ public class BallManager : MonoBehaviour
     {
         if (BallPrefab == null) return;
 
-        GameObject go = Instantiate(BallPrefab, position, Quaternion.identity);
-        Ball ball = go.GetComponent<Ball>();
+        GameObject go   = Instantiate(BallPrefab, position, Quaternion.identity);
+        Ball       ball = go.GetComponent<Ball>();
         if (ball != null)
         {
             ball.Launch(direction);
@@ -160,17 +216,22 @@ public class BallManager : MonoBehaviour
             GameEvents.BallCountChanged(_activeBalls.Count);
         }
     }
+
+    // ── Ball Lifecycle ─────────────────────────────────────────────
+
     public void RegisterBall(Ball ball)
     {
         if (!_activeBalls.Contains(ball))
             _activeBalls.Add(ball);
     }
+
     public void OnBallLost(Ball ball)
     {
         RemoveBall(ball);
         GameEvents.BallLost(ball);
         Debug.Log($"[BallManager] Ball lost. Remaining: {_activeBalls.Count}");
     }
+
     public void OnBallDestroyed(Ball ball)
     {
         RemoveBall(ball);
@@ -181,9 +242,7 @@ public class BallManager : MonoBehaviour
     {
         _activeBalls.Remove(ball);
         Destroy(ball.gameObject);
-
-        GameEvents.BallCountChanged(_activeBalls.Count);   // GameManager triggers RoundEnd at 0
-
+        GameEvents.BallCountChanged(_activeBalls.Count);
         if (_activeBalls.Count == 0)
             _ballInPlay = false;
     }
@@ -196,15 +255,14 @@ public class BallManager : MonoBehaviour
         _activeBalls.Clear();
         _ballInPlay = false;
         _roundTimer = 0f;
-        _rampFired = false;
+        _rampFired  = false;
         _rampActive = false;
-
         GameEvents.BallCountChanged(0);
     }
 
     void ResetTimeScale()
     {
-        Time.timeScale = 1f;
+        Time.timeScale      = 1f;
         Time.fixedDeltaTime = 0.02f;
     }
 

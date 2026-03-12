@@ -5,37 +5,38 @@ public class EnemyManager : MonoBehaviour
 {
     public static EnemyManager Instance { get; private set; }
 
-    [Header("Enemy Prefabs")]
-    [Tooltip("Optional fallback prefab used only by the procedural fallback wave generator.")]
+    [Header("Fallback")]
+    [Tooltip("Used only by the procedural fallback wave when no WaveData assets are assigned.")]
     public GameObject FallbackEnemyPrefab;
 
-    [Header("Grid Layout — Horizontal")]
-    [Tooltip("X position of the rightmost column (right side of screen).")]
+    [Header("Grid Layout")]
+    [Tooltip("X position of the rightmost column.")]
     public float StartX = 5f;
-    [Tooltip("Vertical center of the enemy grid.")]
+    [Tooltip("Vertical centre of the enemy grid.")]
     public float StartY = 0f;
     [Tooltip("Horizontal spacing between columns.")]
     public float SpacingX = 1.4f;
     [Tooltip("Vertical spacing between rows.")]
     public float SpacingY = 1.2f;
-    [Tooltip("How far enemies move LEFT each time they advance.")]
+    [Tooltip("How far enemies move LEFT each time they advance (one round ends with enemies alive).")]
     public float AdvanceDistance = 0.8f;
 
     [Header("Wave Data")]
     public WaveData[] Waves;
 
-    // Active and queued enemies
-    private List<Enemy>          _activeEnemies = new List<Enemy>();
-    private Queue<EnemySpawnInfo> _spawnQueue   = new Queue<EnemySpawnInfo>();
-    private int _maxActive = 0;           // 0 = unlimited
-    private int _totalWaveEnemies = 0;
-    private int _nextSpawnCol = 0;        // tracks which column to spawn queued enemies into
+    private List<Enemy> _activeEnemies = new List<Enemy>();
+    private Queue<ResolvedEnemy> _spawnQueue = new Queue<ResolvedEnemy>();
+
+    private int _maxActive = 0;
+    private int _nextCellIndex = 0;
     private float _totalAdvanceX = 0f;
 
-    // Grid parameters saved at spawn time so queued enemies land on the same grid
+    private int _remainingInWave = 0;
+
     private float _gridTopY;
-    private int   _waveRows;
-    private int   _waveColumns;
+    private int _waveRows;
+    private int _waveColumns;
+    private WaveData _currentWaveData;   // kept so AddEnemiesToWave can use same HP settings
 
     void Awake()
     {
@@ -43,27 +44,25 @@ public class EnemyManager : MonoBehaviour
         Instance = this;
     }
 
-    void Start()  => SubscribeToEvents();
+    void Start() => SubscribeToEvents();
     void OnDestroy() => UnsubscribeFromEvents();
-
-    // ── Event Wiring ───────────────────────────────────────────────
 
     public void SubscribeToEvents()
     {
         GameEvents.OnWaveStarted += HandleWaveStarted;
-        GameEvents.OnRoundEnded  += HandleRoundEnded;
-        GameEvents.OnGameOver    += HandleGameOver;
-        GameEvents.OnVictory     += HandleGameOver;
-        GameEvents.OnEnemyDied   += HandleEnemyDiedForQueue;
+        GameEvents.OnRoundEnded += HandleRoundEnded;
+        GameEvents.OnGameOver += HandleGameOver;
+        GameEvents.OnVictory += HandleGameOver;
+        GameEvents.OnEnemyDied += HandleEnemyDiedForQueue;
     }
 
     void UnsubscribeFromEvents()
     {
         GameEvents.OnWaveStarted -= HandleWaveStarted;
-        GameEvents.OnRoundEnded  -= HandleRoundEnded;
-        GameEvents.OnGameOver    -= HandleGameOver;
-        GameEvents.OnVictory     -= HandleGameOver;
-        GameEvents.OnEnemyDied   -= HandleEnemyDiedForQueue;
+        GameEvents.OnRoundEnded -= HandleRoundEnded;
+        GameEvents.OnGameOver -= HandleGameOver;
+        GameEvents.OnVictory -= HandleGameOver;
+        GameEvents.OnEnemyDied -= HandleEnemyDiedForQueue;
     }
 
     void HandleWaveStarted(int waveNumber) => SpawnWave(waveNumber);
@@ -76,13 +75,12 @@ public class EnemyManager : MonoBehaviour
 
     void HandleGameOver() => ClearAll();
 
-    /// <summary>When an enemy dies, pull the next one from the queue if cap allows.</summary>
     void HandleEnemyDiedForQueue(Enemy enemy, int _)
     {
+        // Remove from active list and decrement wave counter, then try to fill the freed slot.
+        OnEnemyDied(enemy);
         TrySpawnFromQueue();
     }
-
-    // ── Spawn ──────────────────────────────────────────────────────
 
     void SpawnWave(int waveNumber)
     {
@@ -90,141 +88,238 @@ public class EnemyManager : MonoBehaviour
         _totalAdvanceX = 0f;
 
         WaveData data = GetWaveData(waveNumber);
-        _maxActive     = data.MaxActiveEnemies;
-        _waveRows      = data.Rows;
-        _waveColumns   = data.Columns;
+        _currentWaveData = data;
+        _maxActive = data.MaxActiveEnemies;
+        _waveRows = data.Rows;
+        _waveColumns = data.Columns;
 
         float gridHeight = (_waveRows - 1) * SpacingY;
-        _gridTopY        = StartY + gridHeight * 0.5f;
+        _gridTopY = StartY + gridHeight * 0.5f;
 
-        // Build the full spawn queue
+        // ── Build spawn list ───────────────────────────────────────
+
+        int totalCells = _waveRows * _waveColumns;
+        int spawnTarget = Mathf.Min(data.ResolvedSpawnCount, totalCells);
+
+        List<int> cellOrder = BuildShuffledCells(totalCells, data.EmptyCellChance, spawnTarget);
+
         _spawnQueue.Clear();
-        foreach (var info in data.Enemies)
-            _spawnQueue.Enqueue(info);
+        _nextCellIndex = 0;
 
-        _totalWaveEnemies = _spawnQueue.Count;
-        _nextSpawnCol = 0;
+        foreach (int cellIndex in cellOrder)
+        {
+            EnemySpawnInfo entry = data.PickRandom();
+            if (entry == null)
+            {
+                Debug.LogWarning("[EnemyManager] PickRandom returned null — check pool weights/prefabs.");
+                continue;
+            }
 
-        // Spawn up to the cap immediately (or all if cap is 0)
-        int initialCount = (_maxActive > 0) ? _maxActive : _totalWaveEnemies;
+            int col = cellIndex % _waveColumns;
+            int row = cellIndex / _waveColumns;
+
+            _spawnQueue.Enqueue(new ResolvedEnemy
+            {
+                Prefab = entry.Prefab,
+                HP = data.ComputeHP(entry),
+                EssenceReward = WaveData.RollEssenceReward(entry.Tier),
+                Col = col,
+                Row = row,
+            });
+        }
+
+        // _remainingInWave = everything in the queue (active starts at 0 before initial burst)
+        _remainingInWave = _spawnQueue.Count;
+
+        // ── Initial spawn burst ────────────────────────────────────
+
+        int initialCount = (_maxActive > 0) ? _maxActive : _remainingInWave;
         for (int i = 0; i < initialCount && _spawnQueue.Count > 0; i++)
             SpawnNextFromQueue();
 
-        Debug.Log($"[EnemyManager] Wave {waveNumber}: {_totalWaveEnemies} total, " +
-                  $"{_activeEnemies.Count} active, {_spawnQueue.Count} queued.");
+        Debug.Log($"[EnemyManager] Wave {waveNumber}: {_remainingInWave} total enemies " +
+                  $"({_activeEnemies.Count} active, {_spawnQueue.Count} queued) " +
+                  $"| BaseHP={data.BaseHP} WaveMult={data.WaveHPMultiplier:F2}");
 
-        GameManager.Instance.SetWaveEnemyCount(_totalWaveEnemies);
+        GameManager.Instance.SetWaveEnemyCount(_remainingInWave);
+    }
+    List<int> BuildShuffledCells(int totalCells, float emptyCellChance, int spawnTarget)
+    {
+        // Build full index list
+        List<int> allCells = new List<int>(totalCells);
+        for (int i = 0; i < totalCells; i++)
+            allCells.Add(i);
+
+        // Fisher-Yates shuffle
+        for (int i = allCells.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (allCells[i], allCells[j]) = (allCells[j], allCells[i]);
+        }
+
+        // Apply empty-cell chance and cap to spawnTarget
+        List<int> selected = new List<int>();
+        foreach (int cell in allCells)
+        {
+            if (selected.Count >= spawnTarget) break;
+            if (emptyCellChance > 0f && Random.value < emptyCellChance) continue;
+            selected.Add(cell);
+        }
+        selected.Sort();
+        return selected;
     }
 
     void TrySpawnFromQueue()
     {
         if (_spawnQueue.Count == 0) return;
         bool underCap = _maxActive <= 0 || _activeEnemies.Count < _maxActive;
-        if (underCap)
-            SpawnNextFromQueue();
+        if (underCap) SpawnNextFromQueue();
     }
 
     void SpawnNextFromQueue()
     {
         if (_spawnQueue.Count == 0) return;
 
-        EnemySpawnInfo info = _spawnQueue.Dequeue();
-
-        if (info.Prefab == null)
-        {
-            Debug.LogWarning("[EnemyManager] EnemySpawnInfo has no Prefab assigned — skipping.");
-            return;
-        }
-
-        int col = _nextSpawnCol % _waveColumns;
-        int row = (_nextSpawnCol / _waveColumns) % _waveRows;
-        _nextSpawnCol++;
+        ResolvedEnemy resolved = _spawnQueue.Dequeue();
 
         Vector3 pos = new Vector3(
-            StartX - col * SpacingX + _totalAdvanceX,
-            _gridTopY - row * SpacingY,
+            StartX - resolved.Col * SpacingX + _totalAdvanceX,
+            _gridTopY - resolved.Row * SpacingY,
             0f
         );
 
-        GameObject go = Instantiate(info.Prefab, pos, Quaternion.identity);
+        GameObject go = Instantiate(resolved.Prefab, pos, Quaternion.identity);
         Enemy enemy = go.GetComponent<Enemy>();
         if (enemy != null)
         {
-            enemy.Initialize(info.BaseHP, info.EssenceReward);
+            enemy.Initialize(resolved.HP, resolved.EssenceReward);
             _activeEnemies.Add(enemy);
         }
     }
 
-    // ── Advance ────────────────────────────────────────────────────
+    // ── Advance ────────────────────────────────────────────────────────────────
 
     void AdvanceEnemies()
     {
         _totalAdvanceX -= AdvanceDistance;
-
         foreach (Enemy e in _activeEnemies)
         {
             if (e == null) continue;
-            Vector3 pos = e.transform.position;
-            pos.x -= AdvanceDistance;
-            e.transform.position = pos;
+            Vector3 p = e.transform.position;
+            p.x -= AdvanceDistance;
+            e.transform.position = p;
         }
-
-        Debug.Log($"[EnemyManager] Advanced. Total offset: {_totalAdvanceX:F1}");
+        Debug.Log($"[EnemyManager] Enemies advanced. Total offset: {_totalAdvanceX:F1}");
         GameEvents.EnemiesDropped();
     }
 
-    // ── Enemy Removal ──────────────────────────────────────────────
+    // ── Enemy Removal ──────────────────────────────────────────────────────────
 
     public void OnEnemyDied(Enemy enemy)
     {
         _activeEnemies.Remove(enemy);
-        Debug.Log($"[EnemyManager] Removed enemy. Active: {_activeEnemies.Count}, Queued: {_spawnQueue.Count}");
+        _remainingInWave = Mathf.Max(0, _remainingInWave - 1);
+        Debug.Log($"[EnemyManager] Enemy removed. Remaining: {_remainingInWave} " +
+                  $"(active: {_activeEnemies.Count}, queued: {_spawnQueue.Count})");
     }
 
-    public bool AllEnemiesCleared() => _activeEnemies.Count == 0 && _spawnQueue.Count == 0;
-    public int  ActiveEnemyCount   => _activeEnemies.Count;
-    public int  QueuedEnemyCount   => _spawnQueue.Count;
+    /// <summary>
+    /// True only when every enemy in this wave has been defeated —
+    /// nothing active, nothing left in the queue.
+    /// </summary>
+    public bool AllEnemiesCleared() => _remainingInWave <= 0;
 
-    // ── Helpers ────────────────────────────────────────────────────
+    public int ActiveEnemyCount => _activeEnemies.Count;
+    public int QueuedEnemyCount => _spawnQueue.Count;
+    public int RemainingInWave => _remainingInWave;
 
+    public void AddEnemiesToWave(int count, WaveData overrideData = null)
+    {
+        if (count <= 0) return;
+
+        WaveData data = overrideData != null ? overrideData : _currentWaveData;
+        if (data == null)
+        {
+            Debug.LogWarning("[EnemyManager] AddEnemiesToWave called but no active WaveData.");
+            return;
+        }
+
+        int added = 0;
+        for (int i = 0; i < count; i++)
+        {
+            EnemySpawnInfo entry = data.PickRandom();
+            if (entry == null) continue;
+
+            // Wrap cell placement around the grid dimensions
+            int cellIndex = (_nextCellIndex + _spawnQueue.Count + i) % (_waveRows * _waveColumns);
+            int col = cellIndex % _waveColumns;
+            int row = cellIndex / _waveColumns;
+
+            _spawnQueue.Enqueue(new ResolvedEnemy
+            {
+                Prefab = entry.Prefab,
+                HP = data.ComputeHP(entry),
+                EssenceReward = WaveData.RollEssenceReward(entry.Tier),
+                Col = col,
+                Row = row,
+            });
+            added++;
+        }
+
+        _remainingInWave += added;
+        Debug.Log($"[EnemyManager] Injected {added} enemies mid-wave. " +
+                  $"Remaining: {_remainingInWave}");
+        TrySpawnFromQueue();
+    }
     void ClearAll()
     {
         foreach (Enemy e in _activeEnemies)
             if (e != null) Destroy(e.gameObject);
         _activeEnemies.Clear();
         _spawnQueue.Clear();
-        _nextSpawnCol = 0;
+        _nextCellIndex = 0;
+        _remainingInWave = 0;
     }
 
     WaveData GetWaveData(int waveNumber)
     {
-        if (Waves == null || Waves.Length == 0)
+        if (Waves != null && Waves.Length > 0)
         {
-            Debug.LogWarning("[EnemyManager] No WaveData assigned! Using fallback.");
-            return GenerateFallbackWave(waveNumber);
+            int index = Mathf.Clamp(waveNumber - 1, 0, Waves.Length - 1);
+            return Waves[index];
         }
-        int index = Mathf.Clamp(waveNumber - 1, 0, Waves.Length - 1);
-        return Waves[index];
+        Debug.LogWarning("[EnemyManager] No WaveData assigned — using fallback.");
+        return GenerateFallbackWave(waveNumber);
     }
 
     WaveData GenerateFallbackWave(int waveNumber)
     {
-        WaveData fallback         = ScriptableObject.CreateInstance<WaveData>();
-        fallback.Rows             = 3;
-        fallback.Columns          = 4;
-        fallback.MaxActiveEnemies = 5;
-
-        int total = fallback.Rows * fallback.Columns;
-        fallback.Enemies = new EnemySpawnInfo[total];
-        for (int i = 0; i < total; i++)
+        WaveData fb = ScriptableObject.CreateInstance<WaveData>();
+        fb.Rows = 3;
+        fb.Columns = 4;
+        fb.MaxActiveEnemies = 5;
+        fb.MaxSpawnedEnemies = 12;
+        fb.BaseHP = waveNumber + 1;
+        fb.WaveHPMultiplier = 1f + (waveNumber - 1) * 0.2f;   // +20% per wave
+        fb.EmptyCellChance = 0f;
+        fb.EnemyPool = new EnemySpawnInfo[]
         {
-            fallback.Enemies[i] = new EnemySpawnInfo
+            new EnemySpawnInfo
             {
                 Prefab        = FallbackEnemyPrefab,
-                BaseHP        = waveNumber + 1,
-                EssenceReward = waveNumber
-            };
-        }
-        return fallback;
+                Weight        = 1f,
+                HPMultiplier  = 1f,
+                Tier          = EnemyTier.Normal,
+            }
+        };
+        return fb;
     }
+}
+internal struct ResolvedEnemy
+{
+    public GameObject Prefab;
+    public int HP;
+    public int EssenceReward;
+    public int Col;
+    public int Row;
 }

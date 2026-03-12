@@ -66,7 +66,7 @@ public class Ball : MonoBehaviour
         if (col.gameObject.TryGetComponent<Enemy>(out Enemy enemy))
         {
             enemy.TakeDamage(Damage);
-            LoseDurability(5);      // hitting an enemy costs more durability
+            LoseDurability(3);      // hitting an enemy costs more durability
         }
         else if (col.gameObject.TryGetComponent<PaddleController>(out _))
         {
