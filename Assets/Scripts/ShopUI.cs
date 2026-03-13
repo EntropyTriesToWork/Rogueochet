@@ -3,19 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Renders ShopManager.CurrentOfferings as clickable cards.
-/// 
-/// Required prefab layout for ShopCardEntry:
-///   ShopCard
-///     ├─ CategoryLabel (TMP)  e.g. "BALL UPGRADE" / "GLOBAL" / "NEW BALL"
-///     ├─ IconImage (Image)
-///     ├─ NameLabel (TMP)
-///     ├─ DescLabel (TMP)
-///     ├─ CostLabel (TMP)
-///     ├─ TargetLabel (TMP)    e.g. "→ Slot 1: Fire Ball"
-///     └─ BuyButton (Button)
-/// </summary>
 public class ShopUI : MonoBehaviour
 {
     [Header("Layout")]
@@ -35,7 +22,6 @@ public class ShopUI : MonoBehaviour
     {
         GameEvents.OnShopOpened          += OnShopOpened;
         GameEvents.OnShopClosed          += OnShopClosed;
-        GameEvents.OnEssenceChanged      += RefreshEssence;
         GameEvents.OnShopOfferingsChanged += RefreshCards;
 
         PlayerInventory.OnLevelUp        += (_) => RefreshLevelLabel();
@@ -48,14 +34,12 @@ public class ShopUI : MonoBehaviour
     {
         GameEvents.OnShopOpened          -= OnShopOpened;
         GameEvents.OnShopClosed          -= OnShopClosed;
-        GameEvents.OnEssenceChanged      -= RefreshEssence;
         GameEvents.OnShopOfferingsChanged -= RefreshCards;
     }
 
     void OnShopOpened()
     {
         RefreshCards();
-        RefreshEssence(GameManager.Instance.Essence);
         RefreshLevelLabel();
     }
 
@@ -118,12 +102,6 @@ public class ShopUI : MonoBehaviour
         foreach (var c in _cards)
             if (c != null) Destroy(c.gameObject);
         _cards.Clear();
-    }
-
-    void RefreshEssence(int essence)
-    {
-        if (EssenceLabel != null)
-            EssenceLabel.text = $"Essence: {essence}";
     }
 
     void RefreshLevelLabel()

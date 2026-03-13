@@ -1,10 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Handles game pausing via the Escape key.
-/// Pausing freezes Time.timeScale and shows the pause overlay.
-/// Cannot pause during GameOver, Victory, Shop, or Idle states.
-/// </summary>
 public class PauseManager : MonoBehaviour
 {
     public static PauseManager Instance { get; private set; }
@@ -26,7 +21,6 @@ public class PauseManager : MonoBehaviour
 
     void Start()
     {
-        // Auto-resume on state changes that shouldn't allow pause
         GameEvents.OnGameOver += ForceResume;
         GameEvents.OnVictory  += ForceResume;
         GameEvents.OnShopOpened += ForceResume;
@@ -57,7 +51,6 @@ public class PauseManager : MonoBehaviour
 
         var state = GameManager.Instance.State;
 
-        // Only allow pausing during active gameplay
         if (state != GameState.RoundActive && state != GameState.Wave) return;
 
         IsPaused = true;

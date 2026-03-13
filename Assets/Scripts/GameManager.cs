@@ -45,10 +45,7 @@ public class GameManager : MonoBehaviour
         GameEvents.OnEnemyDied -= HandleEnemyDied;
         GameEvents.OnEnemyReachedPaddle -= HandleEnemyReachedPaddle;
         GameEvents.OnWaveStarted -= HandleWaveStarted;
-        GameEvents.ClearAllListeners();
     }
-
-    // ── Event Handlers ─────────────────────────────────────────────
 
     void HandleBallCountChanged(int remaining)
     {
@@ -58,6 +55,7 @@ public class GameManager : MonoBehaviour
 
     void HandleEnemyDied(Enemy enemy, int essenceReward)
     {
+        // Apply essence gain multiplier from inventory
         float mult = PlayerInventory.Instance != null
             ? PlayerInventory.Instance.EssenceGainMultiplier : 1f;
         int awarded = Mathf.Max(1, Mathf.RoundToInt(essenceReward * mult));
@@ -74,8 +72,6 @@ public class GameManager : MonoBehaviour
     public bool AllEnemiesCleared() => EnemyManager.Instance.AllEnemiesCleared();
 
     public void SetWaveEnemyCount(int count) { }
-
-    // ── State Machine ──────────────────────────────────────────────
 
     public void ChangeState(GameState newState)
     {
@@ -125,6 +121,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
+
     public void TakeDamage(int amount)
     {
         int effectiveMax = MaxHealth + (PlayerInventory.Instance?.MaxHPBonus ?? 0);
@@ -151,7 +148,6 @@ public class GameManager : MonoBehaviour
         GameEvents.EssenceChanged(Essence);
         return true;
     }
-
     public void OnShopComplete()
     {
         if (State == GameState.Shop)
@@ -173,15 +169,10 @@ public class GameManager : MonoBehaviour
 
     void ResetGame()
     {
-        GameEvents.ClearAllListeners();
-
-        SubscribeToEvents();
-        UIManager.Instance.SubscribeToEvents();
-        BallManager.Instance.SubscribeToEvents();
-        EnemyManager.Instance.SubscribeToEvents();
-
         if (PlayerInventory.Instance != null)
             PlayerInventory.Instance.FullReset();
+
+        EnemyStats.Reset();
 
         CurrentWave = 0;
         PlayerHealth = MaxHealth;
