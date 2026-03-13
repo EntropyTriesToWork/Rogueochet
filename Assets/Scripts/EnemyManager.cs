@@ -77,7 +77,6 @@ public class EnemyManager : MonoBehaviour
 
     void HandleEnemyDiedForQueue(Enemy enemy, int _)
     {
-        // Remove from active list and decrement wave counter, then try to fill the freed slot.
         OnEnemyDied(enemy);
         TrySpawnFromQueue();
     }
@@ -95,8 +94,6 @@ public class EnemyManager : MonoBehaviour
 
         float gridHeight = (_waveRows - 1) * SpacingY;
         _gridTopY = StartY + gridHeight * 0.5f;
-
-        // ── Build spawn list ───────────────────────────────────────
 
         int totalCells = _waveRows * _waveColumns;
         int spawnTarget = Mathf.Min(data.ResolvedSpawnCount, totalCells);
@@ -127,11 +124,7 @@ public class EnemyManager : MonoBehaviour
                 Row = row,
             });
         }
-
-        // _remainingInWave = everything in the queue (active starts at 0 before initial burst)
         _remainingInWave = _spawnQueue.Count;
-
-        // ── Initial spawn burst ────────────────────────────────────
 
         int initialCount = (_maxActive > 0) ? _maxActive : _remainingInWave;
         for (int i = 0; i < initialCount && _spawnQueue.Count > 0; i++)
@@ -196,9 +189,6 @@ public class EnemyManager : MonoBehaviour
             _activeEnemies.Add(enemy);
         }
     }
-
-    // ── Advance ────────────────────────────────────────────────────────────────
-
     void AdvanceEnemies()
     {
         _totalAdvanceX -= AdvanceDistance;
@@ -212,9 +202,6 @@ public class EnemyManager : MonoBehaviour
         Debug.Log($"[EnemyManager] Enemies advanced. Total offset: {_totalAdvanceX:F1}");
         GameEvents.EnemiesDropped();
     }
-
-    // ── Enemy Removal ──────────────────────────────────────────────────────────
-
     public void OnEnemyDied(Enemy enemy)
     {
         _activeEnemies.Remove(enemy);
@@ -222,11 +209,6 @@ public class EnemyManager : MonoBehaviour
         Debug.Log($"[EnemyManager] Enemy removed. Remaining: {_remainingInWave} " +
                   $"(active: {_activeEnemies.Count}, queued: {_spawnQueue.Count})");
     }
-
-    /// <summary>
-    /// True only when every enemy in this wave has been defeated —
-    /// nothing active, nothing left in the queue.
-    /// </summary>
     public bool AllEnemiesCleared() => _remainingInWave <= 0;
 
     public int ActiveEnemyCount => _activeEnemies.Count;

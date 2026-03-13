@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
@@ -42,6 +43,7 @@ public class PaddleController : MonoBehaviour
         GameEvents.OnShopOpened   += () => _inputEnabled = false;
         GameEvents.OnGameOver     += () => _inputEnabled = false;
         GameEvents.OnVictory      += () => _inputEnabled = false;
+        GameEvents.OnPaddleUpdated += UpdatePaddle;
     }
 
     void UnsubscribeFromEvents()
@@ -72,7 +74,6 @@ public class PaddleController : MonoBehaviour
     public void UpdatePaddle(float newPaddleRange)
     {
         PaddleHalfHeight = newPaddleRange;
-        transform.localScale = new Vector3(transform.localScale.x, newPaddleRange * 2f, transform.localScale.z);
 
         CalculateBounds();
     }

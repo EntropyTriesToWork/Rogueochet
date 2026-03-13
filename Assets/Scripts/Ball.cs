@@ -74,7 +74,6 @@ public class Ball : MonoBehaviour
         }
         else
         {
-            // Wall hit
             LoseDurability(1);
         }
 

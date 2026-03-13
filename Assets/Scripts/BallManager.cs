@@ -81,8 +81,6 @@ public class BallManager : MonoBehaviour
         ResetTimeScale();
     }
 
-    // ── Update ─────────────────────────────────────────────────────
-
     void Update()
     {
         if (_ballInPlay)
@@ -114,13 +112,6 @@ public class BallManager : MonoBehaviour
             }
         }
     }
-
-    // ── Launch ─────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Launches one ball per occupied inventory slot, applying each slot's stats.
-    /// Falls back to a single default ball if inventory is empty.
-    /// </summary>
     public void LaunchAll()
     {
         var inv = PlayerInventory.Instance;
@@ -132,7 +123,7 @@ public class BallManager : MonoBehaviour
         }
         else
         {
-            LaunchBall();   // legacy single-ball fallback
+            LaunchBall(); 
         }
     }
 
@@ -152,18 +143,14 @@ public class BallManager : MonoBehaviour
         Ball       ball = go.GetComponent<Ball>();
         if (ball == null) return;
 
-        // Apply per-ball stats
         instance?.ApplyToBall(ball);
 
-        // Apply global multipliers on top
         if (inv != null)
         {
             ball.Damage        = Mathf.Max(1, Mathf.RoundToInt(ball.Damage * inv.GlobalDamageMultiplier));
             ball.InitialSpeed  *= inv.GlobalSpeedMultiplier;
             ball.MaxDurability  = Mathf.Max(1, ball.MaxDurability + inv.GlobalDurabilityBonus);
         }
-
-        // Launch with a slightly different angle per slot
         float baseAngle = Random.Range(-30f, 30f);
         float slotOffset = (slotIndex - (inv.UsedBallSlots - 1) * 0.5f) * 15f;
         float angle = baseAngle + slotOffset;
@@ -177,8 +164,6 @@ public class BallManager : MonoBehaviour
         GameEvents.BallLaunched(ball);
         GameEvents.BallCountChanged(_activeBalls.Count);
     }
-
-    /// <summary>Legacy single-ball launch used as fallback and by SpawnExtraBall.</summary>
     public void LaunchBall()
     {
         if (BallPrefab == null) { Debug.LogWarning("[BallManager] BallPrefab not assigned!"); return; }
@@ -216,9 +201,6 @@ public class BallManager : MonoBehaviour
             GameEvents.BallCountChanged(_activeBalls.Count);
         }
     }
-
-    // ── Ball Lifecycle ─────────────────────────────────────────────
-
     public void RegisterBall(Ball ball)
     {
         if (!_activeBalls.Contains(ball))
