@@ -6,41 +6,61 @@ using TMPro;
 
 public class ShopUI : MonoBehaviour
 {
+    #region Inspector
+
     [Header("Layout")]
     public Transform CardsContainer;
     public GameObject ShopCardPrefab;
-    [Tooltip("Duration of each card's pop-in animation in seconds.")]
+    [Tooltip("Duration of each card pop-in animation in seconds.")]
     public float ShopCardStaggerDelay = 0.3f;
 
-    [Header("Info Labels")]
+    [Header("Labels")]
     public TextMeshProUGUI EssenceLabel;
     public TextMeshProUGUI LevelLabel;
 
-    [Header("Navigation")]
+    [Header("Buttons")]
     public Button NextWaveButton;
+    public Button RerollButton;
+    public TextMeshProUGUI RerollCostLabel;
+
+    #endregion
+
+    #region Private State
 
     private List<ShopCard> _cards = new List<ShopCard>();
     private Coroutine _staggerCoroutine;
 
+    #endregion
+
+    #region Lifecycle
+
     void Awake()
     {
         GameEvents.OnShopOfferingsChanged += RefreshCards;
-        GameEvents.OnShopClosed           += ClearCards;
-        GameEvents.OnEssenceChanged       += RefreshEssence;
+        GameEvents.OnShopClosed += ClearCards;
+        GameEvents.OnEssenceChanged += RefreshEssence;
 
         PlayerInventory.OnLevelUp += (_) => RefreshLevelLabel();
 
         if (NextWaveButton != null)
             NextWaveButton.onClick.AddListener(() => GameManager.Instance.OnShopComplete());
+
+        if (RerollButton != null)
+            RerollButton.onClick.AddListener(OnRerollPressed);
     }
 
     void OnDestroy()
     {
         GameEvents.OnShopOfferingsChanged -= RefreshCards;
-        GameEvents.OnShopClosed           -= ClearCards;
-        GameEvents.OnEssenceChanged       -= RefreshEssence;
-        PlayerInventory.OnLevelUp         -= (_) => RefreshLevelLabel();
+        GameEvents.OnShopClosed -= ClearCards;
+        GameEvents.OnEssenceChanged -= RefreshEssence;
+        PlayerInventory.OnLevelUp -= (_) => RefreshLevelLabel();
     }
+
+    #endregion
+
+    #region Card Rendering
+
     void RefreshCards()
     {
         ClearCards();
@@ -48,45 +68,34 @@ public class ShopUI : MonoBehaviour
         if (ShopManager.Instance == null || CardsContainer == null || ShopCardPrefab == null) return;
 
         var offerings = ShopManager.Instance.CurrentOfferings;
-        var inv       = PlayerInventory.Instance;
 
         for (int i = 0; i < offerings.Count; i++)
         {
-            int offeringIndex = i;   // capture
-            ShopOffering offering  = offerings[i];
+            int offeringIndex = i;
+            ShopOffering offering = offerings[i];
 
             GameObject go = Instantiate(ShopCardPrefab, CardsContainer);
             ShopCard card = go.GetComponent<ShopCard>();
             if (card == null) continue;
 
-            // Category badge colour
             string categoryText = offering.Category switch
             {
-                UpgradeCategory.BallDirect => "<color=#4FC3F7>BALL UPGRADE</color>",
-                UpgradeCategory.Global     => "<color=#A5D6A7>GLOBAL</color>",
-                UpgradeCategory.NewBall    => "<color=#FFD54F>NEW BALL</color>",
-                _                          => ""
+                UpgradeCategory.BallDirect => "Ball Upgrade",
+                UpgradeCategory.Global => "Global",
+                UpgradeCategory.NewBall => "New Ball",
+                _ => ""
             };
-
-            // Target ball hint
-            string targetText = "";
-            if (offering.Category == UpgradeCategory.BallDirect && inv != null
-                && offering.TargetBallSlot >= 0 && offering.TargetBallSlot < inv.BallInstances.Count)
-            {
-                targetText = $"→ Slot {offering.TargetBallSlot + 1}: {inv.BallInstances[offering.TargetBallSlot].BallTypeName}";
-            }
 
             bool canAfford = GameManager.Instance.Essence >= offering.Upgrade.Cost;
 
             card.Populate(
-                categoryBadge : categoryText,
-                icon          : offering.Upgrade.Icon,
-                upgradeName   : offering.Upgrade.UpgradeName,
-                description   : offering.Upgrade.Description,
-                cost          : offering.Upgrade.Cost,
-                targetHint    : targetText,
-                canAfford     : canAfford,
-                onBuy         : () => ShopManager.Instance.PurchaseOffering(offeringIndex)
+                categoryText: categoryText,
+                icon: offering.Upgrade.Icon,
+                upgradeName: offering.Upgrade.UpgradeName,
+                description: offering.Upgrade.Description,
+                cost: offering.Upgrade.Cost,
+                canAfford: canAfford,
+                onBuy: () => ShopManager.Instance.PurchaseOffering(offeringIndex)
             );
 
             _cards.Add(card);
@@ -94,6 +103,7 @@ public class ShopUI : MonoBehaviour
 
         RefreshEssence(GameManager.Instance.Essence);
         RefreshLevelLabel();
+        RefreshRerollButton();
 
         if (_staggerCoroutine != null) StopCoroutine(_staggerCoroutine);
         _staggerCoroutine = StartCoroutine(StaggerCards());
@@ -106,6 +116,10 @@ public class ShopUI : MonoBehaviour
             if (c != null) Destroy(c.gameObject);
         _cards.Clear();
     }
+
+    #endregion
+
+    #region Stagger Animation
 
     IEnumerator StaggerCards()
     {
@@ -152,16 +166,46 @@ public class ShopUI : MonoBehaviour
         if (rt != null) rt.localScale = Vector3.one;
     }
 
+    #endregion
+
+    #region Reroll
+
+    void OnRerollPressed()
+    {
+        if (ShopManager.Instance == null) return;
+        ShopManager.Instance.Reroll();
+    }
+
+    void RefreshRerollButton()
+    {
+        if (ShopManager.Instance == null) return;
+
+        int cost = ShopManager.Instance.RerollCost;
+        bool canAfford = GameManager.Instance.Essence >= cost;
+
+        if (RerollButton != null) RerollButton.interactable = canAfford;
+        if (RerollCostLabel != null) RerollCostLabel.text = $"Reroll ({cost})";
+    }
+
+    #endregion
+
+    #region Label Helpers
+
     void RefreshEssence(int essence)
     {
         if (EssenceLabel != null)
             EssenceLabel.text = $"Essence: {essence}";
+
+        // Also update reroll button affordability when essence changes mid-shop.
+        RefreshRerollButton();
     }
 
     void RefreshLevelLabel()
     {
         if (LevelLabel == null || PlayerInventory.Instance == null) return;
         var inv = PlayerInventory.Instance;
-        LevelLabel.text = $"Level {inv.CurrentLevel}  |  Slots: {inv.UsedBallSlots}/{inv.MaxBallSlots}";
+        LevelLabel.text = $"Level {inv.CurrentLevel}  Slots: {inv.UsedBallSlots}/{inv.MaxBallSlots}";
     }
+
+    #endregion
 }

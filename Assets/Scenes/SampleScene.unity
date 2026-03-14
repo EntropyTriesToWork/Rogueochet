@@ -2071,6 +2071,8 @@ MonoBehaviour:
   EssenceLabel: {fileID: 0}
   LevelLabel: {fileID: 842881622}
   NextWaveButton: {fileID: 1672907541}
+  RerollButton: {fileID: 1921043885}
+  RerollCostLabel: {fileID: 2085070825}
 --- !u!1 &1144057494
 GameObject:
   m_ObjectHideFlags: 0
@@ -2172,6 +2174,8 @@ MonoBehaviour:
   WeightBallDirect: 60
   WeightGlobal: 30
   WeightNewBall: 10
+  RerollBaseCost: 1
+  RerollCostIncrease: 1
 --- !u!114 &1144057500
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2218,7 +2222,7 @@ MonoBehaviour:
   VictoryPanel: {fileID: 325390666}
   StartPanel: {fileID: 1129182783}
   StartNextWaveButton: {fileID: 1672907541}
-  ShopOpenDelay: 0.5
+  ShopOpenDelay: 0.2
   ShopPanelGroup: {fileID: 29282396}
   ShopFadeInTime: 0.3
 --- !u!114 &1144057502
@@ -3372,6 +3376,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1694462145}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1921043885 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1094839481495602925, guid: 202ae2811a434c14c99635b60b94c242, type: 3}
+  m_PrefabInstance: {fileID: 8362151414766851220}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1 &1958243818
 GameObject:
   m_ObjectHideFlags: 0
@@ -3659,6 +3674,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2013099423}
   m_CullTransparentMesh: 1
+--- !u!114 &2085070825 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3717256133267990906, guid: 202ae2811a434c14c99635b60b94c242, type: 3}
+  m_PrefabInstance: {fileID: 8362151414766851220}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1001 &8362151414766851220
 PrefabInstance:
   m_ObjectHideFlags: 0

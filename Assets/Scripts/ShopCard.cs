@@ -5,36 +5,37 @@ using TMPro;
 
 public class ShopCard : MonoBehaviour
 {
+    #region Inspector
+
     [Header("UI References")]
     public TextMeshProUGUI CategoryLabel;
-    public Image           IconImage;
+    public Image IconImage;
     public TextMeshProUGUI NameLabel;
     public TextMeshProUGUI DescLabel;
     public TextMeshProUGUI CostLabel;
-    public TextMeshProUGUI TargetLabel;
-    public Button          BuyButton;
-    public Image           CardBackground;   // tinted when can't afford
+    public Button BuyButton;
+    public Image CardBackground;
 
     [Header("Style")]
-    public Color AffordableColor   = Color.white;
+    public Color AffordableColor = Color.white;
     public Color UnaffordableColor = new Color(0.5f, 0.5f, 0.5f, 1f);
 
+    #endregion
+
     public void Populate(
-        string categoryBadge,
+        string categoryText,
         Sprite icon,
         string upgradeName,
         string description,
-        int    cost,
-        string targetHint,
-        bool   canAfford,
+        int cost,
+        bool canAfford,
         Action onBuy)
     {
-        if (CategoryLabel != null) CategoryLabel.text = categoryBadge;
-        if (IconImage     != null) { IconImage.sprite = icon; IconImage.gameObject.SetActive(icon != null); }
-        if (NameLabel     != null) NameLabel.text     = upgradeName;
-        if (DescLabel     != null) DescLabel.text     = description;
-        if (CostLabel     != null) CostLabel.text     = $"{cost}";
-        if (TargetLabel   != null) { TargetLabel.text = targetHint; TargetLabel.gameObject.SetActive(!string.IsNullOrEmpty(targetHint)); }
+        if (CategoryLabel != null) CategoryLabel.text = categoryText;
+        if (IconImage != null) { IconImage.sprite = icon; IconImage.gameObject.SetActive(icon != null); }
+        if (NameLabel != null) NameLabel.text = upgradeName;
+        if (DescLabel != null) DescLabel.text = description;
+        if (CostLabel != null) CostLabel.text = $"{cost} Essence";
 
         if (CardBackground != null)
             CardBackground.color = canAfford ? AffordableColor : UnaffordableColor;

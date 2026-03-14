@@ -170,7 +170,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ball
   Damage: 5
-  InitialSpeed: 15
+  InitialSpeed: 25
   MaxDurability: 100
   MinHorizontalSpeed: 2
   PaddleDeflectionRandomRange: 1

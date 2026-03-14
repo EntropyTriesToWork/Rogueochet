@@ -5,27 +5,41 @@ public class ShopManager : MonoBehaviour
 {
     public static ShopManager Instance { get; private set; }
 
-    [Header("Upgrade Pool")]
-    [Tooltip("All BallDirect upgrades available to appear in the shop.")]
+    #region Inspector
+
+    [Header("Upgrade Pools")]
     public UpgradeData[] BallDirectPool;
-    [Tooltip("All Global upgrades available to appear in the shop.")]
     public UpgradeData[] GlobalPool;
-    [Tooltip("All ball upgrades (NewBall category) available.")]
     public UpgradeData[] NewBallPool;
 
     [Header("Shop Settings")]
-    [Tooltip("Total card slots shown each visit.")]
     public int CardCount = 3;
     [Tooltip("Weight for BallDirect cards (relative).")]
     public float WeightBallDirect = 60f;
     [Tooltip("Weight for Global cards (relative).")]
     public float WeightGlobal = 30f;
-    [Tooltip("Weight for NewBall cards (relative).")]
+    [Tooltip("Weight for NewBall cards (relative). At most one NewBall card appears per visit.")]
     public float WeightNewBall = 10f;
+
+    [Header("Reroll")]
+    [Tooltip("Essence cost of the first reroll each wave.")]
+    public int RerollBaseCost = 1;
+    [Tooltip("Added to the reroll cost after each reroll this wave.")]
+    public int RerollCostIncrease = 1;
+
+    #endregion
+
+    #region State
 
     public IReadOnlyList<ShopOffering> CurrentOfferings => _offerings;
     private List<ShopOffering> _offerings = new List<ShopOffering>();
-    private int _targetBallSlot = 0;
+
+    public int RerollCost { get; private set; }
+    public int RerollCount { get; private set; }
+
+    #endregion
+
+    #region Lifecycle
 
     void Awake()
     {
@@ -35,24 +49,39 @@ public class ShopManager : MonoBehaviour
 
     void Start()
     {
+        RerollCost = RerollBaseCost;
         GameEvents.OnShopClosed += ClearOfferings;
+        GameEvents.OnWaveCleared += ResetReroll;
     }
 
     void OnDestroy()
     {
         GameEvents.OnShopClosed -= ClearOfferings;
+        GameEvents.OnWaveCleared -= ResetReroll;
     }
+
+    #endregion
+
+    #region Generation
+
+    /// <summary>Called by UIManager after the shop panel fades in.</summary>
     public void GenerateOfferings()
     {
         _offerings.Clear();
 
         var inv = PlayerInventory.Instance;
-        _targetBallSlot = (inv != null && inv.UsedBallSlots > 0)
-            ? Random.Range(0, inv.UsedBallSlots)
-            : 0;
+        if (inv == null)
+        {
+            Debug.LogWarning("[ShopManager] PlayerInventory not found — shop will be empty.");
+            GameEvents.ShopOfferingsChanged();
+            return;
+        }
 
-        bool hasFreeSlot = inv != null && inv.CanAddBall();
+        // Inline slot check — never rely on CanAddBall() which could have edge cases.
+        bool hasFreeSlot = inv.UsedBallSlots < inv.MaxBallSlots;
         bool newBallUsed = false;
+
+        Debug.Log($"[ShopManager] Generating: UsedSlots={inv.UsedBallSlots} MaxSlots={inv.MaxBallSlots} hasFreeSlot={hasFreeSlot}");
 
         for (int i = 0; i < CardCount; i++)
         {
@@ -63,15 +92,10 @@ public class ShopManager : MonoBehaviour
 
             if (category == UpgradeCategory.NewBall) newBallUsed = true;
 
-            _offerings.Add(new ShopOffering
-            {
-                Upgrade = data,
-                Category = category,
-                TargetBallSlot = (category == UpgradeCategory.BallDirect) ? _targetBallSlot : -1,
-            });
+            _offerings.Add(new ShopOffering { Upgrade = data, Category = category });
         }
 
-        Debug.Log($"[ShopManager] Generated {_offerings.Count} offerings for shop.");
+        Debug.Log($"[ShopManager] Generated {_offerings.Count} offerings.");
         GameEvents.ShopOfferingsChanged();
     }
 
@@ -107,7 +131,36 @@ public class ShopManager : MonoBehaviour
 
     void ClearOfferings() => _offerings.Clear();
 
-    public bool PurchaseOffering(int index, int ballSlotOverride = -1)
+    #endregion
+
+    #region Reroll
+
+    /// <summary>Rerolls all offerings, spending the current reroll cost. Returns false if not enough essence.</summary>
+    public bool Reroll()
+    {
+        if (!GameManager.Instance.SpendEssence(RerollCost))
+        {
+            Debug.Log("[ShopManager] Not enough essence to reroll.");
+            return false;
+        }
+
+        RerollCount++;
+        RerollCost = RerollBaseCost + RerollCount * RerollCostIncrease;
+        GenerateOfferings();
+        return true;
+    }
+
+    void ResetReroll()
+    {
+        RerollCount = 0;
+        RerollCost = RerollBaseCost;
+    }
+
+    #endregion
+
+    #region Purchasing
+
+    public bool PurchaseOffering(int index)
     {
         if (index < 0 || index >= _offerings.Count) return false;
 
@@ -116,7 +169,7 @@ public class ShopManager : MonoBehaviour
         var inv = PlayerInventory.Instance;
         if (inv == null)
         {
-            Debug.LogWarning("[ShopManager] PlayerInventory.Instance is null — cannot purchase.");
+            Debug.LogWarning("[ShopManager] PlayerInventory.Instance is null.");
             return false;
         }
 
@@ -129,7 +182,7 @@ public class ShopManager : MonoBehaviour
         switch (offering.Category)
         {
             case UpgradeCategory.BallDirect:
-                int slot = ballSlotOverride >= 0 ? ballSlotOverride : offering.TargetBallSlot;
+                int slot = inv.UsedBallSlots > 0 ? Random.Range(0, inv.UsedBallSlots) : 0;
                 inv.ApplyDirectUpgrade(offering.Upgrade, slot);
                 break;
 
@@ -148,26 +201,16 @@ public class ShopManager : MonoBehaviour
 
         _offerings.RemoveAt(index);
         GameEvents.ShopOfferingsChanged();
-
         Debug.Log($"[ShopManager] Purchased '{offering.Upgrade.UpgradeName}'.");
         return true;
     }
-    public void BuyPaddleSpeed(int cost, float speedIncrease = 1.5f)
-    {
-        if (!GameManager.Instance.SpendEssence(cost)) return;
-        PaddleController.Instance.MoveSpeed += speedIncrease;
-    }
 
-    public void BuyHealOne(int cost)
-    {
-        if (!GameManager.Instance.SpendEssence(cost)) return;
-        GameManager.Instance.TakeDamage(-1);   // negative damage = heal
-    }
+    #endregion
 }
+
 [System.Serializable]
 public class ShopOffering
 {
     public UpgradeData Upgrade;
     public UpgradeCategory Category;
-    public int TargetBallSlot;   // -1 for Global / NewBall
 }
