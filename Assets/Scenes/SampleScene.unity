@@ -2164,6 +2164,8 @@ MonoBehaviour:
   GlobalPool:
   - {fileID: 11400000, guid: 6cedee68c2420e44f8a72e9ca4ba6e1e, type: 2}
   - {fileID: 11400000, guid: 0291a0385de367b4b87fe55fb2c383fb, type: 2}
+  - {fileID: 11400000, guid: 07b56bd08aa0af746a0a86ea50425d50, type: 2}
+  - {fileID: 11400000, guid: 2718cfcd5c488544481c40c2a90f5174, type: 2}
   NewBallPool:
   - {fileID: 11400000, guid: fcc373979f168ff4f88c256b92e9da34, type: 2}
   CardCount: 3
@@ -3196,7 +3198,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cca69218101f02549a17e67a464c8bab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PaddleController
-  MoveSpeed: 8
+  MoveSpeed: 5
   UseMouse: 1
   PaddleHalfHeight: 1
   PaddleOffset: -0.5
