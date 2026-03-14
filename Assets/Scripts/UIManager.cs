@@ -35,9 +35,6 @@ public class UIManager : MonoBehaviour
 
     [Header("Shop")]
     public Button StartNextWaveButton;
-    [Tooltip("Parent whose direct children are the shop cards. Cards pop in one by one.")]
-    public Transform ShopCardsContainer;
-    public float ShopCardStaggerDelay = 0.3f;
     [Tooltip("Seconds after wave end before the shop panel appears.")]
     public float ShopOpenDelay = 1f;
     [Tooltip("CanvasGroup on ShopPanel used for the fade-in.")]
@@ -78,34 +75,32 @@ public class UIManager : MonoBehaviour
 
     public void SubscribeToEvents()
     {
-        GameEvents.OnPlayerHealthChanged    += OnHealthChanged;
-        GameEvents.OnEssenceChanged         += OnEssenceChanged;
-        GameEvents.OnWaveStarted            += OnWaveStarted;
-        GameEvents.OnRoundStarted           += OnRoundStarted;
-        GameEvents.OnRoundEnded             += OnRoundEnded;
-        GameEvents.OnShopOpened             += OnShopOpened;
-        GameEvents.OnShopClosed             += OnShopClosed;
-        GameEvents.OnGameOver               += OnGameOver;
-        GameEvents.OnVictory                += OnVictory;
-        GameEvents.OnRoundTimerTick         += OnTimerTick;
+        GameEvents.OnPlayerHealthChanged += OnHealthChanged;
+        GameEvents.OnEssenceChanged += OnEssenceChanged;
+        GameEvents.OnWaveStarted += OnWaveStarted;
+        GameEvents.OnRoundStarted += OnRoundStarted;
+        GameEvents.OnRoundEnded += OnRoundEnded;
+        GameEvents.OnShopOpened += OnShopOpened;
+        GameEvents.OnShopClosed += OnShopClosed;
+        GameEvents.OnGameOver += OnGameOver;
+        GameEvents.OnVictory += OnVictory;
+        GameEvents.OnRoundTimerTick += OnTimerTick;
         GameEvents.OnBallSpeedRampTriggered += OnSpeedRamp;
-        GameEvents.OnGameStarted += () => SetOverlay(null);
     }
 
     void UnsubscribeFromEvents()
     {
-        GameEvents.OnPlayerHealthChanged    -= OnHealthChanged;
-        GameEvents.OnEssenceChanged         -= OnEssenceChanged;
-        GameEvents.OnWaveStarted            -= OnWaveStarted;
-        GameEvents.OnRoundStarted           -= OnRoundStarted;
-        GameEvents.OnRoundEnded             -= OnRoundEnded;
-        GameEvents.OnShopOpened             -= OnShopOpened;
-        GameEvents.OnShopClosed             -= OnShopClosed;
-        GameEvents.OnGameOver               -= OnGameOver;
-        GameEvents.OnVictory                -= OnVictory;
-        GameEvents.OnRoundTimerTick         -= OnTimerTick;
+        GameEvents.OnPlayerHealthChanged -= OnHealthChanged;
+        GameEvents.OnEssenceChanged -= OnEssenceChanged;
+        GameEvents.OnWaveStarted -= OnWaveStarted;
+        GameEvents.OnRoundStarted -= OnRoundStarted;
+        GameEvents.OnRoundEnded -= OnRoundEnded;
+        GameEvents.OnShopOpened -= OnShopOpened;
+        GameEvents.OnShopClosed -= OnShopClosed;
+        GameEvents.OnGameOver -= OnGameOver;
+        GameEvents.OnVictory -= OnVictory;
+        GameEvents.OnRoundTimerTick -= OnTimerTick;
         GameEvents.OnBallSpeedRampTriggered -= OnSpeedRamp;
-        GameEvents.OnGameStarted -= () => SetOverlay(null);
     }
 
     #endregion
@@ -126,13 +121,14 @@ public class UIManager : MonoBehaviour
 
     void OnWaveStarted(int waveNumber)
     {
+        SetOverlay(null);
+
         if (WaveLabel != null)
             WaveLabel.text = $"Wave {waveNumber}/{GameManager.Instance.TotalWaves}";
 
-        // Reset timer at the start of each new wave
         if (TimerLabel != null)
         {
-            TimerLabel.text  = Utils.FormatTimeToMinutes(0f);
+            TimerLabel.text = Utils.FormatTimeToMinutes(0f);
             TimerLabel.color = Color.white;
         }
 
@@ -161,7 +157,7 @@ public class UIManager : MonoBehaviour
     void OnShopClosed() => SetOverlay(null);
 
     void OnGameOver() => SetOverlay(GameOverPanel);
-    void OnVictory()  => SetOverlay(VictoryPanel);
+    void OnVictory() => SetOverlay(VictoryPanel);
 
     void OnTimerTick(float elapsed)
     {
@@ -184,7 +180,7 @@ public class UIManager : MonoBehaviour
     {
         if (WaveBannerGroup == null || WaveBannerLabel == null) yield break;
 
-        WaveBannerLabel.text  = $"Wave {waveNumber}";
+        WaveBannerLabel.text = $"Wave {waveNumber}";
         WaveBannerGroup.alpha = 1f;
         WaveBannerGroup.gameObject.SetActive(true);
 
@@ -225,56 +221,10 @@ public class UIManager : MonoBehaviour
             }
             ShopPanelGroup.alpha = 1f;
         }
-
-        if (ShopCardsContainer != null)
-            StartCoroutine(StaggerShopCards());
+        if (ShopManager.Instance != null)
+            ShopManager.Instance.GenerateOfferings();
 
         _shopCoroutine = null;
-    }
-
-    IEnumerator StaggerShopCards()
-    {
-        var cards = new List<GameObject>();
-        for (int i = 0; i < ShopCardsContainer.childCount; i++)
-            cards.Add(ShopCardsContainer.GetChild(i).gameObject);
-
-        foreach (var card in cards)
-            card.SetActive(false);
-
-        foreach (var card in cards)
-        {
-            card.SetActive(true);
-            CanvasGroup cg = card.GetComponent<CanvasGroup>();
-            if (cg != null)
-                yield return StartCoroutine(PopInCard(cg));
-            else
-                yield return new WaitForSecondsRealtime(ShopCardStaggerDelay);
-        }
-    }
-
-    IEnumerator PopInCard(CanvasGroup cg)
-    {
-        cg.alpha = 0f;
-        RectTransform rt = cg.GetComponent<RectTransform>();
-
-        float elapsed = 0f;
-        while (elapsed < ShopCardStaggerDelay)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / ShopCardStaggerDelay);
-            cg.alpha = t;
-            if (rt != null)
-            {
-                float s = t < 0.6f
-                    ? Mathf.SmoothStep(0.7f, 1.1f, t / 0.6f)
-                    : Mathf.Lerp(1.1f, 1f, (t - 0.6f) / 0.4f);
-                rt.localScale = new Vector3(s, s, 1f);
-            }
-            yield return null;
-        }
-
-        cg.alpha = 1f;
-        if (rt != null) rt.localScale = Vector3.one;
     }
 
     #endregion
@@ -286,12 +236,13 @@ public class UIManager : MonoBehaviour
         if (StatusLabel != null)
             StatusLabel.text = message;
     }
+
     void SetOverlay(GameObject panel)
     {
-        if (ShopPanel     != null) ShopPanel.SetActive(ShopPanel         == panel);
+        if (ShopPanel != null) ShopPanel.SetActive(ShopPanel == panel);
         if (GameOverPanel != null) GameOverPanel.SetActive(GameOverPanel == panel);
-        if (VictoryPanel  != null) VictoryPanel.SetActive(VictoryPanel   == panel);
-        if (StartPanel    != null) StartPanel.SetActive(StartPanel       == panel);
+        if (VictoryPanel != null) VictoryPanel.SetActive(VictoryPanel == panel);
+        if (StartPanel != null) StartPanel.SetActive(StartPanel == panel);
     }
 
     #endregion

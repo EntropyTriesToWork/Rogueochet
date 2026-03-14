@@ -1459,7 +1459,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -24}
-  m_SizeDelta: {x: 24.089996, y: 14}
+  m_SizeDelta: {x: 500, y: 14}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &842881622
 MonoBehaviour:
@@ -2067,6 +2067,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopUI
   CardsContainer: {fileID: 1509006482}
   ShopCardPrefab: {fileID: 3967589011015796173, guid: af907b9bc27b822479a6fcac5e43f4eb, type: 3}
+  ShopCardStaggerDelay: 0.3
   EssenceLabel: {fileID: 0}
   LevelLabel: {fileID: 842881622}
   NextWaveButton: {fileID: 1672907541}
@@ -2086,6 +2087,7 @@ GameObject:
   - component: {fileID: 1144057501}
   - component: {fileID: 1144057502}
   - component: {fileID: 1144057503}
+  - component: {fileID: 1144057504}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -2214,8 +2216,6 @@ MonoBehaviour:
   VictoryPanel: {fileID: 325390666}
   StartPanel: {fileID: 1129182783}
   StartNextWaveButton: {fileID: 1672907541}
-  ShopCardsContainer: {fileID: 29282392}
-  ShopCardStaggerDelay: 0.3
   ShopOpenDelay: 0.5
   ShopPanelGroup: {fileID: 29282396}
   ShopFadeInTime: 0.3
@@ -2247,6 +2247,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PauseManager
   PausePanel: {fileID: 122073400}
+--- !u!114 &1144057504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1144057494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dab77d2eb18e9b40ac7aaca07c54eac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInventory
+  EssencePerLevel: 10
+  StartingBallSlots: 1
+  DefaultBallPrefab: {fileID: 8103343861122729336, guid: ba71a2e1b481b5f4b812dfe13cf3346b, type: 3}
+  DefaultBallName: Standard Ball
 --- !u!1 &1163590325
 GameObject:
   m_ObjectHideFlags: 0
