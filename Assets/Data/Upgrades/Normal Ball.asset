@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
   UpgradeName: Normal Ball
   Description: Just a normal ball...
-  Icon: {fileID: 0}
+  Icon: {fileID: -2476932275191213472, guid: 80cd94b07095b7b4c82de5e7e9648b2a, type: 3}
   Category: 2
   Cost: 5
   Effect: 0

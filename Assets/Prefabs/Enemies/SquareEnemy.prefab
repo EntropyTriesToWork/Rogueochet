@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26de0eec9a3cbc0418e7fd805dffabef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  EssenceReward: 1
+  EssenceReward: 10
   HPLabel: {fileID: 5679679370951835787}
   HPVisual: {fileID: 4475357366122152845}
   usesLabel: 0

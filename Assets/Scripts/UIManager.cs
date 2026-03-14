@@ -4,11 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// The HUD is always active. Overlay panels (Shop, GameOver, Victory, Start) sit on top
-/// via Canvas sort order and are toggled independently. The HUD is the single source of
-/// truth for all player-facing resources: HP, Essence, Wave, and Timer.
-/// </summary>
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }

@@ -18,15 +18,24 @@ public class BallManager : MonoBehaviour
     [Tooltip("How quickly timeScale moves toward RampTargetTimeScale (units per unscaled second).")]
     public float RampAcceleration = 1f;
 
+    [Header("Break All (Right-Click Hold)")]
+    [Tooltip("Seconds the player must hold right-click to break all active balls.")]
+    public float BreakHoldDuration = 1f;
+    [Tooltip("Radial fill UI Image shown while holding. Assign an Image with Fill Method = Radial 360.")]
+    public UnityEngine.UI.Image BreakChargeIndicator;
+
     [HideInInspector] public float BaseSpeedRampDelay;
 
     private List<Ball> _activeBalls = new List<Ball>();
-    private bool _launchEnabled = false;
-    private bool _ballInPlay    = false;
-    private float _roundTimer   = 0f;
-    private bool _rampFired     = false;
-    private bool _rampActive    = false;
+    private bool  _launchEnabled    = false;
+    private bool  _ballInPlay       = false;
+    private float _roundTimer       = 0f;
+    private bool  _rampFired        = false;
+    private bool  _rampActive       = false;
     private float _timeSinceLastBall = 0f;
+
+    private float _breakHoldTimer  = 0f;
+    private bool  _breakHoldActive = false;
 
     void Awake()
     {
@@ -37,6 +46,8 @@ public class BallManager : MonoBehaviour
 
     void Start() => SubscribeToEvents();
     void OnDestroy() => UnsubscribeFromEvents();
+
+    // ── Event Wiring ───────────────────────────────────────────────
 
     public void SubscribeToEvents()
     {
@@ -95,6 +106,8 @@ public class BallManager : MonoBehaviour
                 LaunchAll();
         }
 
+        HandleBreakHold();
+
         if (_ballInPlay)
         {
             if (!_rampFired && Time.time - _timeSinceLastBall >= SpeedRampDelay)
@@ -112,6 +125,49 @@ public class BallManager : MonoBehaviour
             }
         }
     }
+
+    void HandleBreakHold()
+    {
+        if (!_ballInPlay)
+        {
+            CancelBreakHold();
+            return;
+        }
+
+        if (Input.GetMouseButton(1))
+        {
+            _breakHoldActive = true;
+            _breakHoldTimer += Time.unscaledDeltaTime;
+
+            if (BreakChargeIndicator != null)
+            {
+                BreakChargeIndicator.gameObject.SetActive(true);
+                BreakChargeIndicator.fillAmount = Mathf.Clamp01(_breakHoldTimer / BreakHoldDuration);
+            }
+
+            if (_breakHoldTimer >= BreakHoldDuration)
+            {
+                DestroyAllBalls();
+                CancelBreakHold();
+            }
+        }
+        else if (_breakHoldActive)
+        {
+            CancelBreakHold();
+        }
+    }
+
+    void CancelBreakHold()
+    {
+        _breakHoldTimer  = 0f;
+        _breakHoldActive = false;
+        if (BreakChargeIndicator != null)
+        {
+            BreakChargeIndicator.fillAmount = 0f;
+            BreakChargeIndicator.gameObject.SetActive(false);
+        }
+    }
+
     public void LaunchAll()
     {
         var inv = PlayerInventory.Instance;
@@ -123,7 +179,7 @@ public class BallManager : MonoBehaviour
         }
         else
         {
-            LaunchBall(); 
+            LaunchBall();   // legacy single-ball fallback
         }
     }
 
@@ -143,14 +199,18 @@ public class BallManager : MonoBehaviour
         Ball       ball = go.GetComponent<Ball>();
         if (ball == null) return;
 
+        // Apply per-ball stats
         instance?.ApplyToBall(ball);
 
+        // Apply global multipliers on top
         if (inv != null)
         {
             ball.Damage        = Mathf.Max(1, Mathf.RoundToInt(ball.Damage * inv.GlobalDamageMultiplier));
             ball.InitialSpeed  *= inv.GlobalSpeedMultiplier;
             ball.MaxDurability  = Mathf.Max(1, ball.MaxDurability + inv.GlobalDurabilityBonus);
         }
+
+        // Launch with a slightly different angle per slot
         float baseAngle = Random.Range(-30f, 30f);
         float slotOffset = (slotIndex - (inv.UsedBallSlots - 1) * 0.5f) * 15f;
         float angle = baseAngle + slotOffset;
@@ -164,6 +224,8 @@ public class BallManager : MonoBehaviour
         GameEvents.BallLaunched(ball);
         GameEvents.BallCountChanged(_activeBalls.Count);
     }
+
+    /// <summary>Legacy single-ball launch used as fallback and by SpawnExtraBall.</summary>
     public void LaunchBall()
     {
         if (BallPrefab == null) { Debug.LogWarning("[BallManager] BallPrefab not assigned!"); return; }
@@ -201,6 +263,9 @@ public class BallManager : MonoBehaviour
             GameEvents.BallCountChanged(_activeBalls.Count);
         }
     }
+
+    // ── Ball Lifecycle ─────────────────────────────────────────────
+
     public void RegisterBall(Ball ball)
     {
         if (!_activeBalls.Contains(ball))

@@ -3,10 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// A single purchasable card in the shop.
-/// Attach to the ShopCard prefab root.
-/// </summary>
 public class ShopCard : MonoBehaviour
 {
     [Header("UI References")]
@@ -37,7 +33,7 @@ public class ShopCard : MonoBehaviour
         if (IconImage     != null) { IconImage.sprite = icon; IconImage.gameObject.SetActive(icon != null); }
         if (NameLabel     != null) NameLabel.text     = upgradeName;
         if (DescLabel     != null) DescLabel.text     = description;
-        if (CostLabel     != null) CostLabel.text     = $"{cost} Essence";
+        if (CostLabel     != null) CostLabel.text     = $"{cost}";
         if (TargetLabel   != null) { TargetLabel.text = targetHint; TargetLabel.gameObject.SetActive(!string.IsNullOrEmpty(targetHint)); }
 
         if (CardBackground != null)

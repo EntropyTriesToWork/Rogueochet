@@ -18,13 +18,14 @@ public class ShopUI : MonoBehaviour
 
     private List<ShopCard> _cards = new List<ShopCard>();
 
-    void Start()
+    void Awake()
     {
-        GameEvents.OnShopOpened          += OnShopOpened;
-        GameEvents.OnShopClosed          += OnShopClosed;
+        GameEvents.OnShopOpened           += OnShopOpened;
+        GameEvents.OnShopClosed           += OnShopClosed;
+        GameEvents.OnEssenceChanged       += RefreshEssence;
         GameEvents.OnShopOfferingsChanged += RefreshCards;
 
-        PlayerInventory.OnLevelUp        += (_) => RefreshLevelLabel();
+        PlayerInventory.OnLevelUp += (_) => RefreshLevelLabel();
 
         if (NextWaveButton != null)
             NextWaveButton.onClick.AddListener(() => GameManager.Instance.OnShopComplete());
@@ -32,14 +33,17 @@ public class ShopUI : MonoBehaviour
 
     void OnDestroy()
     {
-        GameEvents.OnShopOpened          -= OnShopOpened;
-        GameEvents.OnShopClosed          -= OnShopClosed;
+        GameEvents.OnShopOpened           -= OnShopOpened;
+        GameEvents.OnShopClosed           -= OnShopClosed;
+        GameEvents.OnEssenceChanged       -= RefreshEssence;
         GameEvents.OnShopOfferingsChanged -= RefreshCards;
+        PlayerInventory.OnLevelUp         -= (_) => RefreshLevelLabel();
     }
 
     void OnShopOpened()
     {
         RefreshCards();
+        RefreshEssence(GameManager.Instance.Essence);
         RefreshLevelLabel();
     }
 
@@ -68,11 +72,10 @@ public class ShopUI : MonoBehaviour
             {
                 UpgradeCategory.BallDirect => "<color=#4FC3F7>BALL UPGRADE</color>",
                 UpgradeCategory.Global     => "<color=#A5D6A7>GLOBAL</color>",
-                UpgradeCategory.NewBall    => "<color=#FFD54F>✦ NEW BALL</color>",
+                UpgradeCategory.NewBall    => "<color=#FFD54F>NEW BALL</color>",
                 _                          => ""
             };
 
-            // Target ball hint
             string targetText = "";
             if (offering.Category == UpgradeCategory.BallDirect && inv != null
                 && offering.TargetBallSlot >= 0 && offering.TargetBallSlot < inv.BallInstances.Count)
@@ -102,6 +105,12 @@ public class ShopUI : MonoBehaviour
         foreach (var c in _cards)
             if (c != null) Destroy(c.gameObject);
         _cards.Clear();
+    }
+
+    void RefreshEssence(int essence)
+    {
+        if (EssenceLabel != null)
+            EssenceLabel.text = $"Essence: {essence}";
     }
 
     void RefreshLevelLabel()

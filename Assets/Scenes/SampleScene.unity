@@ -130,7 +130,6 @@ GameObject:
   - component: {fileID: 29282392}
   - component: {fileID: 29282394}
   - component: {fileID: 29282393}
-  - component: {fileID: 29282395}
   - component: {fileID: 29282396}
   m_Layer: 5
   m_Name: ShopPanel
@@ -200,23 +199,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 29282391}
   m_CullTransparentMesh: 1
---- !u!114 &29282395
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 29282391}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1eda47f0b8415134798f12810a262b41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShopUI
-  CardsContainer: {fileID: 1509006482}
-  ShopCardPrefab: {fileID: 3967589011015796173, guid: af907b9bc27b822479a6fcac5e43f4eb, type: 3}
-  EssenceLabel: {fileID: 0}
-  LevelLabel: {fileID: 842881622}
-  NextWaveButton: {fileID: 1672907541}
 --- !u!225 &29282396
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1187,6 +1169,102 @@ MonoBehaviour:
   m_CropFrameX: 0
   m_CropFrameY: 0
   m_StretchFill: 0
+--- !u!1 &608947187
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 608947188}
+  - component: {fileID: 608947191}
+  - component: {fileID: 608947190}
+  - component: {fileID: 608947189}
+  m_Layer: 5
+  m_Name: BreakIndicator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &608947188
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 608947187}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1135406095}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 8, y: 8}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &608947189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 608947187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -2476932275191213472, guid: 80cd94b07095b7b4c82de5e7e9648b2a, type: 3}
+  m_Type: 3
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &608947190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 608947187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
+--- !u!222 &608947191
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 608947187}
+  m_CullTransparentMesh: 1
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -1877,6 +1955,7 @@ GameObject:
   - component: {fileID: 1135406094}
   - component: {fileID: 1135406093}
   - component: {fileID: 1135406092}
+  - component: {fileID: 1135406096}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -1960,6 +2039,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 29282392}
+  - {fileID: 608947188}
   - {fileID: 336372424}
   - {fileID: 717766020}
   - {fileID: 325390667}
@@ -1973,6 +2053,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1135406096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1135406091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1eda47f0b8415134798f12810a262b41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShopUI
+  CardsContainer: {fileID: 1509006482}
+  ShopCardPrefab: {fileID: 3967589011015796173, guid: af907b9bc27b822479a6fcac5e43f4eb, type: 3}
+  EssenceLabel: {fileID: 0}
+  LevelLabel: {fileID: 842881622}
+  NextWaveButton: {fileID: 1672907541}
 --- !u!1 &1144057494
 GameObject:
   m_ObjectHideFlags: 0
@@ -2029,6 +2126,8 @@ MonoBehaviour:
   SpeedRampDelay: 10
   RampTargetTimeScale: 5
   RampAcceleration: 0.5
+  BreakHoldDuration: 1
+  BreakChargeIndicator: {fileID: 608947189}
   BaseSpeedRampDelay: 0
 --- !u!114 &1144057497
 MonoBehaviour:
@@ -3083,7 +3182,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PaddleController
   MoveSpeed: 8
   UseMouse: 1
-  PaddleHalfHeight: 3
+  PaddleHalfHeight: 1
   PaddleOffset: -0.5
   SizeChangeSpeed: 4
 --- !u!1 &1768825469
