@@ -1,6 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Central source of truth for the player's run state:
+///  - Ball slots and the BallInstances filling them
+///  - Global upgrades and their applied effects
+///  - Leveling (essence threshold → extra ball slots)
+///  - Run statistics (kills, bounces, balls launched)
+/// </summary>
 public class PlayerInventory : MonoBehaviour
 {
     public static PlayerInventory Instance { get; private set; }
@@ -49,9 +56,11 @@ public class PlayerInventory : MonoBehaviour
     public int   TotalDamageDealt   { get; private set; } = 0;
     public float TotalTimeElapsed   { get; private set; } = 0f;
 
+    // ── Events ─────────────────────────────────────────────────────
     public static System.Action OnInventoryChanged;
     public static System.Action<int> OnLevelUp;
-    public static System.Action<int, int, int> OnEssenceGained;
+
+    // ──────────────────────────────────────────────────────────────
 
     void Awake()
     {
@@ -87,9 +96,12 @@ public class PlayerInventory : MonoBehaviour
         GameEvents.OnGameOver      -= ResetRunStats;
     }
 
+    // ── Event Handlers ─────────────────────────────────────────────
+
     void HandleEnemyDied(Enemy _, int __)
     {
         TotalKills++;
+        // Award leveling essence (separate from spendable essence)
         int awarded = Mathf.RoundToInt(1 * EssenceGainMultiplier);
         AddLevelingEssence(awarded);
     }
@@ -109,7 +121,6 @@ public class PlayerInventory : MonoBehaviour
     void AddLevelingEssence(int amount)
     {
         EssenceAccumulated += amount;
-        OnEssenceGained?.Invoke(amount, EssenceAccumulated, EssenceToNextLevel);
         while (EssenceAccumulated >= EssenceToNextLevel)
         {
             EssenceAccumulated -= EssenceToNextLevel;

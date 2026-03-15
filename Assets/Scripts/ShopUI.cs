@@ -10,19 +10,19 @@ public class ShopUI : MonoBehaviour
     #region Inspector
 
     [Header("Cards")]
-    public Transform CardsContainer;
+    public Transform  CardsContainer;
     public GameObject ShopCardPrefab;
-    public float ShopCardStaggerDelay = 0.3f;
+    public float      ShopCardStaggerDelay = 0.3f;
 
     [Header("Ball Row")]
     [Tooltip("Parent for ball slot icons. Use a Horizontal Layout Group.")]
-    public Transform BallRowContainer;
+    public Transform       BallRowContainer;
     [Tooltip("Prefab with an Image component for the ball sprite.")]
-    public GameObject BallSlotIconPrefab;
+    public GameObject      BallSlotIconPrefab;
     [Tooltip("Tint applied to a ball icon when highlighted by a hovered card.")]
-    public Color BallHighlightColor = new Color(1f, 0.85f, 0.2f, 1f);
+    public Color           BallHighlightColor = new Color(1f, 0.85f, 0.2f, 1f);
     [Tooltip("Tooltip panel shown when hovering a ball icon.")]
-    public GameObject TooltipPanel;
+    public GameObject      TooltipPanel;
     public TextMeshProUGUI TooltipLabel;
 
     [Header("Labels")]
@@ -31,19 +31,19 @@ public class ShopUI : MonoBehaviour
     public TextMeshProUGUI SlotsLabel;
 
     [Header("Buttons")]
-    public Button NextWaveButton;
-    public Button RerollButton;
+    public Button          NextWaveButton;
+    public Button          RerollButton;
     public TextMeshProUGUI RerollCostLabel;
 
     #endregion
 
     #region Private State
 
-    private List<ShopCard> _cards = new List<ShopCard>();
-    private List<GameObject> _ballIcons = new List<GameObject>();
-    private List<Image> _ballImages = new List<Image>();
-    private List<Color> _ballBaseColors = new List<Color>();
-    private Coroutine _staggerCoroutine;
+    private List<ShopCard>   _cards          = new List<ShopCard>();
+    private List<GameObject> _ballIcons      = new List<GameObject>();
+    private List<Image>      _ballImages     = new List<Image>();
+    private List<Color>      _ballBaseColors = new List<Color>();
+    private Coroutine        _staggerCoroutine;
 
     #endregion
 
@@ -52,8 +52,8 @@ public class ShopUI : MonoBehaviour
     void Awake()
     {
         GameEvents.OnShopOfferingsChanged += RefreshCards;
-        GameEvents.OnShopClosed += OnShopClosed;
-        GameEvents.OnEssenceChanged += RefreshEssence;
+        GameEvents.OnShopClosed           += OnShopClosed;
+        GameEvents.OnEssenceChanged       += RefreshEssence;
 
         PlayerInventory.OnInventoryChanged += RefreshBallRow;
 
@@ -70,8 +70,8 @@ public class ShopUI : MonoBehaviour
     void OnDestroy()
     {
         GameEvents.OnShopOfferingsChanged -= RefreshCards;
-        GameEvents.OnShopClosed -= OnShopClosed;
-        GameEvents.OnEssenceChanged -= RefreshEssence;
+        GameEvents.OnShopClosed           -= OnShopClosed;
+        GameEvents.OnEssenceChanged       -= RefreshEssence;
         PlayerInventory.OnInventoryChanged -= RefreshBallRow;
     }
 
@@ -96,37 +96,44 @@ public class ShopUI : MonoBehaviour
 
         for (int i = 0; i < offerings.Count; i++)
         {
-            int offeringIndex = i;
-            ShopOffering offering = offerings[i];
+            int          offeringIndex = i;
+            ShopOffering offering      = offerings[i];
 
-            GameObject go = Instantiate(ShopCardPrefab, CardsContainer);
-            go.SetActive(false);
-            ShopCard card = go.GetComponent<ShopCard>();
+            GameObject go   = Instantiate(ShopCardPrefab, CardsContainer);
+            ShopCard   card = go.GetComponent<ShopCard>();
             if (card == null) continue;
+
+            // Hide via CanvasGroup so the Layout Group still measures the card correctly.
+            // SetActive(false) would cause cards to shift as they activate one-by-one.
+            CanvasGroup cg = go.GetComponent<CanvasGroup>();
+            if (cg == null) cg = go.AddComponent<CanvasGroup>();
+            cg.alpha          = 0f;
+            cg.blocksRaycasts = false;
+            cg.interactable   = false;
 
             string categoryText = offering.Category switch
             {
                 UpgradeCategory.BallDirect => "Ball Upgrade",
-                UpgradeCategory.Global => "Global",
-                UpgradeCategory.NewBall => "New Ball",
-                _ => ""
+                UpgradeCategory.Global     => "Global",
+                UpgradeCategory.NewBall    => "New Ball",
+                _                          => ""
             };
 
             bool canAfford = GameManager.Instance.Essence >= offering.Upgrade.Cost;
 
-            UpgradeCategory category = offering.Category;
-            int targetSlot = offering.TargetBallSlot;
+            UpgradeCategory category   = offering.Category;
+            int             targetSlot = offering.TargetBallSlot;
 
             card.Populate(
-                categoryText: categoryText,
-                icon: offering.Upgrade.Icon,
-                upgradeName: offering.Upgrade.UpgradeName,
-                description: offering.Upgrade.Description,
-                cost: offering.Upgrade.Cost,
-                canAfford: canAfford,
-                onBuy: () => ShopManager.Instance.PurchaseOffering(offeringIndex),
-                onHoverEnter: () => OnCardHoverEnter(category, targetSlot),
-                onHoverExit: ClearBallHighlights
+                categoryText : categoryText,
+                icon         : offering.Upgrade.Icon,
+                upgradeName  : offering.Upgrade.UpgradeName,
+                description  : offering.Upgrade.Description,
+                cost         : offering.Upgrade.Cost,
+                canAfford    : canAfford,
+                onBuy        : () => ShopManager.Instance.PurchaseOffering(offeringIndex),
+                onHoverEnter : () => OnCardHoverEnter(category, targetSlot),
+                onHoverExit  : ClearBallHighlights
             );
 
             _cards.Add(card);
@@ -159,44 +166,27 @@ public class ShopUI : MonoBehaviour
         {
             if (card == null) continue;
 
-            card.gameObject.SetActive(true);
-
             CanvasGroup cg = card.GetComponent<CanvasGroup>();
             if (cg != null)
             {
-                cg.alpha = 0f;
-                yield return StartCoroutine(PopInCard(cg));
+                // Fade in and enable interaction
+                float elapsed = 0f;
+                while (elapsed < ShopCardStaggerDelay)
+                {
+                    elapsed += Time.unscaledDeltaTime;
+                    cg.alpha = Mathf.Clamp01(elapsed / ShopCardStaggerDelay);
+                    yield return null;
+                }
+                cg.alpha          = 1f;
+                cg.blocksRaycasts = true;
+                cg.interactable   = true;
             }
-            else
-            {
-                yield return new WaitForSecondsRealtime(ShopCardStaggerDelay);
-            }
+
+            card.PlayPopIn();
+
+            yield return new WaitForSecondsRealtime(ShopCardStaggerDelay);
         }
         _staggerCoroutine = null;
-    }
-
-    IEnumerator PopInCard(CanvasGroup cg)
-    {
-        RectTransform rt = cg.GetComponent<RectTransform>();
-        float elapsed = 0f;
-
-        while (elapsed < ShopCardStaggerDelay)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / ShopCardStaggerDelay);
-            cg.alpha = t;
-            if (rt != null)
-            {
-                float s = t < 0.6f
-                    ? Mathf.SmoothStep(0.7f, 1.1f, t / 0.6f)
-                    : Mathf.Lerp(1.1f, 1f, (t - 0.6f) / 0.4f);
-                rt.localScale = new Vector3(s, s, 1f);
-            }
-            yield return null;
-        }
-
-        cg.alpha = 1f;
-        if (rt != null) rt.localScale = Vector3.one;
     }
 
     #endregion
@@ -205,8 +195,6 @@ public class ShopUI : MonoBehaviour
 
     void RefreshBallRow()
     {
-        if (BallRowContainer == null || BallSlotIconPrefab == null) return;
-
         foreach (var icon in _ballIcons)
             if (icon != null) Destroy(icon);
         _ballIcons.Clear();
@@ -214,19 +202,42 @@ public class ShopUI : MonoBehaviour
         _ballBaseColors.Clear();
 
         var inv = PlayerInventory.Instance;
-        if (inv == null) return;
+        if (inv == null) { Debug.LogWarning("[ShopUI] PlayerInventory not found for ball row."); return; }
+
+        Debug.Log($"[ShopUI] Building ball row: {inv.BallInstances.Count} balls, container={BallRowContainer != null}, prefab={BallSlotIconPrefab != null}");
 
         for (int i = 0; i < inv.BallInstances.Count; i++)
         {
-            int slotIndex = i;
-            BallInstance ball = inv.BallInstances[i];
+            int          slotIndex = i;
+            BallInstance ball      = inv.BallInstances[i];
 
-            GameObject go = Instantiate(BallSlotIconPrefab, BallRowContainer);
+            // Create icon — use prefab if assigned, otherwise build a minimal fallback
+            GameObject go;
+            if (BallSlotIconPrefab != null && BallRowContainer != null)
+            {
+                go = Instantiate(BallSlotIconPrefab, BallRowContainer);
+            }
+            else if (BallRowContainer != null)
+            {
+                go = new GameObject($"BallIcon_{i}", typeof(RectTransform), typeof(Image));
+                go.transform.SetParent(BallRowContainer, false);
+                var rt = go.GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(48f, 48f);
+            }
+            else
+            {
+                Debug.LogWarning("[ShopUI] BallRowContainer is not assigned.");
+                return;
+            }
+
             Image img = go.GetComponent<Image>();
-
             if (img != null)
             {
-                if (ball.PreviewSprite != null) img.sprite = ball.PreviewSprite;
+                if (ball.PreviewSprite != null)
+                    img.sprite = ball.PreviewSprite;
+                else
+                    img.color = new Color(0.6f, 0.8f, 1f);   // plain blue placeholder
+
                 _ballImages.Add(img);
                 _ballBaseColors.Add(img.color);
             }
@@ -238,7 +249,7 @@ public class ShopUI : MonoBehaviour
 
             EventTrigger trigger = go.GetComponent<EventTrigger>() ?? go.AddComponent<EventTrigger>();
             AddPointerEvent(trigger, EventTriggerType.PointerEnter, (_) => ShowBallTooltip(slotIndex));
-            AddPointerEvent(trigger, EventTriggerType.PointerExit, (_) => HideTooltip());
+            AddPointerEvent(trigger, EventTriggerType.PointerExit,  (_) => HideTooltip());
 
             _ballIcons.Add(go);
         }
@@ -312,10 +323,10 @@ public class ShopUI : MonoBehaviour
     void RefreshRerollButton()
     {
         if (ShopManager.Instance == null) return;
-        int cost = ShopManager.Instance.RerollCost;
+        int  cost      = ShopManager.Instance.RerollCost;
         bool canAfford = GameManager.Instance != null && GameManager.Instance.Essence >= cost;
-        if (RerollButton != null) RerollButton.interactable = canAfford;
-        if (RerollCostLabel != null) RerollCostLabel.text = $"Reroll ({cost})";
+        if (RerollButton    != null) RerollButton.interactable = canAfford;
+        if (RerollCostLabel != null) RerollCostLabel.text      = $"Reroll ({cost})";
     }
 
     #endregion

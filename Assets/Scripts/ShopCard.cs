@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -10,16 +11,18 @@ public class ShopCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     [Header("UI References")]
     public TextMeshProUGUI CategoryLabel;
-    public Image IconImage;
+    public Image           IconImage;
     public TextMeshProUGUI NameLabel;
     public TextMeshProUGUI DescLabel;
     public TextMeshProUGUI CostLabel;
-    public Button BuyButton;
-    public Image CardBackground;
+    public Button          BuyButton;
+    public Image           CardBackground;
 
     [Header("Style")]
-    public Color AffordableColor = Color.white;
+    public Color AffordableColor   = Color.white;
     public Color UnaffordableColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+    public float PopDuration = 0.2f;
 
     #endregion
 
@@ -31,20 +34,20 @@ public class ShopCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         Sprite icon,
         string upgradeName,
         string description,
-        int cost,
-        bool canAfford,
+        int    cost,
+        bool   canAfford,
         Action onBuy,
         Action onHoverEnter = null,
-        Action onHoverExit = null)
+        Action onHoverExit  = null)
     {
         _onHoverEnter = onHoverEnter;
-        _onHoverExit = onHoverExit;
+        _onHoverExit  = onHoverExit;
 
         if (CategoryLabel != null) CategoryLabel.text = categoryText;
-        if (IconImage != null) { IconImage.sprite = icon; IconImage.gameObject.SetActive(icon != null); }
-        if (NameLabel != null) NameLabel.text = upgradeName;
-        if (DescLabel != null) DescLabel.text = description;
-        if (CostLabel != null) CostLabel.text = $"{cost}";
+        if (IconImage     != null) { IconImage.sprite = icon; IconImage.gameObject.SetActive(icon != null); }
+        if (NameLabel     != null) NameLabel.text     = upgradeName;
+        if (DescLabel     != null) DescLabel.text     = description;
+        if (CostLabel     != null) CostLabel.text     = cost.ToString();
 
         if (CardBackground != null)
             CardBackground.color = canAfford ? AffordableColor : UnaffordableColor;
@@ -56,7 +59,29 @@ public class ShopCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             BuyButton.onClick.AddListener(() => onBuy?.Invoke());
         }
     }
+    public void PlayPopIn()
+    {
+        StartCoroutine(PopIn());
+    }
+
+    IEnumerator PopIn()
+    {
+        RectTransform rt      = GetComponent<RectTransform>();
+        float         elapsed = 0f;
+
+        while (elapsed < PopDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / PopDuration);
+            float s = Mathf.SmoothStep(0.75f, 1f, t);
+            if (rt != null) rt.localScale = Vector3.one * s;
+            yield return null;
+        }
+
+        if (rt != null) rt.localScale = Vector3.one;
+    }
 
     public void OnPointerEnter(PointerEventData _) => _onHoverEnter?.Invoke();
-    public void OnPointerExit(PointerEventData _) => _onHoverExit?.Invoke();
+    public void OnPointerExit(PointerEventData  _) => _onHoverExit?.Invoke();
 }
+

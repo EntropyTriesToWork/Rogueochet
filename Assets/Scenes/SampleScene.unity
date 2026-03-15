@@ -154,7 +154,6 @@ RectTransform:
   - {fileID: 1544889286}
   - {fileID: 842881621}
   - {fileID: 1509006482}
-  - {fileID: 867087341}
   m_Father: {fileID: 1135406095}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1625,13 +1624,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 867087340}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2112018120}
-  m_Father: {fileID: 29282392}
+  m_Father: {fileID: 1135406095}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
@@ -1690,6 +1689,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::XPBarUI
   BarFill: {fileID: 2112018122}
   LevelLabel: {fileID: 842881622}
+  Group: {fileID: 0}
   LerpSpeed: 3
   PopScale: 1.25
   PopDuration: 0.3
@@ -2171,6 +2171,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 29282392}
+  - {fileID: 867087341}
   - {fileID: 608947188}
   - {fileID: 336372424}
   - {fileID: 717766020}
@@ -2331,7 +2332,7 @@ MonoBehaviour:
   StartY: 0
   SpacingX: 1.4
   SpacingY: 1.2
-  AdvanceDistance: 0.8
+  AdvanceDistance: 2
   Waves:
   - {fileID: 11400000, guid: fb0c44ee2c6483947a884396a696254d, type: 2}
 --- !u!114 &1144057501
