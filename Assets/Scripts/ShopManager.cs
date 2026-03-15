@@ -63,8 +63,6 @@ public class ShopManager : MonoBehaviour
     #endregion
 
     #region Generation
-
-    /// <summary>Called by UIManager after the shop panel fades in.</summary>
     public void GenerateOfferings()
     {
         _offerings.Clear();
@@ -92,7 +90,11 @@ public class ShopManager : MonoBehaviour
 
             if (category == UpgradeCategory.NewBall) newBallUsed = true;
 
-            _offerings.Add(new ShopOffering { Upgrade = data, Category = category });
+            int targetSlot = (category == UpgradeCategory.BallDirect && inv.UsedBallSlots > 0)
+                ? Random.Range(0, inv.UsedBallSlots)
+                : -1;
+
+            _offerings.Add(new ShopOffering { Upgrade = data, Category = category, TargetBallSlot = targetSlot });
         }
 
         Debug.Log($"[ShopManager] Generated {_offerings.Count} offerings.");
@@ -134,8 +136,6 @@ public class ShopManager : MonoBehaviour
     #endregion
 
     #region Reroll
-
-    /// <summary>Rerolls all offerings, spending the current reroll cost. Returns false if not enough essence.</summary>
     public bool Reroll()
     {
         if (!GameManager.Instance.SpendEssence(RerollCost))
@@ -182,7 +182,8 @@ public class ShopManager : MonoBehaviour
         switch (offering.Category)
         {
             case UpgradeCategory.BallDirect:
-                int slot = inv.UsedBallSlots > 0 ? Random.Range(0, inv.UsedBallSlots) : 0;
+                int slot = offering.TargetBallSlot >= 0 ? offering.TargetBallSlot
+                         : (inv.UsedBallSlots > 0 ? Random.Range(0, inv.UsedBallSlots) : 0);
                 inv.ApplyDirectUpgrade(offering.Upgrade, slot);
                 break;
 
@@ -213,4 +214,5 @@ public class ShopOffering
 {
     public UpgradeData Upgrade;
     public UpgradeCategory Category;
+    public int TargetBallSlot = -1;
 }

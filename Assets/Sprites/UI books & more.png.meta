@@ -1524,6 +1524,138 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: hearts
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 240
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 391f2d1a7866ac24e85b5891c556bf43
+      internalID: 1117614970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballslot
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 128
+        width: 30
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 8, y: 8, z: 8, w: 8}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 383af39d0cf747b4db4ef4211330d884
+      internalID: -45228545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trashcan_hovered
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 192
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e9ded746944bc09458c7c5f1e3072054
+      internalID: -313149072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI books & more_1
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 192
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7d69e1c0bfa2e844c8fa9debb8459b47
+      internalID: -919263065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trashcan
+      rect:
+        serializedVersion: 2
+        x: 736
+        y: 192
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 57f9b8aed61a3cd43a480dc331b464f3
+      internalID: 1346321936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_fill
+      rect:
+        serializedVersion: 2
+        x: 304
+        y: 328
+        width: 32
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7451c283586d24a4cb020575b38368e8
+      internalID: 102824521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -1540,6 +1672,7 @@ TextureImporter:
     nameFileIdTable:
       Souls: 5646173258807337041
       UI books & more_0: 62194020
+      UI books & more_1: -919263065
       UI books & more_10: 3753526078364807342
       UI books & more_100: 4298452406557050187
       UI books & more_101: 736655097875576158
@@ -1644,7 +1777,6 @@ TextureImporter:
       UI books & more_196: -6918876339050374979
       UI books & more_198: 6355245346427023886
       UI books & more_199: -1430812763854341240
-      UI books & more_2: 8621789924122858652
       UI books & more_20: -6545197753736430578
       UI books & more_200: 3232447978615645771
       UI books & more_201: -5675768865333334456
@@ -1766,6 +1898,8 @@ TextureImporter:
       UI books & more_97: -3354186203942271719
       UI books & more_98: 4977379303211936881
       UI books & more_99: -3335054082253386983
+      ballslot: -45228545
+      bar_fill: 102824521
       button_hover: 1407360581
       button_normal: -7389965578554813547
       button_pressed: -757750491
@@ -1775,11 +1909,14 @@ TextureImporter:
       gold: -107390913977004630
       gold_selected: 9045513247881426664
       gold_stack: -1702832535
+      hearts: 1117614970
       lock: 2599226629532371242
       lock_selected: 5024601196164840979
       selection: -7949751280914576756
       selection_border: -3235424380965422647
       selection_small: -5258132437829971901
+      trashcan: 8621789924122858652
+      trashcan_hovered: -313149072
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

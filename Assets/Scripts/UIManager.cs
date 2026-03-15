@@ -110,13 +110,13 @@ public class UIManager : MonoBehaviour
     void OnHealthChanged(int hp, int maxHP)
     {
         if (HealthLabel != null)
-            HealthLabel.text = $"HP: {hp}/{maxHP}";
+            HealthLabel.text = $"{hp}/{maxHP}";
     }
 
     void OnEssenceChanged(int essence)
     {
         if (EssenceLabel != null)
-            EssenceLabel.text = $"Essence: {essence}";
+            EssenceLabel.text = $"{essence}";
     }
 
     void OnWaveStarted(int waveNumber)

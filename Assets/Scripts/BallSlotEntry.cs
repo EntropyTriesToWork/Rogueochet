@@ -4,18 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Single ball slot card in the Inventory UI.
-/// Shows ball name, per-ball stats, list of direct upgrades, and a Discard button.
-/// 
-/// Prefab layout:
-///   BallSlotEntry
-///     ├─ BallNameLabel (TMP)
-///     ├─ StatsLabel (TMP)
-///     ├─ UpgradesLabel (TMP)
-///     └─ DiscardButton (Button)
-///         └─ Text (TMP) "Discard"
-/// </summary>
 public class BallSlotEntry : MonoBehaviour
 {
     [Header("UI References")]

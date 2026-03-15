@@ -6,13 +6,8 @@ public class WallController : MonoBehaviour
     public static WallController Instance { get; private set; }
 
     #region Inspector
-
-    [Header("Walls")]
     public Transform TopWall;
     public Transform BottomWall;
-
-    [Header("Animation")]
-    [Tooltip("Scale units per second. Not a lerp.")]
     public float ScaleSpeed = 3f;
 
     #endregion

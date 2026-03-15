@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1103e5be58722804e9168234fa0a94ac, type: 3}
-  m_Name: DurabilityFlat
+  m_Name: Ball Enlarge - Direct
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  UpgradeName: Toughen Up
-  Description: 'Tough tough '
+  UpgradeName: Enlarge
+  Description: Ball +10% size
   Icon: {fileID: 0}
   Category: 0
-  Cost: 4
-  Effect: 4
-  Value: 10
+  Cost: 8
+  Effect: 5
+  Value: 0.1
   BallPrefab: {fileID: 0}
   BallTypeName: Standard Ball

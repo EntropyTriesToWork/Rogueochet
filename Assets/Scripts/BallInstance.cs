@@ -1,22 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Represents one ball slot the player owns. Tracks:
-///  - which ball prefab/type it uses
-///  - all BallDirect upgrades applied to it
-///  - computed stats (applied to the Ball component at launch)
-/// </summary>
 [System.Serializable]
 public class BallInstance
 {
-    public string BallTypeName = "Standard Ball";
+    public string     BallTypeName  = "Standard Ball";
     public GameObject BallPrefab;
+    public Sprite     PreviewSprite { get; private set; }
 
-    // Per-ball upgrades stacked on this slot
     public List<UpgradeData> DirectUpgrades = new List<UpgradeData>();
 
-    // ── Computed Stats (rebuilt whenever upgrades change) ──────────
     public float ComputedDamageMultiplier  { get; private set; } = 1f;
     public int   ComputedDamageBonus       { get; private set; } = 0;
     public float ComputedSpeedMultiplier   { get; private set; } = 1f;
@@ -30,6 +23,14 @@ public class BallInstance
     {
         BallTypeName = typeName;
         BallPrefab   = prefab;
+
+        if (prefab != null)
+        {
+            var sr = prefab.GetComponent<SpriteRenderer>()
+                  ?? prefab.GetComponentInChildren<SpriteRenderer>();
+            PreviewSprite = sr != null ? sr.sprite : null;
+        }
+
         RebuildStats();
     }
 
@@ -54,14 +55,14 @@ public class BallInstance
         {
             switch (u.Effect)
             {
-                case UpgradeEffect.BallDamageFlat:           ComputedDamageBonus      += Mathf.RoundToInt(u.Value); break;
-                case UpgradeEffect.BallDamagePercent:        ComputedDamageMultiplier *= 1f + u.Value / 100f;       break;
-                case UpgradeEffect.BallSpeedFlat:            ComputedSpeedBonus       += u.Value;                   break;
-                case UpgradeEffect.BallSpeedPercent:         ComputedSpeedMultiplier  *= 1f + u.Value / 100f;       break;
-                case UpgradeEffect.BallDurabilityFlat:       ComputedDurabilityBonus  += Mathf.RoundToInt(u.Value); break;
-                case UpgradeEffect.BallSizeIncrease:         ComputedSizeMultiplier   *= 1f + u.Value / 100f;       break;
-                case UpgradeEffect.BallPaddleDeflectionRange:ComputedDeflectionBonus  += u.Value;                   break;
-                case UpgradeEffect.BallBounceBack:           HasBounceBack            = true;                       break;
+                case UpgradeEffect.BallDamageFlat:            ComputedDamageBonus      += Mathf.RoundToInt(u.Value); break;
+                case UpgradeEffect.BallDamagePercent:         ComputedDamageMultiplier *= 1f + u.Value / 100f;       break;
+                case UpgradeEffect.BallSpeedFlat:             ComputedSpeedBonus       += u.Value;                   break;
+                case UpgradeEffect.BallSpeedPercent:          ComputedSpeedMultiplier  *= 1f + u.Value / 100f;       break;
+                case UpgradeEffect.BallDurabilityFlat:        ComputedDurabilityBonus  += Mathf.RoundToInt(u.Value); break;
+                case UpgradeEffect.BallSizeIncrease:          ComputedSizeMultiplier   *= 1f + u.Value / 100f;       break;
+                case UpgradeEffect.BallPaddleDeflectionRange: ComputedDeflectionBonus  += u.Value;                   break;
+                case UpgradeEffect.BallBounceBack:            HasBounceBack             = true;                      break;
             }
         }
     }
@@ -69,21 +70,32 @@ public class BallInstance
     /// <summary>Apply this instance's computed stats to a freshly spawned Ball component.</summary>
     public void ApplyToBall(Ball ball)
     {
-        // Damage
-        int baseDamage = ball.Damage;
-        ball.Damage = Mathf.Max(1, Mathf.RoundToInt((baseDamage + ComputedDamageBonus) * ComputedDamageMultiplier));
-
-        // Speed
-        ball.InitialSpeed = (ball.InitialSpeed + ComputedSpeedBonus) * ComputedSpeedMultiplier;
-
-        // Durability
+        ball.Damage        = Mathf.Max(1, Mathf.RoundToInt((ball.Damage + ComputedDamageBonus) * ComputedDamageMultiplier));
+        ball.InitialSpeed  = (ball.InitialSpeed + ComputedSpeedBonus) * ComputedSpeedMultiplier;
         ball.MaxDurability = Mathf.Max(1, ball.MaxDurability + ComputedDurabilityBonus);
 
-        // Size
         if (!Mathf.Approximately(ComputedSizeMultiplier, 1f))
             ball.transform.localScale *= ComputedSizeMultiplier;
 
-        // Deflection
         ball.PaddleDeflectionRandomRange += ComputedDeflectionBonus;
+    }
+
+    /// <summary>Builds a readable stat summary string for tooltip display.</summary>
+    public string GetStatSummary()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine(BallTypeName);
+        sb.AppendLine($"DMG:  +{ComputedDamageBonus} x{ComputedDamageMultiplier:F2}");
+        sb.AppendLine($"SPD:  +{ComputedSpeedBonus:F1} x{ComputedSpeedMultiplier:F2}");
+        sb.AppendLine($"DUR:  +{ComputedDurabilityBonus}");
+        sb.AppendLine($"SIZE: x{ComputedSizeMultiplier:F2}");
+        if (HasBounceBack) sb.AppendLine("Bounce Back");
+        if (DirectUpgrades.Count > 0)
+        {
+            sb.AppendLine("Upgrades:");
+            foreach (var u in DirectUpgrades)
+                sb.AppendLine($"  {u.UpgradeName}");
+        }
+        return sb.ToString().TrimEnd();
     }
 }

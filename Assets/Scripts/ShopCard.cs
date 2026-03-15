@@ -1,9 +1,10 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
-public class ShopCard : MonoBehaviour
+public class ShopCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     #region Inspector
 
@@ -22,6 +23,9 @@ public class ShopCard : MonoBehaviour
 
     #endregion
 
+    private Action _onHoverEnter;
+    private Action _onHoverExit;
+
     public void Populate(
         string categoryText,
         Sprite icon,
@@ -29,13 +33,18 @@ public class ShopCard : MonoBehaviour
         string description,
         int cost,
         bool canAfford,
-        Action onBuy)
+        Action onBuy,
+        Action onHoverEnter = null,
+        Action onHoverExit = null)
     {
+        _onHoverEnter = onHoverEnter;
+        _onHoverExit = onHoverExit;
+
         if (CategoryLabel != null) CategoryLabel.text = categoryText;
         if (IconImage != null) { IconImage.sprite = icon; IconImage.gameObject.SetActive(icon != null); }
         if (NameLabel != null) NameLabel.text = upgradeName;
         if (DescLabel != null) DescLabel.text = description;
-        if (CostLabel != null) CostLabel.text = $"{cost} Essence";
+        if (CostLabel != null) CostLabel.text = $"{cost}";
 
         if (CardBackground != null)
             CardBackground.color = canAfford ? AffordableColor : UnaffordableColor;
@@ -47,4 +56,7 @@ public class ShopCard : MonoBehaviour
             BuyButton.onClick.AddListener(() => onBuy?.Invoke());
         }
     }
+
+    public void OnPointerEnter(PointerEventData _) => _onHoverEnter?.Invoke();
+    public void OnPointerExit(PointerEventData _) => _onHoverExit?.Invoke();
 }

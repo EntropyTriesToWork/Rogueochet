@@ -2,21 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
 public class ShopUI : MonoBehaviour
 {
     #region Inspector
 
-    [Header("Layout")]
+    [Header("Cards")]
     public Transform CardsContainer;
     public GameObject ShopCardPrefab;
-    [Tooltip("Duration of each card pop-in animation in seconds.")]
     public float ShopCardStaggerDelay = 0.3f;
+
+    [Header("Ball Row")]
+    [Tooltip("Parent for ball slot icons. Use a Horizontal Layout Group.")]
+    public Transform BallRowContainer;
+    [Tooltip("Prefab with an Image component for the ball sprite.")]
+    public GameObject BallSlotIconPrefab;
+    [Tooltip("Tint applied to a ball icon when highlighted by a hovered card.")]
+    public Color BallHighlightColor = new Color(1f, 0.85f, 0.2f, 1f);
+    [Tooltip("Tooltip panel shown when hovering a ball icon.")]
+    public GameObject TooltipPanel;
+    public TextMeshProUGUI TooltipLabel;
 
     [Header("Labels")]
     public TextMeshProUGUI EssenceLabel;
-    public TextMeshProUGUI LevelLabel;
+    [Tooltip("Shows slot count only. Level display is owned by XPBarUI.")]
+    public TextMeshProUGUI SlotsLabel;
 
     [Header("Buttons")]
     public Button NextWaveButton;
@@ -28,6 +40,9 @@ public class ShopUI : MonoBehaviour
     #region Private State
 
     private List<ShopCard> _cards = new List<ShopCard>();
+    private List<GameObject> _ballIcons = new List<GameObject>();
+    private List<Image> _ballImages = new List<Image>();
+    private List<Color> _ballBaseColors = new List<Color>();
     private Coroutine _staggerCoroutine;
 
     #endregion
@@ -37,24 +52,34 @@ public class ShopUI : MonoBehaviour
     void Awake()
     {
         GameEvents.OnShopOfferingsChanged += RefreshCards;
-        GameEvents.OnShopClosed += ClearCards;
+        GameEvents.OnShopClosed += OnShopClosed;
         GameEvents.OnEssenceChanged += RefreshEssence;
 
-        PlayerInventory.OnLevelUp += (_) => RefreshLevelLabel();
+        PlayerInventory.OnInventoryChanged += RefreshBallRow;
 
         if (NextWaveButton != null)
             NextWaveButton.onClick.AddListener(() => GameManager.Instance.OnShopComplete());
 
         if (RerollButton != null)
             RerollButton.onClick.AddListener(OnRerollPressed);
+
+        if (TooltipPanel != null)
+            TooltipPanel.SetActive(false);
     }
 
     void OnDestroy()
     {
         GameEvents.OnShopOfferingsChanged -= RefreshCards;
-        GameEvents.OnShopClosed -= ClearCards;
+        GameEvents.OnShopClosed -= OnShopClosed;
         GameEvents.OnEssenceChanged -= RefreshEssence;
-        PlayerInventory.OnLevelUp -= (_) => RefreshLevelLabel();
+        PlayerInventory.OnInventoryChanged -= RefreshBallRow;
+    }
+
+    void OnShopClosed()
+    {
+        ClearCards();
+        HideTooltip();
+        ClearBallHighlights();
     }
 
     #endregion
@@ -75,6 +100,7 @@ public class ShopUI : MonoBehaviour
             ShopOffering offering = offerings[i];
 
             GameObject go = Instantiate(ShopCardPrefab, CardsContainer);
+            go.SetActive(false);
             ShopCard card = go.GetComponent<ShopCard>();
             if (card == null) continue;
 
@@ -88,6 +114,9 @@ public class ShopUI : MonoBehaviour
 
             bool canAfford = GameManager.Instance.Essence >= offering.Upgrade.Cost;
 
+            UpgradeCategory category = offering.Category;
+            int targetSlot = offering.TargetBallSlot;
+
             card.Populate(
                 categoryText: categoryText,
                 icon: offering.Upgrade.Icon,
@@ -95,15 +124,18 @@ public class ShopUI : MonoBehaviour
                 description: offering.Upgrade.Description,
                 cost: offering.Upgrade.Cost,
                 canAfford: canAfford,
-                onBuy: () => ShopManager.Instance.PurchaseOffering(offeringIndex)
+                onBuy: () => ShopManager.Instance.PurchaseOffering(offeringIndex),
+                onHoverEnter: () => OnCardHoverEnter(category, targetSlot),
+                onHoverExit: ClearBallHighlights
             );
 
             _cards.Add(card);
         }
 
         RefreshEssence(GameManager.Instance.Essence);
-        RefreshLevelLabel();
+        RefreshSlotsLabel();
         RefreshRerollButton();
+        RefreshBallRow();
 
         if (_staggerCoroutine != null) StopCoroutine(_staggerCoroutine);
         _staggerCoroutine = StartCoroutine(StaggerCards());
@@ -126,16 +158,17 @@ public class ShopUI : MonoBehaviour
         foreach (var card in _cards)
         {
             if (card == null) continue;
+
+            card.gameObject.SetActive(true);
+
             CanvasGroup cg = card.GetComponent<CanvasGroup>();
             if (cg != null)
             {
                 cg.alpha = 0f;
-                card.gameObject.SetActive(true);
                 yield return StartCoroutine(PopInCard(cg));
             }
             else
             {
-                card.gameObject.SetActive(true);
                 yield return new WaitForSecondsRealtime(ShopCardStaggerDelay);
             }
         }
@@ -168,43 +201,139 @@ public class ShopUI : MonoBehaviour
 
     #endregion
 
+    #region Ball Row
+
+    void RefreshBallRow()
+    {
+        if (BallRowContainer == null || BallSlotIconPrefab == null) return;
+
+        foreach (var icon in _ballIcons)
+            if (icon != null) Destroy(icon);
+        _ballIcons.Clear();
+        _ballImages.Clear();
+        _ballBaseColors.Clear();
+
+        var inv = PlayerInventory.Instance;
+        if (inv == null) return;
+
+        for (int i = 0; i < inv.BallInstances.Count; i++)
+        {
+            int slotIndex = i;
+            BallInstance ball = inv.BallInstances[i];
+
+            GameObject go = Instantiate(BallSlotIconPrefab, BallRowContainer);
+            Image img = go.GetComponent<Image>();
+
+            if (img != null)
+            {
+                if (ball.PreviewSprite != null) img.sprite = ball.PreviewSprite;
+                _ballImages.Add(img);
+                _ballBaseColors.Add(img.color);
+            }
+            else
+            {
+                _ballImages.Add(null);
+                _ballBaseColors.Add(Color.white);
+            }
+
+            EventTrigger trigger = go.GetComponent<EventTrigger>() ?? go.AddComponent<EventTrigger>();
+            AddPointerEvent(trigger, EventTriggerType.PointerEnter, (_) => ShowBallTooltip(slotIndex));
+            AddPointerEvent(trigger, EventTriggerType.PointerExit, (_) => HideTooltip());
+
+            _ballIcons.Add(go);
+        }
+    }
+
+    void AddPointerEvent(EventTrigger trigger, EventTriggerType type, UnityEngine.Events.UnityAction<BaseEventData> action)
+    {
+        var entry = new EventTrigger.Entry { eventID = type };
+        entry.callback.AddListener(action);
+        trigger.triggers.Add(entry);
+    }
+
+    void ShowBallTooltip(int slotIndex)
+    {
+        var inv = PlayerInventory.Instance;
+        if (inv == null || slotIndex >= inv.BallInstances.Count) return;
+        if (TooltipLabel != null) TooltipLabel.text = inv.BallInstances[slotIndex].GetStatSummary();
+        if (TooltipPanel != null) TooltipPanel.SetActive(true);
+    }
+
+    void HideTooltip()
+    {
+        if (TooltipPanel != null) TooltipPanel.SetActive(false);
+    }
+
+    #endregion
+
+    #region Ball Highlights
+
+    void OnCardHoverEnter(UpgradeCategory category, int targetSlot)
+    {
+        ClearBallHighlights();
+
+        if (category == UpgradeCategory.Global || category == UpgradeCategory.NewBall)
+            HighlightAllBalls();
+        else if (category == UpgradeCategory.BallDirect)
+            HighlightBall(targetSlot);
+    }
+
+    void HighlightBall(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _ballImages.Count) return;
+        if (_ballImages[slotIndex] != null)
+            _ballImages[slotIndex].color = BallHighlightColor;
+    }
+
+    void HighlightAllBalls()
+    {
+        for (int i = 0; i < _ballImages.Count; i++)
+            if (_ballImages[i] != null)
+                _ballImages[i].color = BallHighlightColor;
+    }
+
+    void ClearBallHighlights()
+    {
+        for (int i = 0; i < _ballImages.Count; i++)
+            if (_ballImages[i] != null && i < _ballBaseColors.Count)
+                _ballImages[i].color = _ballBaseColors[i];
+    }
+
+    #endregion
+
     #region Reroll
 
     void OnRerollPressed()
     {
-        if (ShopManager.Instance == null) return;
-        ShopManager.Instance.Reroll();
+        if (ShopManager.Instance != null)
+            ShopManager.Instance.Reroll();
     }
 
     void RefreshRerollButton()
     {
         if (ShopManager.Instance == null) return;
-
         int cost = ShopManager.Instance.RerollCost;
-        bool canAfford = GameManager.Instance.Essence >= cost;
-
+        bool canAfford = GameManager.Instance != null && GameManager.Instance.Essence >= cost;
         if (RerollButton != null) RerollButton.interactable = canAfford;
         if (RerollCostLabel != null) RerollCostLabel.text = $"Reroll ({cost})";
     }
 
     #endregion
 
-    #region Label Helpers
+    #region Labels
 
     void RefreshEssence(int essence)
     {
         if (EssenceLabel != null)
             EssenceLabel.text = $"Essence: {essence}";
-
-        // Also update reroll button affordability when essence changes mid-shop.
         RefreshRerollButton();
     }
 
-    void RefreshLevelLabel()
+    void RefreshSlotsLabel()
     {
-        if (LevelLabel == null || PlayerInventory.Instance == null) return;
+        if (SlotsLabel == null || PlayerInventory.Instance == null) return;
         var inv = PlayerInventory.Instance;
-        LevelLabel.text = $"Level {inv.CurrentLevel}  Slots: {inv.UsedBallSlots}/{inv.MaxBallSlots}";
+        SlotsLabel.text = $"Slots: {inv.UsedBallSlots}/{inv.MaxBallSlots}";
     }
 
     #endregion

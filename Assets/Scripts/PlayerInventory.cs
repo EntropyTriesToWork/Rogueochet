@@ -18,39 +18,40 @@ public class PlayerInventory : MonoBehaviour
     public string DefaultBallName = "Standard Ball";
 
     // ── Ball Slots ─────────────────────────────────────────────────
-    public int MaxBallSlots { get; private set; }
+    public int MaxBallSlots  { get; private set; }
     public int UsedBallSlots => _ballInstances.Count;
     public IReadOnlyList<BallInstance> BallInstances => _ballInstances;
 
     private List<BallInstance> _ballInstances = new List<BallInstance>();
 
     // ── Level / XP ─────────────────────────────────────────────────
-    public int CurrentLevel { get; private set; } = 1;
-    public int EssenceAccumulated { get; private set; } = 0;   // lifetime essence for leveling
-    public int EssenceToNextLevel => CurrentLevel * EssencePerLevel;
+    public int CurrentLevel           { get; private set; } = 1;
+    public int EssenceAccumulated     { get; private set; } = 0;   // lifetime essence for leveling
+    public int EssenceToNextLevel     => CurrentLevel * EssencePerLevel;
 
     // ── Global Upgrades ────────────────────────────────────────────
     public List<UpgradeData> GlobalUpgrades { get; private set; } = new List<UpgradeData>();
 
     // Global stat cache (rebuilt on purchase)
-    public float GlobalDamageMultiplier { get; private set; } = 1f;
-    public float GlobalSpeedMultiplier { get; private set; } = 1f;
-    public int GlobalDurabilityBonus { get; private set; } = 0;
-    public float EssenceGainMultiplier { get; private set; } = 1f;
-    public int MaxHPBonus { get; private set; } = 0;
-    public float PaddleSpeedBonus { get; private set; } = 0f;
-    public float PaddleSizeBonus { get; private set; } = 0f;
-    public float SpeedRampDelayBonus { get; private set; } = 0f;
+    public float GlobalDamageMultiplier  { get; private set; } = 1f;
+    public float GlobalSpeedMultiplier   { get; private set; } = 1f;
+    public int   GlobalDurabilityBonus   { get; private set; } = 0;
+    public float EssenceGainMultiplier   { get; private set; } = 1f;
+    public int   MaxHPBonus              { get; private set; } = 0;
+    public float PaddleSpeedBonus        { get; private set; } = 0f;
+    public float PaddleSizeBonus         { get; private set; } = 0f;
+    public float SpeedRampDelayBonus     { get; private set; } = 0f;
 
     // ── Run Stats ──────────────────────────────────────────────────
-    public int TotalKills { get; private set; } = 0;
-    public int TotalBallsLaunched { get; private set; } = 0;
-    public int TotalBounces { get; private set; } = 0;
-    public int TotalDamageDealt { get; private set; } = 0;
-    public float TotalTimeElapsed { get; private set; } = 0f;
+    public int   TotalKills         { get; private set; } = 0;
+    public int   TotalBallsLaunched { get; private set; } = 0;
+    public int   TotalBounces       { get; private set; } = 0;
+    public int   TotalDamageDealt   { get; private set; } = 0;
+    public float TotalTimeElapsed   { get; private set; } = 0f;
 
     public static System.Action OnInventoryChanged;
-    public static System.Action<int> OnLevelUp;   // new level
+    public static System.Action<int> OnLevelUp;
+    public static System.Action<int, int, int> OnEssenceGained;
 
     void Awake()
     {
@@ -69,21 +70,21 @@ public class PlayerInventory : MonoBehaviour
 
     void SubscribeToEvents()
     {
-        GameEvents.OnEnemyDied += HandleEnemyDied;
-        GameEvents.OnEnemyDamaged += HandleEnemyDamaged;
-        GameEvents.OnBallLaunched += HandleBallLaunched;
-        GameEvents.OnRoundTimerTick += HandleTimerTick;
-        GameEvents.OnGameOver += ResetRunStats;
-        GameEvents.OnVictory += () => { };   // keep stats on victory
+        GameEvents.OnEnemyDied     += HandleEnemyDied;
+        GameEvents.OnEnemyDamaged  += HandleEnemyDamaged;
+        GameEvents.OnBallLaunched  += HandleBallLaunched;
+        GameEvents.OnRoundTimerTick+= HandleTimerTick;
+        GameEvents.OnGameOver      += ResetRunStats;
+        GameEvents.OnVictory       += () => { };   // keep stats on victory
     }
 
     void UnsubscribeFromEvents()
     {
-        GameEvents.OnEnemyDied -= HandleEnemyDied;
-        GameEvents.OnEnemyDamaged -= HandleEnemyDamaged;
-        GameEvents.OnBallLaunched -= HandleBallLaunched;
-        GameEvents.OnRoundTimerTick -= HandleTimerTick;
-        GameEvents.OnGameOver -= ResetRunStats;
+        GameEvents.OnEnemyDied     -= HandleEnemyDied;
+        GameEvents.OnEnemyDamaged  -= HandleEnemyDamaged;
+        GameEvents.OnBallLaunched  -= HandleBallLaunched;
+        GameEvents.OnRoundTimerTick-= HandleTimerTick;
+        GameEvents.OnGameOver      -= ResetRunStats;
     }
 
     void HandleEnemyDied(Enemy _, int __)
@@ -103,9 +104,12 @@ public class PlayerInventory : MonoBehaviour
 
     void HandleTimerTick(float elapsed) => TotalTimeElapsed = elapsed;
 
+    // ── Leveling ───────────────────────────────────────────────────
+
     void AddLevelingEssence(int amount)
     {
         EssenceAccumulated += amount;
+        OnEssenceGained?.Invoke(amount, EssenceAccumulated, EssenceToNextLevel);
         while (EssenceAccumulated >= EssenceToNextLevel)
         {
             EssenceAccumulated -= EssenceToNextLevel;
@@ -121,6 +125,9 @@ public class PlayerInventory : MonoBehaviour
         OnLevelUp?.Invoke(CurrentLevel);
         OnInventoryChanged?.Invoke();
     }
+
+    // ── Ball Slot Management ───────────────────────────────────────
+
     public bool CanAddBall() => UsedBallSlots < MaxBallSlots;
 
     /// <summary>Add a new ball to the inventory. Returns false if slots are full.</summary>
@@ -147,6 +154,9 @@ public class PlayerInventory : MonoBehaviour
         return true;
     }
 
+    // ── Upgrade Application ────────────────────────────────────────
+
+    /// <summary>Apply a BallDirect upgrade to a specific ball slot.</summary>
     public void ApplyDirectUpgrade(UpgradeData upgrade, int ballSlotIndex)
     {
         if (ballSlotIndex < 0 || ballSlotIndex >= _ballInstances.Count) return;
@@ -168,26 +178,26 @@ public class PlayerInventory : MonoBehaviour
     void RebuildGlobalStats()
     {
         GlobalDamageMultiplier = 1f;
-        GlobalSpeedMultiplier = 1f;
-        GlobalDurabilityBonus = 0;
-        EssenceGainMultiplier = 1f;
-        MaxHPBonus = 0;
-        PaddleSpeedBonus = 0f;
-        PaddleSizeBonus = 0f;
-        SpeedRampDelayBonus = 0f;
+        GlobalSpeedMultiplier  = 1f;
+        GlobalDurabilityBonus  = 0;
+        EssenceGainMultiplier  = 1f;
+        MaxHPBonus             = 0;
+        PaddleSpeedBonus       = 0f;
+        PaddleSizeBonus        = 0f;
+        SpeedRampDelayBonus    = 0f;
 
         foreach (var u in GlobalUpgrades)
         {
             switch (u.Effect)
             {
-                case UpgradeEffect.GlobalDamagePercent: GlobalDamageMultiplier *= 1f + u.Value / 100f; break;
-                case UpgradeEffect.GlobalSpeedPercent: GlobalSpeedMultiplier *= 1f + u.Value / 100f; break;
-                case UpgradeEffect.GlobalDurabilityFlat: GlobalDurabilityBonus += Mathf.RoundToInt(u.Value); break;
-                case UpgradeEffect.EssenceGainPercent: EssenceGainMultiplier *= 1f + u.Value / 100f; break;
-                case UpgradeEffect.PlayerMaxHPFlat: MaxHPBonus += Mathf.RoundToInt(u.Value); break;
-                case UpgradeEffect.PaddleSpeedFlat: PaddleSpeedBonus += u.Value; break;
-                case UpgradeEffect.PaddleSizeFlat: PaddleSizeBonus += u.Value; break;
-                case UpgradeEffect.SpeedRampDelay: SpeedRampDelayBonus += u.Value; break;
+                case UpgradeEffect.GlobalDamagePercent:  GlobalDamageMultiplier *= 1f + u.Value / 100f; break;
+                case UpgradeEffect.GlobalSpeedPercent:   GlobalSpeedMultiplier  *= 1f + u.Value / 100f; break;
+                case UpgradeEffect.GlobalDurabilityFlat: GlobalDurabilityBonus  += Mathf.RoundToInt(u.Value); break;
+                case UpgradeEffect.EssenceGainPercent:   EssenceGainMultiplier  *= 1f + u.Value / 100f; break;
+                case UpgradeEffect.PlayerMaxHPFlat:      MaxHPBonus             += Mathf.RoundToInt(u.Value); break;
+                case UpgradeEffect.PaddleSpeedFlat:      PaddleSpeedBonus       += u.Value;              break;
+                case UpgradeEffect.PaddleSizeFlat:       PaddleSizeBonus        += u.Value;              break;
+                case UpgradeEffect.SpeedRampDelay:       SpeedRampDelayBonus    += u.Value;              break;
             }
         }
     }
@@ -207,6 +217,13 @@ public class PlayerInventory : MonoBehaviour
                 BallManager.Instance.BaseSpeedRampDelay + SpeedRampDelayBonus;
         }
     }
+
+    // ── Ball Spawning Integration ──────────────────────────────────
+
+    /// <summary>
+    /// Called by BallManager when launching. Returns the BallInstance for slot index,
+    /// applying global stats on top of per-ball stats.
+    /// </summary>
     public BallInstance GetBallInstanceForLaunch(int slotIndex)
     {
         if (slotIndex < 0 || slotIndex >= _ballInstances.Count) return null;
@@ -217,11 +234,11 @@ public class PlayerInventory : MonoBehaviour
 
     void ResetRunStats()
     {
-        TotalKills = 0;
+        TotalKills         = 0;
         TotalBallsLaunched = 0;
-        TotalBounces = 0;
-        TotalDamageDealt = 0;
-        TotalTimeElapsed = 0f;
+        TotalBounces       = 0;
+        TotalDamageDealt   = 0;
+        TotalTimeElapsed   = 0f;
     }
 
     public void FullReset()
@@ -229,9 +246,9 @@ public class PlayerInventory : MonoBehaviour
         _ballInstances.Clear();
         GlobalUpgrades.Clear();
         RebuildGlobalStats();
-        CurrentLevel = 1;
+        CurrentLevel       = 1;
         EssenceAccumulated = 0;
-        MaxBallSlots = StartingBallSlots;
+        MaxBallSlots       = StartingBallSlots;
         ResetRunStats();
         AddDefaultBall();
         OnInventoryChanged?.Invoke();
@@ -239,7 +256,8 @@ public class PlayerInventory : MonoBehaviour
 
     void AddDefaultBall()
     {
-        if (DefaultBallPrefab == null) return;
+        if (DefaultBallPrefab == null)
+            Debug.LogWarning("[PlayerInventory] DefaultBallPrefab is not assigned — slot will exist but use fallback prefab.");
         _ballInstances.Add(new BallInstance(DefaultBallName, DefaultBallPrefab));
     }
 }

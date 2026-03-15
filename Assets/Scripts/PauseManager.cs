@@ -6,8 +6,6 @@ public class PauseManager : MonoBehaviour
 
     public bool IsPaused { get; private set; } = false;
 
-    [Header("UI")]
-    [Tooltip("The pause overlay panel to show/hide.")]
     public GameObject PausePanel;
 
     public static System.Action OnPaused;

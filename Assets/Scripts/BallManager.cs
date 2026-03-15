@@ -36,6 +36,7 @@ public class BallManager : MonoBehaviour
 
     private float _breakHoldTimer  = 0f;
     private bool  _breakHoldActive = false;
+    private int   _nextLaunchSlot  = 0;
 
     void Awake()
     {
@@ -46,8 +47,6 @@ public class BallManager : MonoBehaviour
 
     void Start() => SubscribeToEvents();
     void OnDestroy() => UnsubscribeFromEvents();
-
-    // ── Event Wiring ───────────────────────────────────────────────
 
     public void SubscribeToEvents()
     {
@@ -71,9 +70,10 @@ public class BallManager : MonoBehaviour
 
     void HandleRoundStarted()
     {
-        _launchEnabled = true;
-        _rampFired     = false;
-        _rampActive    = false;
+        _launchEnabled    = true;
+        _rampFired        = false;
+        _rampActive       = false;
+        _nextLaunchSlot   = 0;
         if (_activeBalls.Count == 0)
             _ballInPlay = false;
     }
@@ -92,6 +92,8 @@ public class BallManager : MonoBehaviour
         ResetTimeScale();
     }
 
+    // ── Update ─────────────────────────────────────────────────────
+
     void Update()
     {
         if (_ballInPlay)
@@ -100,10 +102,15 @@ public class BallManager : MonoBehaviour
             GameEvents.RoundTimerTick(_roundTimer);
         }
 
-        if (_launchEnabled && !_ballInPlay)
+        if (_launchEnabled)
         {
-            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
-                LaunchAll();
+            var inv = PlayerInventory.Instance;
+            bool allLaunched = inv != null
+                ? _nextLaunchSlot >= inv.UsedBallSlots
+                : _ballInPlay;
+
+            if (!allLaunched && (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)))
+                LaunchNext();
         }
 
         HandleBreakHold();
@@ -125,6 +132,8 @@ public class BallManager : MonoBehaviour
             }
         }
     }
+
+    // ── Break All ──────────────────────────────────────────────────
 
     void HandleBreakHold()
     {
@@ -168,18 +177,27 @@ public class BallManager : MonoBehaviour
         }
     }
 
-    public void LaunchAll()
+    // ── Launch ─────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Launches one ball from the next available inventory slot.
+    /// Subsequent presses cycle through remaining slots until all balls are in play.
+    /// </summary>
+    public void LaunchNext()
     {
         var inv = PlayerInventory.Instance;
 
         if (inv != null && inv.UsedBallSlots > 0)
         {
-            for (int i = 0; i < inv.UsedBallSlots; i++)
-                LaunchFromSlot(i);
+            if (_nextLaunchSlot < inv.UsedBallSlots)
+            {
+                LaunchFromSlot(_nextLaunchSlot);
+                _nextLaunchSlot++;
+            }
         }
         else
         {
-            LaunchBall();   // legacy single-ball fallback
+            LaunchBall();
         }
     }
 
