@@ -756,7 +756,7 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 16
@@ -1643,7 +1643,7 @@ TextureImporter:
         width: 32
         height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1652,6 +1652,28 @@ TextureImporter:
       bones: []
       spriteID: 7451c283586d24a4cb020575b38368e8
       internalID: 102824521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: arrow
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 112
+        width: 16
+        height: 16
+      alignment: 9
+      pivot: {x: 0, y: 0.5}
+      border: {x: 4, y: 8, z: 6, w: 8}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d34da0d4c0d5ee24b84118c18944ac9c
+      internalID: 753999946
       vertices: []
       indices: 
       edges: []
@@ -1898,6 +1920,7 @@ TextureImporter:
       UI books & more_97: -3354186203942271719
       UI books & more_98: 4977379303211936881
       UI books & more_99: -3335054082253386983
+      arrow: 753999946
       ballslot: -45228545
       bar_fill: 102824521
       button_hover: 1407360581

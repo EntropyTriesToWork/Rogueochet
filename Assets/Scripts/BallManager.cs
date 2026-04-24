@@ -26,6 +26,9 @@ public class BallManager : MonoBehaviour
 
     [HideInInspector] public float BaseSpeedRampDelay;
 
+    [Header("Aiming Arrow")]
+    [SerializeField] GameObject aimingArrow;
+
     private List<Ball> _activeBalls = new List<Ball>();
     private bool  _launchEnabled    = false;
     private bool  _ballInPlay       = false;
@@ -37,12 +40,16 @@ public class BallManager : MonoBehaviour
     private float _breakHoldTimer  = 0f;
     private bool  _breakHoldActive = false;
     private int   _nextLaunchSlot  = 0;
+    private Vector2 _aimingDir = Vector2.zero;
+
+    private Camera _cam;
 
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         BaseSpeedRampDelay = SpeedRampDelay;
+        _cam = Camera.main;
     }
 
     void Start() => SubscribeToEvents();
@@ -92,14 +99,21 @@ public class BallManager : MonoBehaviour
         ResetTimeScale();
     }
 
-    // ── Update ─────────────────────────────────────────────────────
-
     void Update()
     {
         if (_ballInPlay)
         {
+            aimingArrow.gameObject.SetActive(false);
             _roundTimer += Time.unscaledDeltaTime;
             GameEvents.RoundTimerTick(_roundTimer);
+        }
+        else if(Input.GetMouseButton(0) || Input.GetKey(KeyCode.Space)) {
+            aimingArrow.gameObject.SetActive(true);
+            aimingArrow.transform.position = BallSpawnPoint.position;
+            Vector3 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
+            mousePos.z = 0f;
+            _aimingDir = mousePos - BallSpawnPoint.position;
+            aimingArrow.transform.right = _aimingDir;
         }
 
         if (_launchEnabled)
@@ -109,8 +123,8 @@ public class BallManager : MonoBehaviour
                 ? _nextLaunchSlot >= inv.UsedBallSlots
                 : _ballInPlay;
 
-            if (!allLaunched && (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)))
-                LaunchNext();
+            if (!allLaunched && (Input.GetMouseButtonUp(0) || Input.GetKeyUp(KeyCode.Space)))
+                LaunchBall();
         }
 
         HandleBreakHold();
@@ -132,8 +146,6 @@ public class BallManager : MonoBehaviour
             }
         }
     }
-
-    // ── Break All ──────────────────────────────────────────────────
 
     void HandleBreakHold()
     {
@@ -227,9 +239,7 @@ public class BallManager : MonoBehaviour
             ball.InitialSpeed  *= inv.GlobalSpeedMultiplier;
             ball.MaxDurability  = Mathf.Max(1, ball.MaxDurability + inv.GlobalDurabilityBonus);
         }
-
-        // Launch with a slightly different angle per slot
-        float baseAngle = Random.Range(-30f, 30f);
+        float baseAngle = Random.Range(-30f, 30f); //Add random angle
         float slotOffset = (slotIndex - (inv.UsedBallSlots - 1) * 0.5f) * 15f;
         float angle = baseAngle + slotOffset;
         Vector2 dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
@@ -242,22 +252,17 @@ public class BallManager : MonoBehaviour
         GameEvents.BallLaunched(ball);
         GameEvents.BallCountChanged(_activeBalls.Count);
     }
-
-    /// <summary>Legacy single-ball launch used as fallback and by SpawnExtraBall.</summary>
     public void LaunchBall()
     {
         if (BallPrefab == null) { Debug.LogWarning("[BallManager] BallPrefab not assigned!"); return; }
 
-        Vector3    spawnPos = BallSpawnPoint != null ? BallSpawnPoint.position : Vector3.zero;
-        GameObject go       = Instantiate(BallPrefab, spawnPos, Quaternion.identity);
-        Ball       ball     = go.GetComponent<Ball>();
+        Vector3 spawnPos = BallSpawnPoint != null ? BallSpawnPoint.position : Vector3.zero;
+        GameObject go = Instantiate(BallPrefab, spawnPos, Quaternion.identity);
+        Ball ball = go.GetComponent<Ball>();
 
         if (ball != null)
         {
-            float   angle = Random.Range(-45f, 45f);
-            Vector2 dir   = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
-            ball.Launch(dir);
-
+            ball.Launch(_aimingDir);
             RegisterBall(ball);
             _ballInPlay        = true;
             _timeSinceLastBall = Time.time;
@@ -281,8 +286,6 @@ public class BallManager : MonoBehaviour
             GameEvents.BallCountChanged(_activeBalls.Count);
         }
     }
-
-    // ── Ball Lifecycle ─────────────────────────────────────────────
 
     public void RegisterBall(Ball ball)
     {

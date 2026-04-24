@@ -20,7 +20,6 @@ public class PaddleController : MonoBehaviour
     [Header("Size Animation")]
     [Tooltip("Scale units per second the paddle grows/shrinks. Not a lerp.")]
     public float SizeChangeSpeed = 4f;
-
     #endregion
 
     #region Private State
@@ -31,9 +30,6 @@ public class PaddleController : MonoBehaviour
     private bool _inputEnabled = true;
 
     private Coroutine _sizeCoroutine;
-
-    // The Y coordinate of the inner wall edge, set by WallController each frame during animation.
-    // Falls back to camera orthographicSize when WallController is not present.
     private float _playBoundaryY;
 
     #endregion
@@ -86,13 +82,14 @@ public class PaddleController : MonoBehaviour
     void Update()
     {
         if (!_inputEnabled) return;
-
+        if(Input.GetKey(KeyCode.Space) || Input.GetMouseButton(0)) { return; }
         float targetY = transform.position.y;
 
         if (UseMouse)
         {
             Vector3 mouseWorld = _cam.ScreenToWorldPoint(Input.mousePosition);
             targetY = mouseWorld.y;
+            mouseWorld.z = 0;
         }
 
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))

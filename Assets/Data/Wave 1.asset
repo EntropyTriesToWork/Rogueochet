@@ -17,7 +17,7 @@ MonoBehaviour:
   EmptyCellChance: 0
   TotalEnemies: 50
   MaxActiveEnemies: 10
-  BaseHP: 5
+  BaseHP: 10
   WaveHPMultiplier: 1
   WallScale: 1
   EnemyPool:
