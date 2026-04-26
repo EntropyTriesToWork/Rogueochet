@@ -139,6 +139,7 @@ public class UIManager : MonoBehaviour
     void OnRoundStarted()
     {
         SetStatus("Click or Space to launch!");
+        if (TimerLabel != null) TimerLabel.color = Color.white;
     }
 
     void OnRoundEnded()
@@ -167,8 +168,7 @@ public class UIManager : MonoBehaviour
 
     void OnSpeedRamp()
     {
-        if (TimerLabel != null)
-            TimerLabel.color = Color.red;
+        if (TimerLabel != null) TimerLabel.color = Color.red;
         SetStatus("SPEED RAMP!");
     }
 
