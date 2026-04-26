@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
 public enum GameState { Idle, Wave, RoundActive, RoundEnd, Shop, Victory, GameOver }
@@ -87,7 +89,7 @@ public class GameManager : MonoBehaviour
                 CurrentWave++;
                 Debug.Log($"[GameManager] Starting Wave {CurrentWave}/{TotalWaves}");
                 GameEvents.WaveStarted(CurrentWave);
-                ChangeState(GameState.RoundActive);
+                DelayedAction(1f, ()=> { ChangeState(GameState.RoundActive); });
                 break;
 
             case GameState.RoundActive:
@@ -180,5 +182,23 @@ public class GameManager : MonoBehaviour
 
         GameEvents.PlayerHealthChanged(PlayerHealth, MaxHealth);
         GameEvents.EssenceChanged(Essence);
+    }
+    public void DelayedAction(float duration, Action OnComplete)
+    {
+        StartCoroutine(DoDelayedAction(duration, OnComplete));
+    }
+    private IEnumerator DoDelayedAction(float duration, Action OnComplete) 
+    {
+        yield return new WaitForSeconds(duration);
+        OnComplete.Invoke();
+    }
+    public void DelayedActionRealtime(float duration, Action OnComplete)
+    {
+        StartCoroutine(DoDelayedActionRealtime(duration, OnComplete));
+    }
+    private IEnumerator DoDelayedActionRealtime(float duration, Action OnComplete)
+    {
+        yield return new WaitForSecondsRealtime(duration);
+        OnComplete.Invoke();
     }
 }

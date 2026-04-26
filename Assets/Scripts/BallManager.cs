@@ -30,18 +30,18 @@ public class BallManager : MonoBehaviour
     [SerializeField] GameObject aimingArrow;
 
     private List<Ball> _activeBalls = new List<Ball>();
-    private bool  _launchEnabled    = false;
-    private bool  _ballInPlay       = false;
-    private float _roundTimer       = 0f;
-    private bool  _rampFired        = false;
-    private bool  _rampActive       = false;
+    private bool _launchEnabled = false;
+    private bool _ballInPlay = false;
+    private float _roundTimer = 0f;
+    private bool _rampFired = false;
+    private bool _rampActive = false;
     private float _timeSinceLastBall = 0f;
 
-    private float _breakHoldTimer  = 0f;
-    private bool  _breakHoldActive = false;
-    private int   _nextLaunchSlot  = 0;
+    private float _breakHoldTimer = 0f;
+    private bool _breakHoldActive = false;
+    private int _nextLaunchSlot = 0;
     private Vector2 _aimingDir = Vector2.zero;
-
+    private Vector2 _mousePos = Vector2.zero;
     private Camera _cam;
 
     void Awake()
@@ -58,29 +58,29 @@ public class BallManager : MonoBehaviour
     public void SubscribeToEvents()
     {
         GameEvents.OnRoundStarted += HandleRoundStarted;
-        GameEvents.OnRoundEnded   += HandleRoundEnded;
-        GameEvents.OnGameOver     += HandleGameOver;
-        GameEvents.OnVictory      += HandleGameOver;
-        GameEvents.OnWaveStarted  += HandleWaveStarted;
+        GameEvents.OnRoundEnded += HandleRoundEnded;
+        GameEvents.OnGameOver += HandleGameOver;
+        GameEvents.OnVictory += HandleGameOver;
+        GameEvents.OnWaveStarted += HandleWaveStarted;
     }
 
     void UnsubscribeFromEvents()
     {
         GameEvents.OnRoundStarted -= HandleRoundStarted;
-        GameEvents.OnRoundEnded   -= HandleRoundEnded;
-        GameEvents.OnGameOver     -= HandleGameOver;
-        GameEvents.OnVictory      -= HandleGameOver;
-        GameEvents.OnWaveStarted  -= HandleWaveStarted;
+        GameEvents.OnRoundEnded -= HandleRoundEnded;
+        GameEvents.OnGameOver -= HandleGameOver;
+        GameEvents.OnVictory -= HandleGameOver;
+        GameEvents.OnWaveStarted -= HandleWaveStarted;
     }
 
     void HandleWaveStarted(int _) => _roundTimer = 0f;
 
     void HandleRoundStarted()
     {
-        _launchEnabled    = true;
-        _rampFired        = false;
-        _rampActive       = false;
-        _nextLaunchSlot   = 0;
+        _launchEnabled = true;
+        _rampFired = false;
+        _rampActive = false;
+        _nextLaunchSlot = 0;
         if (_activeBalls.Count == 0)
             _ballInPlay = false;
     }
@@ -88,8 +88,8 @@ public class BallManager : MonoBehaviour
     void HandleRoundEnded()
     {
         _launchEnabled = false;
-        _rampFired     = false;
-        _rampActive    = false;
+        _rampFired = false;
+        _rampActive = false;
         ResetTimeScale();
     }
 
@@ -101,13 +101,9 @@ public class BallManager : MonoBehaviour
 
     void Update()
     {
-        if (_ballInPlay)
-        {
-            aimingArrow.gameObject.SetActive(false);
-            _roundTimer += Time.unscaledDeltaTime;
-            GameEvents.RoundTimerTick(_roundTimer);
-        }
-        else if(Input.GetMouseButton(0) || Input.GetKey(KeyCode.Space)) {
+        if (GameManager.Instance.State != GameState.RoundActive || PauseManager.Instance.IsPaused) return;
+
+        if (Input.GetMouseButton(0) || Input.GetKey(KeyCode.Space)) {
             aimingArrow.gameObject.SetActive(true);
             aimingArrow.transform.position = BallSpawnPoint.position;
             Vector3 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
@@ -115,6 +111,13 @@ public class BallManager : MonoBehaviour
             _aimingDir = mousePos - BallSpawnPoint.position;
             aimingArrow.transform.right = _aimingDir;
         }
+        else if (_ballInPlay)
+        {
+            aimingArrow.gameObject.SetActive(false);
+            _roundTimer += Time.unscaledDeltaTime;
+            GameEvents.RoundTimerTick(_roundTimer);
+        }
+        else { aimingArrow.gameObject.SetActive(false); }
 
         if (_launchEnabled)
         {
@@ -122,7 +125,6 @@ public class BallManager : MonoBehaviour
             bool allLaunched = inv != null
                 ? _nextLaunchSlot >= inv.UsedBallSlots
                 : _ballInPlay;
-
             if (!allLaunched && (Input.GetMouseButtonUp(0) || Input.GetKeyUp(KeyCode.Space)))
                 LaunchBall();
         }
@@ -141,7 +143,7 @@ public class BallManager : MonoBehaviour
 
             if (_rampActive && Time.timeScale < RampTargetTimeScale)
             {
-                Time.timeScale      = Mathf.MoveTowards(Time.timeScale, RampTargetTimeScale, RampAcceleration * Time.unscaledDeltaTime);
+                Time.timeScale = Mathf.MoveTowards(Time.timeScale, RampTargetTimeScale, RampAcceleration * Time.unscaledDeltaTime);
                 Time.fixedDeltaTime = 0.02f * Time.timeScale;
             }
         }
@@ -155,7 +157,7 @@ public class BallManager : MonoBehaviour
             return;
         }
 
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1) || GameManager.Instance.AllEnemiesCleared())
         {
             _breakHoldActive = true;
             _breakHoldTimer += Time.unscaledDeltaTime;
@@ -163,6 +165,7 @@ public class BallManager : MonoBehaviour
             if (BreakChargeIndicator != null)
             {
                 BreakChargeIndicator.gameObject.SetActive(true);
+                BreakChargeIndicator.transform.position = _mousePos + Vector2.one;
                 BreakChargeIndicator.fillAmount = Mathf.Clamp01(_breakHoldTimer / BreakHoldDuration);
             }
 
@@ -177,7 +180,6 @@ public class BallManager : MonoBehaviour
             CancelBreakHold();
         }
     }
-
     void CancelBreakHold()
     {
         _breakHoldTimer  = 0f;
@@ -188,13 +190,6 @@ public class BallManager : MonoBehaviour
             BreakChargeIndicator.gameObject.SetActive(false);
         }
     }
-
-    // ── Launch ─────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Launches one ball from the next available inventory slot.
-    /// Subsequent presses cycle through remaining slots until all balls are in play.
-    /// </summary>
     public void LaunchNext()
     {
         var inv = PlayerInventory.Instance;
@@ -207,10 +202,7 @@ public class BallManager : MonoBehaviour
                 _nextLaunchSlot++;
             }
         }
-        else
-        {
-            LaunchBall();
-        }
+        else { LaunchBall(); }
     }
 
     void LaunchFromSlot(int slotIndex)

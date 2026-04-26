@@ -187,7 +187,6 @@ public class EnemyManager : MonoBehaviour
     #endregion
 
     #region Spawning
-
     void TrySpawnFromQueue()
     {
         if (_spawnQueue.Count == 0) return;
@@ -200,12 +199,6 @@ public class EnemyManager : MonoBehaviour
         if (_spawnQueue.Count == 0) return;
         InstantiateEnemy(_spawnQueue.Dequeue());
     }
-
-    /// <summary>
-    /// Spawns enemies from the pool directly, bypassing the active cap.
-    /// These enemies are added to _remainingInWave and tracked normally.
-    /// The cap will resume blocking queue spawns until active count drops below it.
-    /// </summary>
     public void ForceSpawnEnemy(int count, WaveData overrideData = null)
     {
         if (count <= 0) return;
@@ -239,7 +232,6 @@ public class EnemyManager : MonoBehaviour
 
         Debug.Log($"[EnemyManager] Force-spawned {count} enemies. Remaining: {_remainingInWave}");
     }
-
     /// <summary>
     /// Adds enemies to the back of the spawn queue. They obey the active cap and
     /// trickle in as slots open. Intended for enemy abilities that summon reinforcements.
@@ -254,7 +246,6 @@ public class EnemyManager : MonoBehaviour
             Debug.LogWarning("[EnemyManager] AddEnemiesToWave called but no active WaveData.");
             return;
         }
-
         int gridTotal = Mathf.Max(1, _waveRows * _waveColumns);
         int added = 0;
 
@@ -275,12 +266,10 @@ public class EnemyManager : MonoBehaviour
             });
             added++;
         }
-
         _remainingInWave += added;
         Debug.Log($"[EnemyManager] Queued {added} reinforcements. Remaining: {_remainingInWave}");
         TrySpawnFromQueue();
     }
-
     void InstantiateEnemy(ResolvedEnemy resolved)
     {
         Vector3 pos = new Vector3(
@@ -289,19 +278,17 @@ public class EnemyManager : MonoBehaviour
             0f
         );
 
-        GameObject go    = Instantiate(resolved.Prefab, pos, Quaternion.identity);
-        Enemy      enemy = go.GetComponent<Enemy>();
+        GameObject go = Instantiate(resolved.Prefab, pos, Quaternion.identity);
+        Enemy enemy = go.GetComponent<Enemy>();
         if (enemy != null)
         {
             enemy.Initialize(resolved.HP, resolved.EssenceReward);
             _activeEnemies.Add(enemy);
         }
     }
-
     #endregion
 
     #region Advancement
-
     void AdvanceEnemies()
     {
         _totalAdvanceX -= AdvanceDistance;
@@ -315,7 +302,6 @@ public class EnemyManager : MonoBehaviour
         Debug.Log($"[EnemyManager] Enemies advanced. Total offset: {_totalAdvanceX:F1}");
         GameEvents.EnemiesDropped();
     }
-
     #endregion
 
     #region Enemy Removal

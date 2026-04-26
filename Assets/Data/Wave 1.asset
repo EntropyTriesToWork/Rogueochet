@@ -15,7 +15,7 @@ MonoBehaviour:
   Rows: 7
   Columns: 3
   EmptyCellChance: 0
-  TotalEnemies: 50
+  TotalEnemies: 10
   MaxActiveEnemies: 10
   BaseHP: 10
   WaveHPMultiplier: 1

@@ -81,7 +81,7 @@ public class PaddleController : MonoBehaviour
 
     void Update()
     {
-        if (!_inputEnabled) return;
+        if (!_inputEnabled || PauseManager.Instance.IsPaused) return;
         if(Input.GetKey(KeyCode.Space) || Input.GetMouseButton(0)) { return; }
         float targetY = transform.position.y;
 

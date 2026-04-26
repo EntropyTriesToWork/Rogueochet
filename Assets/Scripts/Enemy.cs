@@ -38,7 +38,6 @@ public class Enemy : MonoBehaviour
     #endregion
 
     #region Lifecycle
-
     void Awake()
     {
         if (SpriteRenderer == null)
@@ -51,7 +50,6 @@ public class Enemy : MonoBehaviour
         if (usesLabel)  HPLabel.gameObject.SetActive(true);   else HPLabel.gameObject.SetActive(false);
         if (usesVisual) HPVisual.gameObject.SetActive(true);  else HPVisual.gameObject.SetActive(false);
     }
-
     void Update()
     {
         if (!_isFlashing) return;
@@ -134,7 +132,7 @@ public class Enemy : MonoBehaviour
 
     #region Visuals
 
-    void UpdateHPVisual()
+    public void UpdateHPVisual()
     {
         if (HPLabel  != null && usesLabel)  HPLabel.text = CurrentHP.ToString();
         if (HPVisual != null && usesVisual) HPVisual.localScale = Vector3.one * ((float)CurrentHP / MaxHP);

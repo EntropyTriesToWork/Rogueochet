@@ -210,8 +210,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -8399763048273731415, guid: 6552ac2b6a2d68d429eb1a21ed724362, type: 3}
-  m_Type: 2
+  m_Sprite: {fileID: 2060719789, guid: 6552ac2b6a2d68d429eb1a21ed724362, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -241,6 +241,7 @@ MonoBehaviour:
   CardBackground: {fileID: 1506614871114237404}
   AffordableColor: {r: 0.8018868, g: 0.8018868, b: 0.8018868, a: 1}
   UnaffordableColor: {r: 0.8773585, g: 0.46764863, b: 0.5337308, a: 1}
+  PopDuration: 0.2
 --- !u!114 &9097038170125774138
 MonoBehaviour:
   m_ObjectHideFlags: 0

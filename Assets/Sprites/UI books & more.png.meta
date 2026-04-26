@@ -1678,6 +1678,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: bg
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 384
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 4, y: 4, z: 4, w: 4}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d18ce45d870d08469e2c09493090b4d
+      internalID: 2060719789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -1923,6 +1945,7 @@ TextureImporter:
       arrow: 753999946
       ballslot: -45228545
       bar_fill: 102824521
+      bg: 2060719789
       button_hover: 1407360581
       button_normal: -7389965578554813547
       button_pressed: -757750491

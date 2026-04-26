@@ -11,15 +11,15 @@ public class ShopCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     [Header("UI References")]
     public TextMeshProUGUI CategoryLabel;
-    public Image           IconImage;
+    public Image IconImage;
     public TextMeshProUGUI NameLabel;
     public TextMeshProUGUI DescLabel;
     public TextMeshProUGUI CostLabel;
-    public Button          BuyButton;
-    public Image           CardBackground;
+    public Button BuyButton;
+    public Image CardBackground;
 
     [Header("Style")]
-    public Color AffordableColor   = Color.white;
+    public Color AffordableColor = Color.white;
     public Color UnaffordableColor = new Color(0.5f, 0.5f, 0.5f, 1f);
 
     public float PopDuration = 0.2f;
@@ -34,8 +34,8 @@ public class ShopCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         Sprite icon,
         string upgradeName,
         string description,
-        int    cost,
-        bool   canAfford,
+        int cost,
+        bool canAfford,
         Action onBuy,
         Action onHoverEnter = null,
         Action onHoverExit  = null)
@@ -44,10 +44,10 @@ public class ShopCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         _onHoverExit  = onHoverExit;
 
         if (CategoryLabel != null) CategoryLabel.text = categoryText;
-        if (IconImage     != null) { IconImage.sprite = icon; IconImage.gameObject.SetActive(icon != null); }
-        if (NameLabel     != null) NameLabel.text     = upgradeName;
-        if (DescLabel     != null) DescLabel.text     = description;
-        if (CostLabel     != null) CostLabel.text     = cost.ToString();
+        if (IconImage != null) { IconImage.sprite = icon; IconImage.gameObject.SetActive(icon != null); }
+        if (NameLabel != null) NameLabel.text = upgradeName;
+        if (DescLabel != null) DescLabel.text = description;
+        if (CostLabel != null) CostLabel.text = cost.ToString();
 
         if (CardBackground != null)
             CardBackground.color = canAfford ? AffordableColor : UnaffordableColor;
@@ -66,8 +66,8 @@ public class ShopCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     IEnumerator PopIn()
     {
-        RectTransform rt      = GetComponent<RectTransform>();
-        float         elapsed = 0f;
+        RectTransform rt = GetComponent<RectTransform>();
+        float elapsed = 0f;
 
         while (elapsed < PopDuration)
         {
