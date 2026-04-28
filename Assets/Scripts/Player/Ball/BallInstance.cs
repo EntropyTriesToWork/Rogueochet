@@ -4,7 +4,7 @@ using UnityEngine;
 [System.Serializable]
 public class BallInstance
 {
-    public string     BallTypeName  = "Standard Ball";
+    public string     BallName  = "Standard Ball";
     public GameObject BallPrefab;
     public Sprite     PreviewSprite { get; private set; }
 
@@ -21,7 +21,7 @@ public class BallInstance
 
     public BallInstance(string typeName, GameObject prefab)
     {
-        BallTypeName = typeName;
+        BallName = typeName;
         BallPrefab   = prefab;
 
         if (prefab != null)
@@ -84,7 +84,7 @@ public class BallInstance
     public string GetStatSummary()
     {
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine(BallTypeName);
+        sb.AppendLine(BallName);
         sb.AppendLine($"DMG:  +{ComputedDamageBonus} x{ComputedDamageMultiplier:F2}");
         sb.AppendLine($"SPD:  +{ComputedSpeedBonus:F1} x{ComputedSpeedMultiplier:F2}");
         sb.AppendLine($"DUR:  +{ComputedDurabilityBonus}");

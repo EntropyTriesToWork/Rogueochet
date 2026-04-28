@@ -7,9 +7,9 @@ public static class GameEvents
     public static event Action OnGameOver;
     public static event Action OnVictory;
 
-    public static void GameStarted()  => OnGameStarted?.Invoke();
-    public static void GameOver()     => OnGameOver?.Invoke();
-    public static void Victory()      => OnVictory?.Invoke();
+    public static void GameStarted() => OnGameStarted?.Invoke();
+    public static void GameOver() => OnGameOver?.Invoke();
+    public static void Victory() => OnVictory?.Invoke();
 
     public static event Action<int>   OnWaveStarted;
     public static event Action<float> OnWaveSetup;
@@ -18,18 +18,18 @@ public static class GameEvents
     public static event Action OnRoundEnded;
 
     public static void WaveStarted(int waveNumber) => OnWaveStarted?.Invoke(waveNumber);
-    public static void WaveSetup(float wallScale)  => OnWaveSetup?.Invoke(wallScale);
-    public static void WaveCleared()               => OnWaveCleared?.Invoke();
-    public static void RoundStarted()              => OnRoundStarted?.Invoke();
-    public static void RoundEnded()                => OnRoundEnded?.Invoke();
+    public static void WaveSetup(float wallScale) => OnWaveSetup?.Invoke(wallScale);
+    public static void WaveCleared() => OnWaveCleared?.Invoke();
+    public static void RoundStarted() => OnRoundStarted?.Invoke();
+    public static void RoundEnded() => OnRoundEnded?.Invoke();
 
     // ── Shop ───────────────────────────────────────────────────────
     public static event Action OnShopOpened;
     public static event Action OnShopClosed;
     public static event Action OnShopOfferingsChanged;   // ← NEW: cards refreshed
 
-    public static void ShopOpened()            => OnShopOpened?.Invoke();
-    public static void ShopClosed()            => OnShopClosed?.Invoke();
+    public static void ShopOpened() => OnShopOpened?.Invoke();
+    public static void ShopClosed() => OnShopClosed?.Invoke();
     public static void ShopOfferingsChanged()  => OnShopOfferingsChanged?.Invoke();
 
     // ── Player ─────────────────────────────────────────────────────
@@ -37,33 +37,37 @@ public static class GameEvents
     public static event Action<int>      OnEssenceChanged;
 
     public static void PlayerHealthChanged(int currentHP, int maxHP) => OnPlayerHealthChanged?.Invoke(currentHP, maxHP);
-    public static void EssenceChanged(int currentEssence)            => OnEssenceChanged?.Invoke(currentEssence);
+    public static void EssenceChanged(int currentEssence) => OnEssenceChanged?.Invoke(currentEssence);
 
     // ── Ball ───────────────────────────────────────────────────────
-    public static event Action<Ball>      OnBallLost;
-    public static event Action<Ball>      OnBallLaunched;
-    public static event Action<int>       OnBallCountChanged;
-    public static event Action            OnBallSpeedRampTriggered;
-    public static event Action<float>     OnRoundTimerTick;
+    public static event Action<Ball> OnBallLost;
+    public static event Action<Ball> OnBallLaunched;
+    public static event Action<int> OnBallCountChanged;
+    public static event Action OnBallSpeedRampTriggered;
+    public static event Action<float> OnRoundTimerTick;
     public static event Action<Ball, int, int> OnBallDurabilityChanged;
+    public static event Action OnReloadTriggered;
+    public static event Action<int> OnSelectedBallChanged; // int = slot index
 
-    public static void BallLost(Ball ball)                               => OnBallLost?.Invoke(ball);
-    public static void BallLaunched(Ball ball)                           => OnBallLaunched?.Invoke(ball);
-    public static void BallCountChanged(int remaining)                   => OnBallCountChanged?.Invoke(remaining);
-    public static void BallSpeedRampTriggered()                          => OnBallSpeedRampTriggered?.Invoke();
-    public static void RoundTimerTick(float elapsed)                     => OnRoundTimerTick?.Invoke(elapsed);
+    public static void BallLost(Ball ball) => OnBallLost?.Invoke(ball);
+    public static void BallLaunched(Ball ball) => OnBallLaunched?.Invoke(ball);
+    public static void BallCountChanged(int remaining) => OnBallCountChanged?.Invoke(remaining);
+    public static void BallSpeedRampTriggered() => OnBallSpeedRampTriggered?.Invoke();
+    public static void RoundTimerTick(float elapsed) => OnRoundTimerTick?.Invoke(elapsed);
     public static void BallDurabilityChanged(Ball ball, int cur, int max)=> OnBallDurabilityChanged?.Invoke(ball, cur, max);
+    public static void ReloadTriggered() => OnReloadTriggered?.Invoke();
+    public static void SelectedBallChanged(int slotIndex) => OnSelectedBallChanged?.Invoke(slotIndex);
 
     // ── Enemy ──────────────────────────────────────────────────────
-    public static event Action<Enemy, int>      OnEnemyDied;
+    public static event Action<Enemy, int> OnEnemyDied;
     public static event Action<Enemy, int, int> OnEnemyDamaged;
-    public static event Action<Enemy>           OnEnemyReachedPaddle;
-    public static event Action                  OnEnemiesDropped;
+    public static event Action<Enemy> OnEnemyReachedPaddle;
+    public static event Action OnEnemiesDropped;
 
-    public static void EnemyDied(Enemy enemy, int essenceAwarded)           => OnEnemyDied?.Invoke(enemy, essenceAwarded);
+    public static void EnemyDied(Enemy enemy, int essenceAwarded)  => OnEnemyDied?.Invoke(enemy, essenceAwarded);
     public static void EnemyDamaged(Enemy enemy, int damage, int remaining) => OnEnemyDamaged?.Invoke(enemy, damage, remaining);
-    public static void EnemyReachedPaddle(Enemy enemy)                      => OnEnemyReachedPaddle?.Invoke(enemy);
-    public static void EnemiesDropped()                                      => OnEnemiesDropped?.Invoke();
+    public static void EnemyReachedPaddle(Enemy enemy) => OnEnemyReachedPaddle?.Invoke(enemy);
+    public static void EnemiesDropped() => OnEnemiesDropped?.Invoke();
 
     // ── Inventory / Leveling ───────────────────────────────────────
     public static event Action<int> OnPlayerLevelUp;   // ← NEW: new level value
@@ -96,5 +100,7 @@ public static class GameEvents
         OnEnemyReachedPaddle     = null;
         OnEnemiesDropped         = null;
         OnPlayerLevelUp          = null;
+        OnReloadTriggered = null;
+        OnSelectedBallChanged = null;
     }
 }

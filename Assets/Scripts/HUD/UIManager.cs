@@ -32,6 +32,7 @@ public class UIManager : MonoBehaviour
     public GameObject GameOverPanel;
     public GameObject VictoryPanel;
     public GameObject StartPanel;
+    public GameObject BallAmmoPanel;
 
     [Header("Shop")]
     public Button StartNextWaveButton;
@@ -44,14 +45,11 @@ public class UIManager : MonoBehaviour
     #endregion
 
     #region Private State
-
     private Coroutine _bannerCoroutine;
     private Coroutine _shopCoroutine;
-
     #endregion
 
     #region Lifecycle
-
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -60,15 +58,12 @@ public class UIManager : MonoBehaviour
         if (StartNextWaveButton != null)
             StartNextWaveButton.onClick.AddListener(() => GameManager.Instance.OnShopComplete());
     }
-
     void Start()
     {
         SubscribeToEvents();
         SetOverlay(StartPanel);
     }
-
     void OnDestroy() => UnsubscribeFromEvents();
-
     #endregion
 
     #region Events
@@ -243,7 +238,8 @@ public class UIManager : MonoBehaviour
         if (GameOverPanel != null) GameOverPanel.SetActive(GameOverPanel == panel);
         if (VictoryPanel != null) VictoryPanel.SetActive(VictoryPanel == panel);
         if (StartPanel != null) StartPanel.SetActive(StartPanel == panel);
-    }
 
+        if (BallAmmoPanel != null) { BallAmmoPanel.SetActive(panel != ShopPanel); }
+    }
     #endregion
 }

@@ -22,7 +22,7 @@ public class ShopCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public Color AffordableColor = Color.white;
     public Color UnaffordableColor = new Color(0.5f, 0.5f, 0.5f, 1f);
 
-    public float PopDuration = 0.2f;
+    public float PopDuration = 0.1f;
 
     #endregion
 

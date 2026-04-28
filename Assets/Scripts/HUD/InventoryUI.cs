@@ -69,9 +69,6 @@ public class InventoryUI : MonoBehaviour
             ToggleInventory();
         }
     }
-
-    // ── Open / Close ───────────────────────────────────────────────
-
     public void ToggleInventory()
     {
         if (_isOpen) CloseInventory();
@@ -82,7 +79,7 @@ public class InventoryUI : MonoBehaviour
     {
         _isOpen = true;
         if (InventoryPanel != null) InventoryPanel.SetActive(true);
-        Time.timeScale = 0f;    // pause while browsing inventory
+        Time.timeScale = 0f; // pause while browsing inventory
         Refresh();
     }
 

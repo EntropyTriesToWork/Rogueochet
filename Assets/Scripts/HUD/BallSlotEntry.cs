@@ -18,7 +18,7 @@ public class BallSlotEntry : MonoBehaviour
         if (EmptySlotIndicator != null) EmptySlotIndicator.SetActive(false);
 
         if (BallNameLabel != null)
-            BallNameLabel.text = $"Slot {slotIndex + 1}: {instance.BallTypeName}";
+            BallNameLabel.text = $"Slot {slotIndex + 1}: {instance.BallName}";
 
         if (StatsLabel != null)
         {

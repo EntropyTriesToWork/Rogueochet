@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class BallManager : MonoBehaviour
 {
+    #region Variables and Properties
     public static BallManager Instance { get; private set; }
 
     [Header("Ball Settings")]
@@ -19,10 +20,13 @@ public class BallManager : MonoBehaviour
     public float RampAcceleration = 1f;
 
     [Header("Break All (Right-Click Hold)")]
-    [Tooltip("Seconds the player must hold right-click to break all active balls.")]
     public float BreakHoldDuration = 1f;
-    [Tooltip("Radial fill UI Image shown while holding. Assign an Image with Fill Method = Radial 360.")]
     public UnityEngine.UI.Image BreakChargeIndicator;
+
+    [Header("Ball Selection & Reload")]
+    public KeyCode ReloadKey = KeyCode.R;
+    public KeyCode NextBallKey = KeyCode.Tab;
+    public bool AutoReload = true;
 
     [HideInInspector] public float BaseSpeedRampDelay;
 
@@ -37,12 +41,20 @@ public class BallManager : MonoBehaviour
     private bool _rampActive = false;
     private float _timeSinceLastBall = 0f;
 
+    private int _selectedBallSlot = 0;
+    private bool _reloading = false;
+
     private float _breakHoldTimer = 0f;
     private bool _breakHoldActive = false;
     private int _nextLaunchSlot = 0;
     private Vector2 _aimingDir = Vector2.zero;
-    private Vector2 _mousePos = Vector2.zero;
+    private Vector3 _mousePos = Vector3.zero;
     private Camera _cam;
+
+    public int GetSelectedSlot => _selectedBallSlot;
+    public bool IsBallInPlay => _ballInPlay;
+    public int GetLaunchedCount => _nextLaunchSlot;
+    #endregion
 
     void Awake()
     {
@@ -106,9 +118,9 @@ public class BallManager : MonoBehaviour
         if (Input.GetMouseButton(0) || Input.GetKey(KeyCode.Space)) {
             aimingArrow.gameObject.SetActive(true);
             aimingArrow.transform.position = BallSpawnPoint.position;
-            Vector3 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
-            mousePos.z = 0f;
-            _aimingDir = mousePos - BallSpawnPoint.position;
+            _mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
+            _mousePos.z = 0f;
+            _aimingDir = _mousePos - BallSpawnPoint.position;
             aimingArrow.transform.right = _aimingDir;
         }
         else if (_ballInPlay)
@@ -129,10 +141,10 @@ public class BallManager : MonoBehaviour
                 LaunchBall();
         }
 
-        HandleBreakHold();
-
         if (_ballInPlay)
         {
+            HandleBreakHold();
+
             if (!_rampFired && Time.time - _timeSinceLastBall >= SpeedRampDelay)
             {
                 _rampFired  = true;
@@ -147,17 +159,40 @@ public class BallManager : MonoBehaviour
                 Time.fixedDeltaTime = 0.02f * Time.timeScale;
             }
         }
+        else
+        {
+            if (Input.GetKeyDown(ReloadKey) && !_reloading) // Handle manual reload
+            {
+                ManualReload();
+            }
+            if (Input.GetKeyDown(NextBallKey) && !_ballInPlay) // Handle ball selection cycling
+            {
+                CycleSelectedBall();
+            }
+            if (AutoReload && _launchEnabled && !_ballInPlay) // Check for auto-reload when all balls are launched
+            {
+                var inv = PlayerInventory.Instance;
+                bool allLaunched = inv != null
+                    ? _nextLaunchSlot >= inv.UsedBallSlots
+                    : true;
+
+                if (allLaunched && !_reloading && _nextLaunchSlot > 0)
+                {
+                    AutoReloadBalls();
+                }
+            }
+        }
     }
 
     void HandleBreakHold()
     {
-        if (!_ballInPlay)
+        if (!_ballInPlay || GameManager.Instance.AllEnemiesCleared())
         {
             CancelBreakHold();
             return;
         }
 
-        if (Input.GetMouseButton(1) || GameManager.Instance.AllEnemiesCleared())
+        if (Input.GetMouseButton(1))
         {
             _breakHoldActive = true;
             _breakHoldTimer += Time.unscaledDeltaTime;
@@ -165,7 +200,6 @@ public class BallManager : MonoBehaviour
             if (BreakChargeIndicator != null)
             {
                 BreakChargeIndicator.gameObject.SetActive(true);
-                BreakChargeIndicator.transform.position = _mousePos + Vector2.one;
                 BreakChargeIndicator.fillAmount = Mathf.Clamp01(_breakHoldTimer / BreakHoldDuration);
             }
 
@@ -190,21 +224,72 @@ public class BallManager : MonoBehaviour
             BreakChargeIndicator.gameObject.SetActive(false);
         }
     }
-    public void LaunchNext()
+    public void ManualReload()
+    {
+        if (_reloading) return;
+
+        _reloading = true;
+        _nextLaunchSlot = 0;
+        _selectedBallSlot = 0;
+        _ballInPlay = false;
+
+        GameEvents.ReloadTriggered();
+        GameEvents.SelectedBallChanged(0);
+
+        _reloading = false;
+        Debug.Log("[BallManager] Manual reload triggered");
+    }
+    void AutoReloadBalls()
+    {
+        if (_reloading) return;
+
+        _reloading = true;
+        _nextLaunchSlot = 0;
+        _selectedBallSlot = 0;
+        _ballInPlay = false;
+
+        GameEvents.ReloadTriggered();
+        //UpdateSelectedBallDisplay();
+
+        _reloading = false;
+        Debug.Log("[BallManager] Auto-reload triggered");
+    }
+    void CycleSelectedBall()
     {
         var inv = PlayerInventory.Instance;
+        if (inv == null || inv.UsedBallSlots <= 1) return;
 
+        _selectedBallSlot = (_selectedBallSlot + 1) % inv.UsedBallSlots;
+        GameEvents.SelectedBallChanged(_selectedBallSlot);
+
+        Debug.Log($"[BallManager] Selected ball changed to slot {_selectedBallSlot}");
+    }
+    public void LaunchSelectedBall() // Modify LaunchFromSlot to use selected ball instead of sequential
+    {
+        if (!_launchEnabled || _ballInPlay) return;
+
+        var inv = PlayerInventory.Instance;
         if (inv != null && inv.UsedBallSlots > 0)
         {
-            if (_nextLaunchSlot < inv.UsedBallSlots)
+            if (_selectedBallSlot < inv.UsedBallSlots)
             {
-                LaunchFromSlot(_nextLaunchSlot);
-                _nextLaunchSlot++;
+                LaunchFromSlot(_selectedBallSlot);
+                // Move to next slot for next launch if we're launching sequentially
+                // Or keep same slot if you want multi-shot of same ball type
+                _nextLaunchSlot = _selectedBallSlot + 1;
+
+                if (_nextLaunchSlot >= inv.UsedBallSlots)
+                {
+                    _ballInPlay = true;
+                }
             }
         }
-        else { LaunchBall(); }
+        else
+        {
+            LaunchBall();
+        }
     }
-
+    #region Ball Controls
     void LaunchFromSlot(int slotIndex)
     {
         var inv      = PlayerInventory.Instance;
@@ -221,10 +306,8 @@ public class BallManager : MonoBehaviour
         Ball       ball = go.GetComponent<Ball>();
         if (ball == null) return;
 
-        // Apply per-ball stats
         instance?.ApplyToBall(ball);
 
-        // Apply global multipliers on top
         if (inv != null)
         {
             ball.Damage        = Mathf.Max(1, Mathf.RoundToInt(ball.Damage * inv.GlobalDamageMultiplier));
@@ -319,13 +402,13 @@ public class BallManager : MonoBehaviour
         _rampActive = false;
         GameEvents.BallCountChanged(0);
     }
+    #endregion
 
     void ResetTimeScale()
     {
         Time.timeScale      = 1f;
         Time.fixedDeltaTime = 0.02f;
     }
-
     public int   ActiveBallCount => _activeBalls.Count;
     public float RoundTimer      => _roundTimer;
 }
