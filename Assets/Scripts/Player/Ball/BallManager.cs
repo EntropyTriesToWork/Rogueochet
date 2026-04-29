@@ -10,6 +10,7 @@ public class BallManager : MonoBehaviour
     [Tooltip("Default prefab used when PlayerInventory has no balls assigned.")]
     public GameObject BallPrefab;
     public Transform BallSpawnPoint;
+    [SerializeField] GameStats _stats;
 
     [Header("Speed Ramp")]
     [Tooltip("Seconds of real time after the first ball is launched before timeScale ramps up.")]
@@ -140,11 +141,9 @@ public class BallManager : MonoBehaviour
             if (!allLaunched && (Input.GetMouseButtonUp(0) || Input.GetKeyUp(KeyCode.Space)))
                 LaunchBall();
         }
-
+        HandleBreakHold();
         if (_ballInPlay)
         {
-            HandleBreakHold();
-
             if (!_rampFired && Time.time - _timeSinceLastBall >= SpeedRampDelay)
             {
                 _rampFired  = true;
@@ -186,13 +185,13 @@ public class BallManager : MonoBehaviour
 
     void HandleBreakHold()
     {
-        if (!_ballInPlay || GameManager.Instance.AllEnemiesCleared())
+        if (!_ballInPlay)
         {
             CancelBreakHold();
             return;
         }
 
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1) || GameManager.Instance.AllEnemiesCleared())
         {
             _breakHoldActive = true;
             _breakHoldTimer += Time.unscaledDeltaTime;
@@ -310,9 +309,9 @@ public class BallManager : MonoBehaviour
 
         if (inv != null)
         {
-            ball.Damage        = Mathf.Max(1, Mathf.RoundToInt(ball.Damage * inv.GlobalDamageMultiplier));
-            ball.InitialSpeed  *= inv.GlobalSpeedMultiplier;
-            ball.MaxDurability  = Mathf.Max(1, ball.MaxDurability + inv.GlobalDurabilityBonus);
+            ball.Damage        = Mathf.Max(1, Mathf.RoundToInt(ball.Damage * _stats.GlobalDamageMultiplier));
+            ball.InitialSpeed  *= _stats.GlobalSpeedMultiplier;
+            ball.MaxDurability  = Mathf.Max(1, ball.MaxDurability + _stats.GlobalDurabilityBonus);
         }
         float baseAngle = Random.Range(-30f, 30f); //Add random angle
         float slotOffset = (slotIndex - (inv.UsedBallSlots - 1) * 0.5f) * 15f;

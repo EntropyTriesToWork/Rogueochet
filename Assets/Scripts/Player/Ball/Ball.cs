@@ -60,7 +60,6 @@ public class Ball : MonoBehaviour
     #endregion
 
     #region Launch
-
     public void Launch(Vector2 direction)
     {
         CurrentDurability  = MaxDurability;
@@ -68,7 +67,6 @@ public class Ball : MonoBehaviour
         _launched          = true;
         GameEvents.BallDurabilityChanged(this, CurrentDurability, MaxDurability);
     }
-
     #endregion
 
     #region Collision

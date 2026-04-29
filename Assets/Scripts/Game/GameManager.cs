@@ -1,36 +1,41 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public enum GameState { Idle, Wave, RoundActive, RoundEnd, Shop, Victory, GameOver }
+public enum GameState { Idle, Wave, RoundActive, RoundEnd, Shop, LevelUp, Victory, GameOver }
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
     [Header("Player Stats")]
-    public int PlayerHealth = 5;
-    public int MaxHealth = 5;
+    [SerializeField] int _baseMaxHealth = 20;
+    public int PlayerHealth { get; private set; }
+    public int MaxHealth { get; private set; }
     public int Essence = 0;
 
     [Header("Wave Settings")]
     public int TotalWaves = 5;
     public int CurrentWave { get; private set; } = 0;
 
-    public GameState State { get; private set; } = GameState.Idle;
+    [Header("Run Statistics")]
+    [SerializeField] private GameStats _stats;
+
+    private bool _waitingForLevelUp = false;
 
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
     }
-
     void Start()
     {
+        ResetGame();
         SubscribeToEvents();
         ChangeState(GameState.Idle);
     }
-
+    #region Events
     void OnDestroy() => UnsubscribeFromEvents();
 
     void SubscribeToEvents()
@@ -38,17 +43,13 @@ public class GameManager : MonoBehaviour
         GameEvents.OnBallCountChanged += HandleBallCountChanged;
         GameEvents.OnEnemyDied += HandleEnemyDied;
         GameEvents.OnEnemyReachedPaddle += HandleEnemyReachedPaddle;
-        GameEvents.OnWaveStarted += HandleWaveStarted;
     }
-
     void UnsubscribeFromEvents()
     {
         GameEvents.OnBallCountChanged -= HandleBallCountChanged;
         GameEvents.OnEnemyDied -= HandleEnemyDied;
         GameEvents.OnEnemyReachedPaddle -= HandleEnemyReachedPaddle;
-        GameEvents.OnWaveStarted -= HandleWaveStarted;
     }
-
     void HandleBallCountChanged(int remaining)
     {
         if (remaining == 0 && State == GameState.RoundActive)
@@ -57,24 +58,38 @@ public class GameManager : MonoBehaviour
 
     void HandleEnemyDied(Enemy enemy, int essenceReward)
     {
-        // Apply essence gain multiplier from inventory
-        float mult = PlayerInventory.Instance != null
-            ? PlayerInventory.Instance.EssenceGainMultiplier : 1f;
-        int awarded = Mathf.Max(1, Mathf.RoundToInt(essenceReward * mult));
+        int awarded = Mathf.Max(1, Mathf.RoundToInt(essenceReward * _stats.EssenceGainMultiplier));
         AddEssence(awarded);
 
         if (AllEnemiesCleared() && State == GameState.RoundActive)
             ChangeState(GameState.RoundEnd);
     }
-
     void HandleEnemyReachedPaddle(Enemy enemy) => TakeDamage(1);
 
-    void HandleWaveStarted(int waveNumber) { }
+    private IEnumerator HandleLevelUpBeforeShop()
+    {
+        var inv = PlayerInventory.Instance;
+        if (inv == null) yield break;
+        Debug.Log("Leveling up before shop!");
+        while (inv.TryGetLevelUpRewards(out List<UpgradeData> rewards)) // Keep trying while there are pending level‑ups
+        {
+            _waitingForLevelUp = true;
+            // Show UI and wait for player to choose
+            ShopManager.Instance.ShowLevelUpChoices(rewards, () =>
+            {
+                _waitingForLevelUp = false;
+            });
+            yield return new WaitUntil(() => !_waitingForLevelUp);
+        }
+        // After all level‑ups are done, proceed to shop or victory
+        if (CurrentWave >= TotalWaves)
+            ChangeState(GameState.Victory);
+        else
+            ChangeState(GameState.Shop);
+    }
+    #endregion
 
-    public bool AllEnemiesCleared() => EnemyManager.Instance.AllEnemiesCleared();
-
-    public void SetWaveEnemyCount(int count) { }
-
+    #region Public Methods
     public void ChangeState(GameState newState)
     {
         State = newState;
@@ -82,42 +97,37 @@ public class GameManager : MonoBehaviour
 
         switch (newState)
         {
-            case GameState.Idle:
-                break;
-
+            case GameState.Idle: break;
             case GameState.Wave:
                 CurrentWave++;
-                Debug.Log($"[GameManager] Starting Wave {CurrentWave}/{TotalWaves}");
                 GameEvents.WaveStarted(CurrentWave);
-                DelayedAction(1f, ()=> { ChangeState(GameState.RoundActive); });
+                DelayedAction(1f, () => ChangeState(GameState.RoundActive));
                 break;
-
             case GameState.RoundActive:
                 GameEvents.RoundStarted();
                 break;
-
             case GameState.RoundEnd:
                 GameEvents.RoundEnded();
                 if (AllEnemiesCleared())
                 {
-                    if (CurrentWave >= TotalWaves) ChangeState(GameState.Victory);
-                    else ChangeState(GameState.Shop);
+                    // Before going to shop, handle any pending level‑ups
+                    StartCoroutine(HandleLevelUpBeforeShop());
                 }
                 else
                 {
                     ChangeState(GameState.RoundActive);
                 }
                 break;
-
             case GameState.Shop:
                 GameEvents.WaveCleared();
                 GameEvents.ShopOpened();
                 break;
-
+            case GameState.LevelUp:
+                // This state is not strictly needed; we use coroutine + UI.
+                break;
             case GameState.Victory:
                 GameEvents.Victory();
                 break;
-
             case GameState.GameOver:
                 GameEvents.GameOver();
                 break;
@@ -126,23 +136,24 @@ public class GameManager : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
-        int effectiveMax = MaxHealth + (PlayerInventory.Instance?.MaxHPBonus ?? 0);
-        PlayerHealth = Mathf.Clamp(PlayerHealth - amount, 0, effectiveMax);
-        GameEvents.PlayerHealthChanged(PlayerHealth, effectiveMax);
-        Debug.Log($"[GameManager] Player {(amount > 0 ? "took" : "healed")} {Mathf.Abs(amount)}. HP: {PlayerHealth}/{effectiveMax}");
-
-        if (PlayerHealth <= 0)
-            ChangeState(GameState.GameOver);
+        PlayerHealth = Mathf.Clamp(PlayerHealth - amount, 0, MaxHealth);
+        GameEvents.PlayerHealthChanged(PlayerHealth, MaxHealth);
+        if (PlayerHealth <= 0) ChangeState(GameState.GameOver);
     }
-
     public void Heal(int amount) => TakeDamage(-amount);
-
     public void AddEssence(int amount)
     {
         Essence += amount;
+        if (_stats != null) _stats.TotalEssenceGained += amount;
         GameEvents.EssenceChanged(Essence);
     }
-
+    public void ChangeMaxHP(int amount)
+    {
+        _stats.MaxHPBonus += amount;
+        MaxHealth += amount;
+        if (MaxHealth <= 0) MaxHealth = 1;
+        GameEvents.PlayerHealthChanged(PlayerHealth, MaxHealth);
+    }
     public bool SpendEssence(int amount)
     {
         if (Essence < amount) return false;
@@ -158,7 +169,6 @@ public class GameManager : MonoBehaviour
             ChangeState(GameState.Wave);
         }
     }
-
     public void StartGame()
     {
         if (State == GameState.Idle || State == GameState.GameOver || State == GameState.Victory)
@@ -168,37 +178,39 @@ public class GameManager : MonoBehaviour
             ChangeState(GameState.Wave);
         }
     }
-
-    void ResetGame()
+    public void ResetGame()
     {
         if (PlayerInventory.Instance != null)
             PlayerInventory.Instance.FullReset();
 
+        // Reset run stats in GameStats asset
+        if (_stats != null)
+        {
+            _stats.TotalKills = 0;
+            _stats.TotalBallsLaunched = 0;
+            _stats.TotalBounces = 0;
+            _stats.TotalDamageDealt = 0;
+            _stats.TotalGameTime = 0f;
+            _stats.TotalEssenceGained = 0;
+            _stats.TotalEssenceSpent = 0;
+            _stats.TotalHealthLost = 0;
+            _stats.TotalHealthGained = 0;
+        }
+
         EnemyStats.Reset();
-
         CurrentWave = 0;
-        PlayerHealth = MaxHealth;
+        Heal(MaxHealth);
         Essence = 0;
-
-        GameEvents.PlayerHealthChanged(PlayerHealth, MaxHealth);
         GameEvents.EssenceChanged(Essence);
     }
-    public void DelayedAction(float duration, Action OnComplete)
-    {
-        StartCoroutine(DoDelayedAction(duration, OnComplete));
-    }
-    private IEnumerator DoDelayedAction(float duration, Action OnComplete) 
+    public void DelayedAction(float duration, Action onComplete) => StartCoroutine(DoDelayedAction(duration, onComplete));
+    private IEnumerator DoDelayedAction(float duration, Action onComplete)
     {
         yield return new WaitForSeconds(duration);
-        OnComplete.Invoke();
+        onComplete?.Invoke();
     }
-    public void DelayedActionRealtime(float duration, Action OnComplete)
-    {
-        StartCoroutine(DoDelayedActionRealtime(duration, OnComplete));
-    }
-    private IEnumerator DoDelayedActionRealtime(float duration, Action OnComplete)
-    {
-        yield return new WaitForSecondsRealtime(duration);
-        OnComplete.Invoke();
-    }
+    #endregion
+
+    public GameState State { get; private set; } = GameState.Idle;
+    public bool AllEnemiesCleared() => EnemyManager.Instance?.AllEnemiesCleared() ?? true;
 }

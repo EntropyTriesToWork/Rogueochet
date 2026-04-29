@@ -7,7 +7,6 @@ using TMPro;
 public class XPBarUI : MonoBehaviour
 {
     #region Inspector
-
     [Header("References")]
     [Tooltip("Image with Fill Method set to Filled.")]
     public Image BarFill;
@@ -41,7 +40,7 @@ public class XPBarUI : MonoBehaviour
 
     void Awake()
     {
-        PlayerInventory.OnLevelUp += HandleLevelUp;
+        GameEvents.OnLevelUp += HandleLevelUp;
         GameEvents.OnShopOpened += OnShopOpened;
         GameEvents.OnShopClosed += OnShopClosed;
         GameEvents.OnWaveStarted += HandleWaveStarted;
@@ -53,7 +52,7 @@ public class XPBarUI : MonoBehaviour
         _destroyed = true;
         StopAllCoroutines();
 
-        PlayerInventory.OnLevelUp -= HandleLevelUp;
+        GameEvents.OnLevelUp -= HandleLevelUp;
         GameEvents.OnShopOpened -= OnShopOpened;
         GameEvents.OnShopClosed -= OnShopClosed;
         GameEvents.OnWaveStarted -= HandleWaveStarted;

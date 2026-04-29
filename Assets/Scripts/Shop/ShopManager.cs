@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ShopManager : MonoBehaviour
 {
@@ -27,20 +28,22 @@ public class ShopManager : MonoBehaviour
     [Tooltip("Added to the reroll cost after each reroll this wave.")]
     public int RerollCostIncrease = 1;
 
+    [Header("Level‑Up UI")]
+    [SerializeField] private CanvasGroup levelUpCanvas; // panel with buttons
+    [SerializeField] private Transform levelUpButtonContainer;
+    [SerializeField] private GameObject levelUpButtonPrefab;
+    private System.Action _onLevelUpComplete;
     #endregion
 
     #region State
-
     public IReadOnlyList<ShopOffering> CurrentOfferings => _offerings;
     private List<ShopOffering> _offerings = new List<ShopOffering>();
 
     public int RerollCost { get; private set; }
     public int RerollCount { get; private set; }
-
     #endregion
 
     #region Lifecycle
-
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -52,6 +55,9 @@ public class ShopManager : MonoBehaviour
         RerollCost = RerollBaseCost;
         GameEvents.OnShopClosed += ClearOfferings;
         GameEvents.OnWaveCleared += ResetReroll;
+
+        levelUpCanvas.alpha = 0;
+        levelUpCanvas.interactable = false;
     }
 
     void OnDestroy()
@@ -159,7 +165,6 @@ public class ShopManager : MonoBehaviour
     #endregion
 
     #region Purchasing
-
     public bool PurchaseOffering(int index)
     {
         if (index < 0 || index >= _offerings.Count) return false;
@@ -179,26 +184,26 @@ public class ShopManager : MonoBehaviour
             return false;
         }
 
-        switch (offering.Category)
-        {
-            case UpgradeCategory.BallDirect:
-                int slot = offering.TargetBallSlot >= 0 ? offering.TargetBallSlot
-                         : (inv.UsedBallSlots > 0 ? Random.Range(0, inv.UsedBallSlots) : 0);
-                inv.ApplyDirectUpgrade(offering.Upgrade, slot);
-                break;
+        //switch (offering.Category)
+        //{
+        //    case UpgradeCategory.BallDirect:
+        //        int slot = offering.TargetBallSlot >= 0 ? offering.TargetBallSlot
+        //                 : (inv.UsedBallSlots > 0 ? Random.Range(0, inv.UsedBallSlots) : 0);
+        //        inv.ApplyDirectUpgrade(offering.Upgrade, slot);
+        //        break;
 
-            case UpgradeCategory.Global:
-                inv.ApplyGlobalUpgrade(offering.Upgrade);
-                break;
+        //    case UpgradeCategory.Global:
+        //        inv.ApplyGlobalUpgrade(offering.Upgrade);
+        //        break;
 
-            case UpgradeCategory.NewBall:
-                if (!inv.AddBall(offering.Upgrade))
-                {
-                    GameManager.Instance.AddEssence(offering.Upgrade.Cost);
-                    return false;
-                }
-                break;
-        }
+        //    case UpgradeCategory.NewBall:
+        //        if (!inv.AddBall(offering.Upgrade))
+        //        {
+        //            GameManager.Instance.AddEssence(offering.Upgrade.Cost);
+        //            return false;
+        //        }
+        //        break;
+        //}
 
         _offerings.RemoveAt(index);
         GameEvents.ShopOfferingsChanged();
@@ -207,8 +212,38 @@ public class ShopManager : MonoBehaviour
     }
 
     #endregion
-}
 
+    #region Level Up
+    public void ShowLevelUpChoices(List<UpgradeData> choices, System.Action onComplete) // Call this from GameManager when level‑up rewards are ready
+    {
+        _onLevelUpComplete = onComplete;
+        levelUpCanvas.interactable = true;
+        levelUpCanvas.alpha = 1;
+        
+        foreach (Transform child in levelUpButtonContainer)
+            Destroy(child.gameObject);
+
+        // Create a button for each choice
+        foreach (var choice in choices)
+        {
+            Debug.Log($"Showing {choice.Effect} as an option.");
+            GameObject btnObj = Instantiate(levelUpButtonPrefab, levelUpButtonContainer);
+            var button = btnObj.GetComponent<UnityEngine.UI.Button>();
+            var text = btnObj.GetComponentInChildren<TMPro.TMP_Text>();
+            if (text != null) text.text = $"{choice.UpgradeName}";
+            button.onClick.AddListener(() => OnLevelUpChoiceSelected(choice));
+        }
+    }
+    private void OnLevelUpChoiceSelected(UpgradeData selected)
+    {
+        PlayerInventory.Instance.ApplyLevelUpReward(selected);
+        levelUpCanvas.alpha = 0;
+        levelUpCanvas.interactable = false;
+        _onLevelUpComplete?.Invoke();
+        _onLevelUpComplete = null;
+    }
+    #endregion
+}
 [System.Serializable]
 public class ShopOffering
 {

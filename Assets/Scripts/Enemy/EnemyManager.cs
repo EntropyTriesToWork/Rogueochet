@@ -126,7 +126,6 @@ public class EnemyManager : MonoBehaviour
                 Debug.LogWarning("[EnemyManager] PickRandom returned null — check pool weights/prefabs.");
                 continue;
             }
-
             _spawnQueue.Enqueue(new ResolvedEnemy
             {
                 Prefab        = entry.Prefab,
@@ -148,8 +147,6 @@ public class EnemyManager : MonoBehaviour
         Debug.Log($"[EnemyManager] Wave {waveNumber}: {_remainingInWave} total " +
                   $"({_activeEnemies.Count} active, {_spawnQueue.Count} queued) " +
                   $"BaseHP={data.BaseHP} WaveMult={data.WaveHPMultiplier:F2}");
-
-        GameManager.Instance.SetWaveEnemyCount(_remainingInWave);
     }
     IEnumerator PopInInitialEnemies(int count)
     {

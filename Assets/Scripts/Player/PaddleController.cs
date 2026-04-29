@@ -7,23 +7,24 @@ public class PaddleController : MonoBehaviour
     public static PaddleController Instance { get; private set; }
 
     #region Inspector
+    [SerializeField] GameStats _stats;
 
     [Header("Movement")]
-    public float MoveSpeed = 8f;
+    [SerializeField] float _baseMoveSpeed = 8f;
     public bool UseMouse = true;
 
     [Header("Size")]
-    public float PaddleHalfHeight = 0.6f;
+    [SerializeField] float _paddleHalfHeight = 1f;
+    float _paddleSizeMultiplier = 1f;
     [Tooltip("Small gap kept between the paddle edge and the wall inner edge.")]
     public float PaddleOffset = 0.1f;
 
     [Header("Size Animation")]
     [Tooltip("Scale units per second the paddle grows/shrinks. Not a lerp.")]
-    public float SizeChangeSpeed = 4f;
+    [SerializeField] float SizeChangeSpeed = 4f;
     #endregion
 
     #region Private State
-
     private float _minY;
     private float _maxY;
     private Camera _cam;
@@ -31,28 +32,44 @@ public class PaddleController : MonoBehaviour
 
     private Coroutine _sizeCoroutine;
     private float _playBoundaryY;
-
     #endregion
 
     #region Lifecycle
-
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         _cam = Camera.main;
     }
-
     void Start()
     {
-        // Default bounds from screen size until WallController overrides them
-        _playBoundaryY = _cam != null ? _cam.orthographicSize : 5f;
-        ApplySizeImmediate(PaddleHalfHeight);
+        _playBoundaryY = _cam != null ? _cam.orthographicSize : 5f; //Default size until wall controller changes the boundary
+        ApplySizeImmediate(_paddleHalfHeight);
         SubscribeToEvents();
     }
+    void Update()
+    {
+        if (!_inputEnabled || PauseManager.Instance.IsPaused) return;
+        if(Input.GetKey(KeyCode.Space) || Input.GetMouseButton(0)) { return; }
+        float targetY = transform.position.y;
 
+        if (UseMouse)
+        {
+            Vector3 mouseWorld = _cam.ScreenToWorldPoint(Input.mousePosition);
+            targetY = mouseWorld.y;
+            mouseWorld.z = 0;
+        }
+
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+            targetY = transform.position.y + PaddleSpeed * Time.deltaTime;
+        else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+            targetY = transform.position.y - PaddleSpeed * Time.deltaTime;
+
+        float newY = Mathf.MoveTowards(transform.position.y, targetY, PaddleSpeed * Time.deltaTime);
+        newY = Mathf.Clamp(newY, _minY, _maxY);
+        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+    }
     void OnDestroy() => UnsubscribeFromEvents();
-
     #endregion
 
     #region Events
@@ -77,33 +94,6 @@ public class PaddleController : MonoBehaviour
 
     #endregion
 
-    #region Update
-
-    void Update()
-    {
-        if (!_inputEnabled || PauseManager.Instance.IsPaused) return;
-        if(Input.GetKey(KeyCode.Space) || Input.GetMouseButton(0)) { return; }
-        float targetY = transform.position.y;
-
-        if (UseMouse)
-        {
-            Vector3 mouseWorld = _cam.ScreenToWorldPoint(Input.mousePosition);
-            targetY = mouseWorld.y;
-            mouseWorld.z = 0;
-        }
-
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
-            targetY = transform.position.y + MoveSpeed * Time.unscaledDeltaTime;
-        else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-            targetY = transform.position.y - MoveSpeed * Time.unscaledDeltaTime;
-
-        float newY = Mathf.MoveTowards(transform.position.y, targetY, MoveSpeed * Time.unscaledDeltaTime);
-        newY = Mathf.Clamp(newY, _minY, _maxY);
-        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
-    }
-
-    #endregion
-
     #region Bounds
     public void SetPlayBounds(float innerEdgeY)
     {
@@ -113,16 +103,17 @@ public class PaddleController : MonoBehaviour
 
     void RecalculateBounds()
     {
-        _minY = -_playBoundaryY + PaddleHalfHeight + PaddleOffset;
-        _maxY =  _playBoundaryY - PaddleHalfHeight - PaddleOffset;
+        _minY = -_playBoundaryY + PaddleHalfSize + PaddleOffset;
+        _maxY =  _playBoundaryY - PaddleHalfSize - PaddleOffset;
     }
 
     #endregion
 
-    #region Size
-    public void UpdatePaddle(float newHalfHeight)
+    #region Size and Speed
+    void UpdatePaddle(float newHalfHeight, float sizeMultiplier)
     {
-        PaddleHalfHeight = newHalfHeight;
+        _paddleHalfHeight = newHalfHeight;
+        _paddleSizeMultiplier = sizeMultiplier;
         RecalculateBounds();
 
         if (_sizeCoroutine != null) StopCoroutine(_sizeCoroutine);
@@ -130,14 +121,17 @@ public class PaddleController : MonoBehaviour
     }
     public void ApplySizeImmediate(float halfHeight)
     {
-        PaddleHalfHeight = halfHeight;
+        _paddleHalfHeight = halfHeight;
         transform.localScale = new Vector3(
             transform.localScale.x,
-            halfHeight * 2f,
+            PaddleHalfSize * 2f,
             transform.localScale.z);
         RecalculateBounds();
     }
-
+    public void ApplySizeBonus(float newHalfHeight, float sizeMultiplier = 0f)
+    {
+        UpdatePaddle(newHalfHeight + _paddleHalfHeight, sizeMultiplier);
+    }
     IEnumerator AnimateSize(float targetHalfHeight)
     {
         float targetScaleY = targetHalfHeight * 2f;
@@ -156,11 +150,12 @@ public class PaddleController : MonoBehaviour
         transform.localScale = new Vector3(transform.localScale.x, targetScaleY, transform.localScale.z);
         _sizeCoroutine = null;
     }
-
+    public float PaddleSize => _paddleHalfHeight * 2f * _paddleSizeMultiplier;
+    public float PaddleHalfSize => _paddleHalfHeight * _paddleSizeMultiplier;
+    public float PaddleSpeed => _baseMoveSpeed + _stats.PaddleSpeedBonus;
     #endregion
 
     #region Collisions
-
     void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject.TryGetComponent(out Enemy enemy))
@@ -169,7 +164,6 @@ public class PaddleController : MonoBehaviour
             enemy.OnReachedPaddle();
         }
     }
-
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.TryGetComponent(out Enemy enemy))
@@ -178,6 +172,5 @@ public class PaddleController : MonoBehaviour
             enemy.OnReachedPaddle();
         }
     }
-
     #endregion
 }

@@ -2,11 +2,10 @@ using UnityEngine;
 
 public enum UpgradeCategory
 {
-    BallDirect,   // 60% — upgrade applied to one specific ball
-    Global,       // 30% — upgrade applied to all balls / player stats
-    NewBall,      // 10% — grants a new ball to equip
+    BallDirect,
+    Global,
+    NewBall,
 }
-
 public enum UpgradeEffect
 {
     // ── Ball-Direct ────────────────────────────────────────────────
@@ -17,7 +16,7 @@ public enum UpgradeEffect
     BallDurabilityFlat,
     BallSizeIncrease,
     BallPaddleDeflectionRange,
-    BallBounceBack,          // on wall hit, small speed burst
+    BallBounceBack, // on wall hit, small speed burst
 
     // ── Global ─────────────────────────────────────────────────────
     GlobalDamagePercent,
@@ -27,12 +26,16 @@ public enum UpgradeEffect
     PlayerMaxHPFlat,
     PaddleSpeedFlat,
     PaddleSizeFlat,
-    SpeedRampDelay,          // delays the speed ramp trigger
-
+    SpeedRampDelay,
+    CriticalChancePercent,
+    CriticalDamagePercent,
+    BallLifeSteal,
+    BallPierceChance,
+    ExtraBounces,
+    EssenceOnHitChance,
     // ── New Ball (effect unused; BallPrefab carries the data) ──────
     None,
 }
-
 [CreateAssetMenu(fileName = "UpgradeData", menuName = "RoguelikePong/Upgrade Data")]
 public class UpgradeData : ScriptableObject
 {
@@ -49,6 +52,7 @@ public class UpgradeData : ScriptableObject
     [Header("Effect")]
     public UpgradeEffect Effect = UpgradeEffect.BallDamageFlat;
     public float Value = 1f;          // meaning depends on Effect
+    public bool IsGlobal = true;
 
     [Header("New Ball Only")]
     [Tooltip("Prefab to use when this upgrade grants a new ball type.")]

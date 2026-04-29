@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 318e3537db8a9d6499fa3cc8476956ff, type: 3}
+  m_Name: GameStats
+  m_EditorClassIdentifier: Assembly-CSharp::GameStats
+  TotalKills: 0
+  TotalBallsLaunched: 0
+  TotalBounces: 0
+  TotalDamageDealt: 0
+  TotalGameTime: 0
+  TotalEssenceGained: 0
+  TotalEssenceSpent: 0
+  TotalHealthLost: 0
+  TotalHealthGained: 0
+  GlobalDamageMultiplier: 1
+  GlobalSpeedMultiplier: 1
+  GlobalDurabilityBonus: 0
+  EssenceGainMultiplier: 1
+  MaxHPBonus: 0
+  PaddleSpeedBonus: 0
+  PaddleSizeBonus: 0
+  SpeedRampDelayBonus: 0
+  CriticalChanceBonus: 0
+  CriticalDamageBonus: 0
+  BallLifeSteal: 0
+  BallPierceChance: 0
+  ExtraBounces: 0
+  EssenceOnHitChance: 0
+  LifetimeKills: 0
+  LifetimeBallsLaunched: 0
+  LifetimeBounces: 0
+  LifetimeDamageDealt: 0
+  LifetimeGameTime: 0
+  LifetimeEssenceGained: 0
+  LifetimeEssenceSpent: 0
+  LifetimeHealthLost: 0
+  LifetimeHealthGained: 0
+  LifetimeWins: 0
+  LifetimeLosses: 0
+  LifetimeRuns: 0

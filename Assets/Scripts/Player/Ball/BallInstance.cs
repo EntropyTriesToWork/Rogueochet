@@ -66,11 +66,9 @@ public class BallInstance
             }
         }
     }
-
-    /// <summary>Apply this instance's computed stats to a freshly spawned Ball component.</summary>
-    public void ApplyToBall(Ball ball)
+    public void ApplyToBall(Ball ball) /// <summary>Apply this instance's computed stats to a freshly spawned Ball component.</summary>
     {
-        ball.Damage        = Mathf.Max(1, Mathf.RoundToInt((ball.Damage + ComputedDamageBonus) * ComputedDamageMultiplier));
+        ball.Damage = Mathf.Max(1, Mathf.RoundToInt((ball.Damage + ComputedDamageBonus) * ComputedDamageMultiplier));
         ball.InitialSpeed  = (ball.InitialSpeed + ComputedSpeedBonus) * ComputedSpeedMultiplier;
         ball.MaxDurability = Mathf.Max(1, ball.MaxDurability + ComputedDurabilityBonus);
 
@@ -79,9 +77,7 @@ public class BallInstance
 
         ball.PaddleDeflectionRandomRange += ComputedDeflectionBonus;
     }
-
-    /// <summary>Builds a readable stat summary string for tooltip display.</summary>
-    public string GetStatSummary()
+    public string GetStatSummary() /// <summary>Builds a readable stat summary string for tooltip display.</summary>
     {
         var sb = new System.Text.StringBuilder();
         sb.AppendLine(BallName);

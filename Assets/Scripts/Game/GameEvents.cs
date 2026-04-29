@@ -30,14 +30,18 @@ public static class GameEvents
 
     public static void ShopOpened() => OnShopOpened?.Invoke();
     public static void ShopClosed() => OnShopClosed?.Invoke();
-    public static void ShopOfferingsChanged()  => OnShopOfferingsChanged?.Invoke();
+    public static void ShopOfferingsChanged() => OnShopOfferingsChanged?.Invoke();
 
     // ── Player ─────────────────────────────────────────────────────
     public static event Action<int, int> OnPlayerHealthChanged;
-    public static event Action<int>      OnEssenceChanged;
+    public static event Action<int> OnEssenceChanged;
+    public static event Action OnInventoryChanged;
+    public static event Action<int> OnLevelUp;
 
     public static void PlayerHealthChanged(int currentHP, int maxHP) => OnPlayerHealthChanged?.Invoke(currentHP, maxHP);
     public static void EssenceChanged(int currentEssence) => OnEssenceChanged?.Invoke(currentEssence);
+    public static void InventoryChanged() => OnInventoryChanged?.Invoke();
+    public static void LevelUp(int newLevel) => OnLevelUp?.Invoke(newLevel);
 
     // ── Ball ───────────────────────────────────────────────────────
     public static event Action<Ball> OnBallLost;
