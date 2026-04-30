@@ -70,8 +70,8 @@ public class BallManager : MonoBehaviour
 
     public void SubscribeToEvents()
     {
-        GameEvents.OnRoundStarted += HandleRoundStarted;
-        GameEvents.OnRoundEnded += HandleRoundEnded;
+        GameEvents.OnRoomEntered += HandleRoomEntered;
+        GameEvents.OnRoomCleared += HandleRoomCleared;
         GameEvents.OnGameOver += HandleGameOver;
         GameEvents.OnVictory += HandleGameOver;
         GameEvents.OnWaveStarted += HandleWaveStarted;
@@ -79,8 +79,8 @@ public class BallManager : MonoBehaviour
 
     void UnsubscribeFromEvents()
     {
-        GameEvents.OnRoundStarted -= HandleRoundStarted;
-        GameEvents.OnRoundEnded -= HandleRoundEnded;
+        GameEvents.OnRoomEntered -= HandleRoomEntered;
+        GameEvents.OnRoomCleared -= HandleRoomCleared;
         GameEvents.OnGameOver -= HandleGameOver;
         GameEvents.OnVictory -= HandleGameOver;
         GameEvents.OnWaveStarted -= HandleWaveStarted;
@@ -88,17 +88,16 @@ public class BallManager : MonoBehaviour
 
     void HandleWaveStarted(int _) => _roundTimer = 0f;
 
-    void HandleRoundStarted()
+    void HandleRoomEntered(RoomData roomData)
     {
         _launchEnabled = true;
         _rampFired = false;
         _rampActive = false;
         _nextLaunchSlot = 0;
-        if (_activeBalls.Count == 0)
-            _ballInPlay = false;
+        if (_activeBalls.Count == 0) _ballInPlay = false;
     }
 
-    void HandleRoundEnded()
+    void HandleRoomCleared()
     {
         _launchEnabled = false;
         _rampFired = false;
@@ -114,7 +113,7 @@ public class BallManager : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.Instance.State != GameState.RoundActive || PauseManager.Instance.IsPaused) return;
+        if (GameManager.Instance.State != GameState.Combat || PauseManager.Instance.IsPaused) return;
 
         if (Input.GetMouseButton(0) || Input.GetKey(KeyCode.Space)) {
             aimingArrow.gameObject.SetActive(true);

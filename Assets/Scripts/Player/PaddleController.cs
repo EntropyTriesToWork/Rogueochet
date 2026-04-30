@@ -76,20 +76,20 @@ public class PaddleController : MonoBehaviour
 
     void SubscribeToEvents()
     {
-        GameEvents.OnRoundStarted += () => _inputEnabled = true;
-        GameEvents.OnRoundEnded   += () => _inputEnabled = false;
-        GameEvents.OnShopOpened   += () => _inputEnabled = false;
-        GameEvents.OnGameOver     += () => _inputEnabled = false;
-        GameEvents.OnVictory      += () => _inputEnabled = false;
+        GameEvents.OnWaveStarted += (int v) => _inputEnabled = true;
+        GameEvents.OnRoomCleared += () => _inputEnabled = false;
+        GameEvents.OnShopOpened += () => _inputEnabled = false;
+        GameEvents.OnGameOver += () => _inputEnabled = false;
+        GameEvents.OnVictory += () => _inputEnabled = false;
     }
 
     void UnsubscribeFromEvents()
     {
-        GameEvents.OnRoundStarted -= () => _inputEnabled = true;
-        GameEvents.OnRoundEnded   -= () => _inputEnabled = false;
-        GameEvents.OnShopOpened   -= () => _inputEnabled = false;
-        GameEvents.OnGameOver     -= () => _inputEnabled = false;
-        GameEvents.OnVictory      -= () => _inputEnabled = false;
+        GameEvents.OnWaveStarted -= (int v) => _inputEnabled = true;
+        GameEvents.OnRoomCleared -= () => _inputEnabled = false;
+        GameEvents.OnShopOpened -= () => _inputEnabled = false;
+        GameEvents.OnGameOver -= () => _inputEnabled = false;
+        GameEvents.OnVictory -= () => _inputEnabled = false;
     }
 
     #endregion

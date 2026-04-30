@@ -2,7 +2,7 @@ using System;
 
 public static class GameEvents
 {
-    // ── Game State ─────────────────────────────────────────────────
+    #region Game 
     public static event Action OnGameStarted;
     public static event Action OnGameOver;
     public static event Action OnVictory;
@@ -11,39 +11,41 @@ public static class GameEvents
     public static void GameOver() => OnGameOver?.Invoke();
     public static void Victory() => OnVictory?.Invoke();
 
-    public static event Action<int>   OnWaveStarted;
+    public static event Action<int> OnWaveStarted;
     public static event Action<float> OnWaveSetup;
     public static event Action OnWaveCleared;
-    public static event Action OnRoundStarted;
-    public static event Action OnRoundEnded;
+    public static event Action<RoomData> OnRoomEntered;
+    public static event Action OnRoomCleared;
 
     public static void WaveStarted(int waveNumber) => OnWaveStarted?.Invoke(waveNumber);
     public static void WaveSetup(float wallScale) => OnWaveSetup?.Invoke(wallScale);
     public static void WaveCleared() => OnWaveCleared?.Invoke();
-    public static void RoundStarted() => OnRoundStarted?.Invoke();
-    public static void RoundEnded() => OnRoundEnded?.Invoke();
+    public static void RoomEntered(RoomData roomData) => OnRoomEntered?.Invoke(roomData);
+    public static void RoomCleared() => OnRoomCleared?.Invoke();
+    #endregion
 
-    // ── Shop ───────────────────────────────────────────────────────
+    #region Shop
     public static event Action OnShopOpened;
     public static event Action OnShopClosed;
-    public static event Action OnShopOfferingsChanged;   // ← NEW: cards refreshed
+    public static event Action OnShopOfferingsChanged;
 
     public static void ShopOpened() => OnShopOpened?.Invoke();
     public static void ShopClosed() => OnShopClosed?.Invoke();
     public static void ShopOfferingsChanged() => OnShopOfferingsChanged?.Invoke();
+    #endregion
 
-    // ── Player ─────────────────────────────────────────────────────
+    #region Player
     public static event Action<int, int> OnPlayerHealthChanged;
     public static event Action<int> OnEssenceChanged;
-    public static event Action OnInventoryChanged;
     public static event Action<int> OnLevelUp;
+
 
     public static void PlayerHealthChanged(int currentHP, int maxHP) => OnPlayerHealthChanged?.Invoke(currentHP, maxHP);
     public static void EssenceChanged(int currentEssence) => OnEssenceChanged?.Invoke(currentEssence);
-    public static void InventoryChanged() => OnInventoryChanged?.Invoke();
     public static void LevelUp(int newLevel) => OnLevelUp?.Invoke(newLevel);
+    #endregion
 
-    // ── Ball ───────────────────────────────────────────────────────
+    #region Ball
     public static event Action<Ball> OnBallLost;
     public static event Action<Ball> OnBallLaunched;
     public static event Action<int> OnBallCountChanged;
@@ -61,50 +63,66 @@ public static class GameEvents
     public static void BallDurabilityChanged(Ball ball, int cur, int max)=> OnBallDurabilityChanged?.Invoke(ball, cur, max);
     public static void ReloadTriggered() => OnReloadTriggered?.Invoke();
     public static void SelectedBallChanged(int slotIndex) => OnSelectedBallChanged?.Invoke(slotIndex);
+    #endregion
 
-    // ── Enemy ──────────────────────────────────────────────────────
+    #region Enemy
     public static event Action<Enemy, int> OnEnemyDied;
     public static event Action<Enemy, int, int> OnEnemyDamaged;
     public static event Action<Enemy> OnEnemyReachedPaddle;
-    public static event Action OnEnemiesDropped;
+    public static event Action<Enemy> OnEnemySpawned;
+    public static event Action OnAllEnemiesSpawned;
 
     public static void EnemyDied(Enemy enemy, int essenceAwarded)  => OnEnemyDied?.Invoke(enemy, essenceAwarded);
     public static void EnemyDamaged(Enemy enemy, int damage, int remaining) => OnEnemyDamaged?.Invoke(enemy, damage, remaining);
     public static void EnemyReachedPaddle(Enemy enemy) => OnEnemyReachedPaddle?.Invoke(enemy);
-    public static void EnemiesDropped() => OnEnemiesDropped?.Invoke();
+    public static void EnemySpawn(Enemy enemy) => OnEnemySpawned?.Invoke(enemy);
+    public static void AllEnemiesSpawned() => OnAllEnemiesSpawned?.Invoke();
+    #endregion
 
-    // ── Inventory / Leveling ───────────────────────────────────────
-    public static event Action<int> OnPlayerLevelUp;   // ← NEW: new level value
-    public static void PlayerLevelUp(int newLevel) => OnPlayerLevelUp?.Invoke(newLevel);
+    #region Inventory
+    public static event Action OnInventoryChanged;
+    public static void InventoryChanged() => OnInventoryChanged?.Invoke();
+    #endregion
 
-    // ── Utility ────────────────────────────────────────────────────
     public static void ClearAllListeners()
     {
-        OnGameStarted            = null;
-        OnGameOver               = null;
-        OnVictory                = null;
-        OnWaveStarted            = null;
-        OnWaveSetup              = null;
-        OnWaveCleared            = null;
-        OnRoundStarted           = null;
-        OnRoundEnded             = null;
-        OnShopOpened             = null;
-        OnShopClosed             = null;
-        OnShopOfferingsChanged   = null;
-        OnPlayerHealthChanged    = null;
-        OnEssenceChanged         = null;
-        OnBallLost               = null;
-        OnBallLaunched           = null;
-        OnBallCountChanged       = null;
+        // Game
+        OnGameStarted = null;
+        OnGameOver = null;
+        OnVictory = null;
+        OnWaveStarted = null;
+        OnWaveSetup = null;
+        OnWaveCleared = null;
+        OnRoomEntered = null;
+        OnRoomCleared = null;
+
+        // Shop
+        OnShopOpened = null;
+        OnShopClosed = null;
+        OnShopOfferingsChanged = null;
+
+        // Player
+        OnPlayerHealthChanged = null;
+        OnEssenceChanged = null;
+        OnLevelUp = null;
+
+        // Ball
+        OnBallLost = null;
+        OnBallLaunched = null;
+        OnBallCountChanged = null;
         OnBallSpeedRampTriggered = null;
-        OnRoundTimerTick         = null;
-        OnBallDurabilityChanged  = null;
-        OnEnemyDied              = null;
-        OnEnemyDamaged           = null;
-        OnEnemyReachedPaddle     = null;
-        OnEnemiesDropped         = null;
-        OnPlayerLevelUp          = null;
+        OnRoundTimerTick = null;
+        OnBallDurabilityChanged = null;
         OnReloadTriggered = null;
         OnSelectedBallChanged = null;
+
+        // Enemy
+        OnEnemyDied = null;
+        OnEnemyDamaged = null;
+        OnEnemyReachedPaddle = null;
+        OnAllEnemiesSpawned = null;
+
+        // Inventory
+        OnInventoryChanged = null;
     }
 }

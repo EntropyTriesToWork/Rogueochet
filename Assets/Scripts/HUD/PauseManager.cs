@@ -49,7 +49,7 @@ public class PauseManager : MonoBehaviour
 
         var state = GameManager.Instance.State;
 
-        if (state != GameState.RoundActive && state != GameState.Wave) return;
+        if (state == GameState.GameOver || state != GameState.RoomTransition) return;
 
         IsPaused = true;
         Time.timeScale = 0f;

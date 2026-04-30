@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class WallController : MonoBehaviour
 {
-    public static WallController Instance { get; private set; }
-
     #region Inspector
     public Transform TopWall;
     public Transform BottomWall;
@@ -26,8 +24,6 @@ public class WallController : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
         _cam = Camera.main;
     }
 

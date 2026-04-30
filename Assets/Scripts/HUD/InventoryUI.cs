@@ -1,14 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Tab-key overlay showing:
-///   - Ball slots with per-ball stats and Discard button
-///   - Global stats panel (from GameStats)
-///   - Run stats panel (from GameStats)
-/// </summary>
 public class InventoryUI : MonoBehaviour
 {
     public static InventoryUI Instance { get; private set; }
@@ -54,7 +47,7 @@ public class InventoryUI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             var state = GameManager.Instance?.State ?? GameState.Idle;
-            bool allowedState = state == GameState.RoundActive || state == GameState.Wave || state == GameState.RoundEnd;
+            bool allowedState = state == GameState.Combat || state == GameState.Shop || state == GameState.RoomTransition;
 
             if (!allowedState && !_isOpen) return;
             ToggleInventory();
@@ -95,8 +88,6 @@ public class InventoryUI : MonoBehaviour
             LevelLabel.text = $"Level {newLevel}  |  Ball Slots: {PlayerInventory.Instance.MaxBallSlots}";
         if (_isOpen) Refresh();
     }
-
-    // ── Refresh ────────────────────────────────────────────────────
 
     public void Refresh()
     {

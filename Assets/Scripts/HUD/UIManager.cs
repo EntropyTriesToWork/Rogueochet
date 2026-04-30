@@ -73,8 +73,8 @@ public class UIManager : MonoBehaviour
         GameEvents.OnPlayerHealthChanged += OnHealthChanged;
         GameEvents.OnEssenceChanged += OnEssenceChanged;
         GameEvents.OnWaveStarted += OnWaveStarted;
-        GameEvents.OnRoundStarted += OnRoundStarted;
-        GameEvents.OnRoundEnded += OnRoundEnded;
+        GameEvents.OnRoomEntered += OnRoomEntered;
+        GameEvents.OnRoomCleared += OnRoomCleared;
         GameEvents.OnShopOpened += OnShopOpened;
         GameEvents.OnShopClosed += OnShopClosed;
         GameEvents.OnGameOver += OnGameOver;
@@ -88,8 +88,8 @@ public class UIManager : MonoBehaviour
         GameEvents.OnPlayerHealthChanged -= OnHealthChanged;
         GameEvents.OnEssenceChanged -= OnEssenceChanged;
         GameEvents.OnWaveStarted -= OnWaveStarted;
-        GameEvents.OnRoundStarted -= OnRoundStarted;
-        GameEvents.OnRoundEnded -= OnRoundEnded;
+        GameEvents.OnRoomEntered -= OnRoomEntered;
+        GameEvents.OnRoomCleared -= OnRoomCleared;
         GameEvents.OnShopOpened -= OnShopOpened;
         GameEvents.OnShopClosed -= OnShopClosed;
         GameEvents.OnGameOver -= OnGameOver;
@@ -118,8 +118,7 @@ public class UIManager : MonoBehaviour
     {
         SetOverlay(null);
 
-        if (WaveLabel != null)
-            WaveLabel.text = $"Wave {waveNumber}/{GameManager.Instance.TotalWaves}";
+        if (WaveLabel != null) WaveLabel.text = $"Wave {waveNumber}";
 
         if (TimerLabel != null)
         {
@@ -131,15 +130,15 @@ public class UIManager : MonoBehaviour
         _bannerCoroutine = StartCoroutine(ShowWaveBanner(waveNumber));
     }
 
-    void OnRoundStarted()
+    void OnRoomEntered(RoomData roomData)
     {
         SetStatus("Click or Space to launch!");
+        SetOverlay(null);
         if (TimerLabel != null) TimerLabel.color = Color.white;
     }
 
-    void OnRoundEnded()
+    void OnRoomCleared()
     {
-        // Timer display freezes — BallManager stops ticking OnRoundTimerTick when _ballInPlay = false
         if (EnemyManager.Instance.ActiveEnemyCount > 0)
             SetStatus("Enemies advancing...");
     }
@@ -197,7 +196,6 @@ public class UIManager : MonoBehaviour
     #endregion
 
     #region Shop Animation
-
     IEnumerator OpenShopDelayed()
     {
         yield return new WaitForSecondsRealtime(ShopOpenDelay);

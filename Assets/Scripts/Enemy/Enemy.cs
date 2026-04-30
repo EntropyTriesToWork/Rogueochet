@@ -5,11 +5,13 @@ using TMPro;
 public class Enemy : MonoBehaviour
 {
     #region Inspector
-
     [Header("Stats")]
-    public int MaxHP      { get; protected set; }
-    public int CurrentHP  { get; protected set; }
-    public int EssenceReward = 1;
+    public int MaxHP { get; protected set; }
+    public int CurrentHP { get; protected set; }
+    public int EssenceReward { get; protected set; }
+    public int Damage { get; protected set; }
+    public float MoveDistance { get; protected set; }
+    public int WaveNumber { get; protected set; }
 
     [Header("UI")]
     [Tooltip("Assign a child TextMeshPro to display current HP above the enemy.")]
@@ -25,16 +27,13 @@ public class Enemy : MonoBehaviour
     [Header("Spawn Animation")]
     [Tooltip("How long the pop-in scale animation lasts in seconds.")]
     public float PopInDuration = 0.2f;
-
     #endregion
 
     #region Private State
-
     private Color _originalColor;
     private Vector3 _naturalScale;
     private float _flashTimer;
     private bool  _isFlashing;
-
     #endregion
 
     #region Lifecycle
@@ -61,7 +60,6 @@ public class Enemy : MonoBehaviour
                 SpriteRenderer.color = _originalColor;
         }
     }
-
     #endregion
 
     #region Initialisation
@@ -71,11 +69,14 @@ public class Enemy : MonoBehaviour
     /// HP is computed by WaveData (BaseHP x entry.HPMultiplier x WaveHPMultiplier),
     /// then EnemyStats global modifiers are applied on top.
     /// </summary>
-    public void Initialize(int resolvedHP, int essenceReward)
+    public void Initialize(int resolvedHP, int essenceReward, int damage, float moveDistance, int wave)
     {
-        MaxHP         = EnemyStats.ComputeMaxHP(resolvedHP);
-        CurrentHP     = MaxHP;
+        MaxHP = EnemyStats.ComputeMaxHP(resolvedHP);
+        CurrentHP = MaxHP;
         EssenceReward = essenceReward;
+        Damage = damage;
+        MoveDistance = moveDistance;
+        WaveNumber = wave;
         UpdateHPVisual();
         StartCoroutine(PopIn());
     }
@@ -103,7 +104,6 @@ public class Enemy : MonoBehaviour
     #endregion
 
     #region Combat
-
     public void TakeDamage(int damage)
     {
         if (CurrentHP <= 0) return;
@@ -112,10 +112,8 @@ public class Enemy : MonoBehaviour
         FlashDamage();
         GameEvents.EnemyDamaged(this, damage, CurrentHP);
         Debug.Log($"[Enemy] {name} took {damage}. HP: {CurrentHP}/{MaxHP}");
-        if (CurrentHP <= 0)
-            Die();
+        if (CurrentHP <= 0) Die();
     }
-
     void Die()
     {
         GameEvents.EnemyDied(this, EssenceReward);
@@ -124,10 +122,10 @@ public class Enemy : MonoBehaviour
 
     public void OnReachedPaddle()
     {
-        EnemyManager.Instance.OnEnemyDied(this);
+        Debug.Log("ENEMY DEALS DAMAGE");
+        GameManager.Instance.TakeDamage(Damage);
         Destroy(gameObject);
     }
-
     #endregion
 
     #region Visuals

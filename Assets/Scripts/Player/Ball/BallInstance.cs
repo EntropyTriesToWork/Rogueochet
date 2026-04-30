@@ -10,14 +10,14 @@ public class BallInstance
 
     public List<UpgradeData> DirectUpgrades = new List<UpgradeData>();
 
-    public float ComputedDamageMultiplier  { get; private set; } = 1f;
-    public int   ComputedDamageBonus       { get; private set; } = 0;
-    public float ComputedSpeedMultiplier   { get; private set; } = 1f;
-    public float ComputedSpeedBonus        { get; private set; } = 0f;
-    public int   ComputedDurabilityBonus   { get; private set; } = 0;
-    public float ComputedSizeMultiplier    { get; private set; } = 1f;
-    public float ComputedDeflectionBonus   { get; private set; } = 0f;
-    public bool  HasBounceBack             { get; private set; } = false;
+    public float ComputedDamageMultiplier { get; private set; } = 1f;
+    public int   ComputedDamageBonus { get; private set; } = 0;
+    public float ComputedSpeedMultiplier { get; private set; } = 1f;
+    public float ComputedSpeedBonus { get; private set; } = 0f;
+    public int   ComputedDurabilityBonus { get; private set; } = 0;
+    public float ComputedSizeMultiplier { get; private set; } = 1f;
+    public float ComputedDeflectionBonus { get; private set; } = 0f;
+    public bool  HasBounceBack { get; private set; } = false;
 
     public BallInstance(string typeName, GameObject prefab)
     {
@@ -43,26 +43,26 @@ public class BallInstance
     public void RebuildStats()
     {
         ComputedDamageMultiplier = 1f;
-        ComputedDamageBonus      = 0;
-        ComputedSpeedMultiplier  = 1f;
-        ComputedSpeedBonus       = 0f;
-        ComputedDurabilityBonus  = 0;
-        ComputedSizeMultiplier   = 1f;
-        ComputedDeflectionBonus  = 0f;
-        HasBounceBack            = false;
+        ComputedDamageBonus  = 0;
+        ComputedSpeedMultiplier = 1f;
+        ComputedSpeedBonus  = 0f;
+        ComputedDurabilityBonus = 0;
+        ComputedSizeMultiplier = 1f;
+        ComputedDeflectionBonus = 0f;
+        HasBounceBack  = false;
 
         foreach (var u in DirectUpgrades)
         {
             switch (u.Effect)
             {
-                case UpgradeEffect.BallDamageFlat:            ComputedDamageBonus      += Mathf.RoundToInt(u.Value); break;
-                case UpgradeEffect.BallDamagePercent:         ComputedDamageMultiplier *= 1f + u.Value / 100f;       break;
-                case UpgradeEffect.BallSpeedFlat:             ComputedSpeedBonus       += u.Value;                   break;
-                case UpgradeEffect.BallSpeedPercent:          ComputedSpeedMultiplier  *= 1f + u.Value / 100f;       break;
-                case UpgradeEffect.BallDurabilityFlat:        ComputedDurabilityBonus  += Mathf.RoundToInt(u.Value); break;
-                case UpgradeEffect.BallSizeIncrease:          ComputedSizeMultiplier   *= 1f + u.Value / 100f;       break;
-                case UpgradeEffect.BallPaddleDeflectionRange: ComputedDeflectionBonus  += u.Value;                   break;
-                case UpgradeEffect.BallBounceBack:            HasBounceBack             = true;                      break;
+                case UpgradeEffect.BallDamageFlat: ComputedDamageBonus += Mathf.RoundToInt(u.Value); break;
+                case UpgradeEffect.BallDamagePercent: ComputedDamageMultiplier *= 1f + u.Value / 100f; break;
+                case UpgradeEffect.BallSpeedFlat: ComputedSpeedBonus += u.Value; break;
+                case UpgradeEffect.BallSpeedPercent: ComputedSpeedMultiplier *= 1f + u.Value / 100f; break;
+                case UpgradeEffect.BallDurabilityFlat: ComputedDurabilityBonus += Mathf.RoundToInt(u.Value); break;
+                case UpgradeEffect.BallSizeIncrease: ComputedSizeMultiplier *= 1f + u.Value / 100f; break;
+                case UpgradeEffect.BallPaddleDeflectionRange: ComputedDeflectionBonus  += u.Value; break;
+                case UpgradeEffect.BallBounceBack: HasBounceBack = true; break;
             }
         }
     }

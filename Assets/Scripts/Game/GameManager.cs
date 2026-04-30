@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum GameState { Idle, Wave, RoundActive, RoundEnd, Shop, LevelUp, Victory, GameOver }
+public enum GameState { Idle, RoomTransition, Combat, Shop, Victory, GameOver }
 
 public class GameManager : MonoBehaviour
 {
@@ -15,12 +15,15 @@ public class GameManager : MonoBehaviour
     public int MaxHealth { get; private set; }
     public int Essence = 0;
 
-    [Header("Wave Settings")]
-    public int TotalWaves = 5;
-    public int CurrentWave { get; private set; } = 0;
-
-    [Header("Run Statistics")]
+    [Header("Run Settings")]
+    public int TotalRooms = 15; // number of rooms in this run (excluding shop/victory)
     [SerializeField] private GameStats _stats;
+
+    // Room & wave tracking
+    private int _currentRoomIndex = -1;
+    private int _currentWaveInRoom = 0;
+    private int _totalWavesInCurrentRoom = 0;
+    private bool _roomCompleted = false;
 
     private bool _waitingForLevelUp = false;
 
@@ -29,12 +32,14 @@ public class GameManager : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
     }
+
     void Start()
     {
         ResetGame();
         SubscribeToEvents();
         ChangeState(GameState.Idle);
     }
+
     #region Events
     void OnDestroy() => UnsubscribeFromEvents();
 
@@ -43,17 +48,26 @@ public class GameManager : MonoBehaviour
         GameEvents.OnBallCountChanged += HandleBallCountChanged;
         GameEvents.OnEnemyDied += HandleEnemyDied;
         GameEvents.OnEnemyReachedPaddle += HandleEnemyReachedPaddle;
+        GameEvents.OnWaveCleared += HandleWaveCleared;   // new event
     }
+
     void UnsubscribeFromEvents()
     {
         GameEvents.OnBallCountChanged -= HandleBallCountChanged;
         GameEvents.OnEnemyDied -= HandleEnemyDied;
         GameEvents.OnEnemyReachedPaddle -= HandleEnemyReachedPaddle;
+        GameEvents.OnWaveCleared -= HandleWaveCleared;
     }
+
     void HandleBallCountChanged(int remaining)
     {
-        if (remaining == 0 && State == GameState.RoundActive)
-            ChangeState(GameState.RoundEnd);
+        if (remaining == 0 && State == GameState.Combat && !_roomCompleted)
+        {
+            if (AllEnemiesCleared())
+                CompleteRoom();   // all enemies dead
+            else
+                ChangeState(GameState.GameOver);  // or handle retry? We'll do GameOver
+        }
     }
 
     void HandleEnemyDied(Enemy enemy, int essenceReward)
@@ -61,31 +75,26 @@ public class GameManager : MonoBehaviour
         int awarded = Mathf.Max(1, Mathf.RoundToInt(essenceReward * _stats.EssenceGainMultiplier));
         AddEssence(awarded);
 
-        if (AllEnemiesCleared() && State == GameState.RoundActive)
-            ChangeState(GameState.RoundEnd);
+        if (AllEnemiesCleared() && State == GameState.Combat && !_roomCompleted)
+            CompleteRoom();
     }
+
     void HandleEnemyReachedPaddle(Enemy enemy) => TakeDamage(1);
 
-    private IEnumerator HandleLevelUpBeforeShop()
+    void HandleWaveCleared()
     {
-        var inv = PlayerInventory.Instance;
-        if (inv == null) yield break;
-        Debug.Log("Leveling up before shop!");
-        while (inv.TryGetLevelUpRewards(out List<UpgradeData> rewards)) // Keep trying while there are pending level‑ups
+        if (State != GameState.Combat) return;
+
+        _currentWaveInRoom++;
+        if (_currentWaveInRoom < _totalWavesInCurrentRoom)
         {
-            _waitingForLevelUp = true;
-            // Show UI and wait for player to choose
-            ShopManager.Instance.ShowLevelUpChoices(rewards, () =>
-            {
-                _waitingForLevelUp = false;
-            });
-            yield return new WaitUntil(() => !_waitingForLevelUp);
+            GameEvents.WaveStarted(_currentWaveInRoom + 1);
         }
-        // After all level‑ups are done, proceed to shop or victory
-        if (CurrentWave >= TotalWaves)
-            ChangeState(GameState.Victory);
         else
-            ChangeState(GameState.Shop);
+        {
+            _roomCompleted = true;
+            CompleteRoom();
+        }
     }
     #endregion
 
@@ -97,43 +106,97 @@ public class GameManager : MonoBehaviour
 
         switch (newState)
         {
-            case GameState.Idle: break;
-            case GameState.Wave:
-                CurrentWave++;
-                GameEvents.WaveStarted(CurrentWave);
-                DelayedAction(1f, () => ChangeState(GameState.RoundActive));
+            case GameState.Idle:
                 break;
-            case GameState.RoundActive:
-                GameEvents.RoundStarted();
+
+            case GameState.RoomTransition:
+                EnterNextRoom();
                 break;
-            case GameState.RoundEnd:
-                GameEvents.RoundEnded();
-                if (AllEnemiesCleared())
-                {
-                    // Before going to shop, handle any pending level‑ups
-                    StartCoroutine(HandleLevelUpBeforeShop());
-                }
-                else
-                {
-                    ChangeState(GameState.RoundActive);
-                }
+
+            case GameState.Combat:
+                StartCombatRoom();
                 break;
+
             case GameState.Shop:
-                GameEvents.WaveCleared();
                 GameEvents.ShopOpened();
                 break;
-            case GameState.LevelUp:
-                // This state is not strictly needed; we use coroutine + UI.
-                break;
+
             case GameState.Victory:
                 GameEvents.Victory();
                 break;
+
             case GameState.GameOver:
                 GameEvents.GameOver();
                 break;
         }
     }
 
+    void EnterNextRoom()
+    {
+        _currentRoomIndex++;
+
+        if (_currentRoomIndex >= TotalRooms)
+        {
+            ChangeState(GameState.Victory);
+            return;
+        }
+        RoomType nextType = PathManager.Instance?.GetRoomData(_currentRoomIndex).Type ?? RoomType.Combat;
+
+        if (nextType == RoomType.Shop)
+        {
+            ChangeState(GameState.Shop); // Only open shop on certain rounds (controlled by path)
+        }
+        else // Combat
+        {
+            _roomCompleted = false;
+            ChangeState(GameState.Combat);
+        }
+    }
+    void StartCombatRoom()
+    {
+        GameEvents.RoomEntered(PathManager.Instance.GetRoomData(_currentRoomIndex));
+    }
+    void CompleteRoom()
+    {
+        GameEvents.RoomCleared();   // new event for UI to show continue button
+    }
+    public void LeaveRoom()
+    {
+        if (State != GameState.Combat && State != GameState.Shop) return;
+
+        StartCoroutine(HandleLevelUpsBetweenRooms());
+    }
+    private IEnumerator HandleLevelUpsBetweenRooms()
+    {
+        var inv = PlayerInventory.Instance;
+        if (inv == null) yield break;
+
+        while (inv.TryGetLevelUpRewards(out List<UpgradeData> rewards))
+        {
+            _waitingForLevelUp = true;
+            ShopManager.Instance.ShowLevelUpChoices(rewards, () => _waitingForLevelUp = false);
+            yield return new WaitUntil(() => !_waitingForLevelUp);
+        }
+        ChangeState(GameState.RoomTransition);
+    }
+
+    public void ContinueFromRoom()
+    {
+        if (State != GameState.Combat && State != GameState.Shop) return;
+        LeaveRoom();   // same as leave for now
+    }
+
+    public void OnShopComplete()
+    {
+        if (State == GameState.Shop)
+        {
+            GameEvents.ShopClosed();
+            LeaveRoom();
+        }
+    }
+    #endregion
+
+    #region Core Game Actions
     public void TakeDamage(int amount)
     {
         PlayerHealth = Mathf.Clamp(PlayerHealth - amount, 0, MaxHealth);
@@ -161,48 +224,36 @@ public class GameManager : MonoBehaviour
         GameEvents.EssenceChanged(Essence);
         return true;
     }
-    public void OnShopComplete()
-    {
-        if (State == GameState.Shop)
-        {
-            GameEvents.ShopClosed();
-            ChangeState(GameState.Wave);
-        }
-    }
     public void StartGame()
     {
         if (State == GameState.Idle || State == GameState.GameOver || State == GameState.Victory)
         {
             ResetGame();
             GameEvents.GameStarted();
-            ChangeState(GameState.Wave);
+            ChangeState(GameState.RoomTransition);
         }
     }
     public void ResetGame()
     {
-        if (PlayerInventory.Instance != null)
-            PlayerInventory.Instance.FullReset();
+        if (PlayerInventory.Instance != null) PlayerInventory.Instance.FullReset();
 
-        // Reset run stats in GameStats asset
-        if (_stats != null)
-        {
-            _stats.TotalKills = 0;
-            _stats.TotalBallsLaunched = 0;
-            _stats.TotalBounces = 0;
-            _stats.TotalDamageDealt = 0;
-            _stats.TotalGameTime = 0f;
-            _stats.TotalEssenceGained = 0;
-            _stats.TotalEssenceSpent = 0;
-            _stats.TotalHealthLost = 0;
-            _stats.TotalHealthGained = 0;
-        }
+        // Reset ALL run stats AND buffs (everything in GameStats)
+        if (_stats != null) _stats.ResetRun();   // we'll add this method to GameStats
 
         EnemyStats.Reset();
-        CurrentWave = 0;
-        Heal(MaxHealth);
+        _currentRoomIndex = -1;
+        _currentWaveInRoom = 0;
+        _totalWavesInCurrentRoom = 0;
+        _roomCompleted = false;
+
+        MaxHealth = _baseMaxHealth;
+        PlayerHealth = MaxHealth;
         Essence = 0;
+
+        GameEvents.PlayerHealthChanged(PlayerHealth, MaxHealth);
         GameEvents.EssenceChanged(Essence);
     }
+
     public void DelayedAction(float duration, Action onComplete) => StartCoroutine(DoDelayedAction(duration, onComplete));
     private IEnumerator DoDelayedAction(float duration, Action onComplete)
     {
