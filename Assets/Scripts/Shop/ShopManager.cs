@@ -54,7 +54,7 @@ public class ShopManager : MonoBehaviour
     {
         RerollCost = RerollBaseCost;
         GameEvents.OnShopClosed += ClearOfferings;
-        GameEvents.OnWaveCleared += ResetReroll;
+        GameEvents.OnRoomCleared += ResetReroll;
 
         levelUpCanvas.alpha = 0;
         levelUpCanvas.interactable = false;
@@ -63,7 +63,7 @@ public class ShopManager : MonoBehaviour
     void OnDestroy()
     {
         GameEvents.OnShopClosed -= ClearOfferings;
-        GameEvents.OnWaveCleared -= ResetReroll;
+        GameEvents.OnRoomCleared -= ResetReroll;
     }
 
     #endregion

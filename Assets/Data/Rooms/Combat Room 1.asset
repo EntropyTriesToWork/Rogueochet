@@ -15,8 +15,8 @@ MonoBehaviour:
   Type: 0
   Waves:
   - {fileID: 11400000, guid: 2257ec59de95bb540b106be0b19d0e95, type: 2}
-  - {fileID: 11400000, guid: 7f0bffbd4729ddb42baef9872228219e, type: 2}
-  - {fileID: 11400000, guid: 2257ec59de95bb540b106be0b19d0e95, type: 2}
+  - {fileID: 11400000, guid: eb376c58c9451f74a88c220c78b4b362, type: 2}
+  - {fileID: 11400000, guid: eb376c58c9451f74a88c220c78b4b362, type: 2}
   - {fileID: 11400000, guid: 7f0bffbd4729ddb42baef9872228219e, type: 2}
   BaseHP: 5
   HealthMultiplier: 1

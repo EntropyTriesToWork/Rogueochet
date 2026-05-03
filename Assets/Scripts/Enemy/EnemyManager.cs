@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,17 +10,22 @@ public class EnemyManager : MonoBehaviour
     public GameObject FallbackEnemyPrefab;
 
     private List<Enemy> _activeEnemies = new List<Enemy>();
-    private Queue<(Vector2 position, EnemySpawnInfo enemy)> _spawnQueue = new Queue<(Vector2, EnemySpawnInfo)>();
     private RoomData _roomData;
-    private Coroutine _spawnCoroutine;
-    private int _remainingInWave = 0;
-    private int _wavesCompletedInRoom = 0;
+    private Coroutine _waveSpawnCoroutine;
 
-    public int CurrentWaveNumber => _wavesCompletedInRoom + 1;
-    public float TotalWavesInRoom => _roomData.Waves.Count;
-    public WaveData CurrentWave => _roomData.Waves[CurrentWaveNumber - 1]; // zero‑based index
-    public float NextWaveDelay => _nextWaveDelay;
-    float _nextWaveDelay = 1f;
+    // Wave tracking
+    private float _roomStartTime;
+    private List<WaveSpawnTask> _waveSchedule;
+    private int[] _waveTotalCount;
+    private int[] _waveAliveCount;
+    private bool[] _waveSpawned;
+    private bool _allWavesSpawned = false;
+
+    private struct WaveSpawnTask
+    {
+        public int WaveIndex;
+        public float SpawnTime; // absolute time (Time.time) when to spawn
+    }
 
     void Awake() => Instance = this;
     void Start() => SubscribeToEvents();
@@ -31,7 +35,6 @@ public class EnemyManager : MonoBehaviour
     void SubscribeToEvents()
     {
         GameEvents.OnRoomEntered += HandleEnterCombatRoom;
-        GameEvents.OnWaveStarted += HandleWaveStarted;
         GameEvents.OnRoomCleared += HandleRoomCleared;
         GameEvents.OnGameOver += HandleGameOver;
         GameEvents.OnVictory += HandleGameOver;
@@ -41,7 +44,6 @@ public class EnemyManager : MonoBehaviour
     void UnsubscribeFromEvents()
     {
         GameEvents.OnRoomEntered -= HandleEnterCombatRoom;
-        GameEvents.OnWaveStarted -= HandleWaveStarted;
         GameEvents.OnRoomCleared -= HandleRoomCleared;
         GameEvents.OnGameOver -= HandleGameOver;
         GameEvents.OnVictory -= HandleGameOver;
@@ -49,36 +51,20 @@ public class EnemyManager : MonoBehaviour
     }
 
     void HandleEnterCombatRoom(RoomData roomData) => StartRoom(roomData);
-    void HandleWaveStarted(int waveNumber) => StartWave(waveNumber);
-    void HandleRoomCleared() => _wavesCompletedInRoom = 0;
+    void HandleRoomCleared() => ClearAll();
     void HandleGameOver() => ClearAll();
 
     void HandleEnemyDied(Enemy enemy, int _)
     {
+        int waveIdx = enemy.WaveIndex;
         _activeEnemies.Remove(enemy);
-        _remainingInWave--;
-
-        if (_remainingInWave <= 0 && _spawnQueue.Count == 0)
-            OnWaveCleared();
-    }
-
-    void OnWaveCleared()
-    {
-        _wavesCompletedInRoom++;
-        GameEvents.WaveCleared();
-        if (_wavesCompletedInRoom >= TotalWavesInRoom)
+        if (waveIdx >= 0 && waveIdx < _waveAliveCount.Length)
         {
-            GameEvents.RoomCleared();
+            _waveAliveCount[waveIdx]--;
+            if (_waveAliveCount[waveIdx] <= 0)
+                OnWaveCleared(waveIdx);
         }
-        else
-        {
-            StartCoroutine(StartNextWaveAfterDelay(1f));
-        }
-    }
-    IEnumerator StartNextWaveAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        GameEvents.WaveStarted(_wavesCompletedInRoom + 1);
+        CheckRoomCompletion();
     }
     #endregion
 
@@ -86,33 +72,75 @@ public class EnemyManager : MonoBehaviour
     public void StartRoom(RoomData roomData)
     {
         _roomData = roomData;
-        _wavesCompletedInRoom = 0;
-        StartWave(0);
-    }
-    public void StartWave(int waveIndex)
-    {
-        if (_roomData == null || waveIndex >= _roomData.Waves.Count)
-        {
-            GameEvents.RoomCleared();
-            return;
-        }
-        WaveData wave = _roomData.Waves[waveIndex];
-        var entries = wave.GetAllSpawnEntries(); // returns List<(Vector2, EnemySpawnInfo)>
-        foreach (var entry in entries)
-            _spawnQueue.Enqueue(entry);
+        _roomStartTime = Time.time;
+        _allWavesSpawned = false;
 
-        _remainingInWave = _spawnQueue.Count;
-        SpawnAllEnemies();
+        int waveCount = _roomData.Waves.Count;
+        _waveTotalCount = new int[waveCount];
+        _waveAliveCount = new int[waveCount];
+        _waveSpawned = new bool[waveCount];
+
+        BuildWaveSchedule();
+        if (_waveSpawnCoroutine != null) StopCoroutine(_waveSpawnCoroutine);
+        _waveSpawnCoroutine = StartCoroutine(SpawnWavesByTimer());
     }
-    private void SpawnAllEnemies()
+
+    private void BuildWaveSchedule()
     {
-        while (_spawnQueue.Count > 0)
+        _waveSchedule = new List<WaveSpawnTask>();
+        float cumulativeTime = _roomStartTime;
+        for (int i = 0; i < _roomData.Waves.Count; i++)
         {
-            var (pos, spawnInfo) = _spawnQueue.Dequeue();
-            SpawnEnemy(pos, spawnInfo);
+            float delay = _roomData.Waves[i].SpawnDelay;
+            cumulativeTime += delay;
+            _waveSchedule.Add(new WaveSpawnTask
+            {
+                WaveIndex = i,
+                SpawnTime = cumulativeTime
+            });
+
+            // Pre‑calculate total enemies per wave
+            _waveTotalCount[i] = _roomData.Waves[i].GetAllSpawnEntries().Count;
+            _waveAliveCount[i] = 0;
+            _waveSpawned[i] = false;
         }
     }
-    private void SpawnEnemy(Vector2 position, EnemySpawnInfo spawnInfo)
+
+    private IEnumerator SpawnWavesByTimer()
+    {
+        int nextWaveIdx = 0;
+        while (nextWaveIdx < _waveSchedule.Count)
+        {
+            float waitTime = _waveSchedule[nextWaveIdx].SpawnTime - Time.time;
+            if (waitTime > 0)
+                yield return new WaitForSeconds(waitTime);
+
+            SpawnWave(_waveSchedule[nextWaveIdx].WaveIndex);
+            nextWaveIdx++;
+
+            if (nextWaveIdx >= _waveSchedule.Count)
+            {
+                _allWavesSpawned = true;
+                CheckRoomCompletion();
+            }
+        }
+    }
+
+    private void SpawnWave(int waveIndex)
+    {
+        if (_waveSpawned[waveIndex]) return;
+        _waveSpawned[waveIndex] = true;
+
+        WaveData wave = _roomData.Waves[waveIndex];
+        var entries = wave.GetAllSpawnEntries();
+
+        _waveAliveCount[waveIndex] = entries.Count;
+
+        foreach (var (pos, spawnInfo) in entries)
+            SpawnEnemy(pos, spawnInfo, waveIndex);
+    }
+
+    private void SpawnEnemy(Vector2 position, EnemySpawnInfo spawnInfo, int waveIndex)
     {
         GameObject go = Instantiate(spawnInfo.Prefab, position, Quaternion.identity);
         Enemy enemy = go.GetComponent<Enemy>();
@@ -120,14 +148,31 @@ public class EnemyManager : MonoBehaviour
         {
             int hp = ComputeHP(spawnInfo);
             int essence = WaveData.RollEssenceReward(spawnInfo.Tier);
-            enemy.Initialize(hp, essence, spawnInfo.Damage, spawnInfo.MoveDistance, CurrentWaveNumber);
-            _activeEnemies.Add(enemy); //Enemies will be in charge of their own movements (they will be staggered and won't move synchronously) 
+            enemy.Initialize(hp, essence, spawnInfo.Damage, spawnInfo.MoveDistance, waveIndex);
+            _activeEnemies.Add(enemy);
         }
+    }
+
+    private void OnWaveCleared(int waveIndex)
+    {
+        Debug.Log($"Wave {waveIndex + 1} cleared");
+        GameEvents.WaveCleared();
+    }
+
+    private void CheckRoomCompletion()
+    {
+        if (!_allWavesSpawned) return;
+
+        for (int i = 0; i < _waveAliveCount.Length; i++)
+            if (_waveAliveCount[i] > 0) return;
+
+        // All waves spawned and no enemies left
+        GameEvents.RoomCleared();
+        ClearAll();
     }
 
     private int ComputeHP(EnemySpawnInfo spawnInfo)
     {
-        // Use enemy's own BaseHealth multiplied by room's health multiplier
         float raw = spawnInfo.BaseHealth * _roomData.HealthMultiplier;
         return Mathf.Max(1, Mathf.RoundToInt(raw));
     }
@@ -137,7 +182,10 @@ public class EnemyManager : MonoBehaviour
     private WaveData GenerateFallbackWave(int waveNumber)
     {
         WaveData fb = ScriptableObject.CreateInstance<WaveData>();
-        fb.Grid = new EnemySpawnInfo[3, 7];
+        fb.SpawnDelay = 3f;
+        fb.GridStart = new Vector2(5f, 0f);
+        fb.GridSpacing = new Vector2(1.4f, 1.2f);
+        fb.Grid = new EnemySpawnInfo[1, 3];
         for (int i = 0; i < 3; i++)
         {
             fb.Grid[0, i] = new EnemySpawnInfo
@@ -149,26 +197,47 @@ public class EnemyManager : MonoBehaviour
                 MoveDistance = 1f,
             };
         }
-        fb.InitialSpawnDelay = 0f;
-        fb.GridStart = new Vector2(5f, 0f);
-        fb.GridSpacing = new Vector2(1.4f, 1.2f);
         return fb;
     }
-
     private void ClearAll()
     {
         foreach (Enemy e in _activeEnemies)
             if (e != null) Destroy(e.gameObject);
         _activeEnemies.Clear();
-        _spawnQueue.Clear();
-        _remainingInWave = 0;
-        if (_spawnCoroutine != null) StopCoroutine(_spawnCoroutine);
+        if (_waveSpawnCoroutine != null) StopCoroutine(_waveSpawnCoroutine);
+        _waveSpawnCoroutine = null;
+        _allWavesSpawned = false;
     }
     #endregion
 
     #region Public API
-    public bool AllEnemiesCleared() => _remainingInWave <= 0 && _spawnQueue.Count == 0;
+    public bool AllEnemiesCleared()
+    {
+        if (!_allWavesSpawned) return false;
+        for (int i = 0; i < _waveAliveCount.Length; i++)
+            if (_waveAliveCount[i] > 0) return false;
+        return true;
+    }
+
+    public int GetEnemiesLeftToSpawn()
+    {
+        int total = 0;
+        for (int i = 0; i < _waveSpawned.Length; i++)
+            if (!_waveSpawned[i])
+                total += _waveTotalCount[i];
+        return total;
+    }
+
+    public int GetEnemiesAlive() => _activeEnemies.Count;
+
+    public int GetEnemiesKilled()
+    {
+        int totalAcrossAllWaves = 0;
+        for (int i = 0; i < _waveTotalCount.Length; i++)
+            totalAcrossAllWaves += _waveTotalCount[i];
+        return totalAcrossAllWaves - GetEnemiesAlive() - GetEnemiesLeftToSpawn();
+    }
+
     public int ActiveEnemyCount => _activeEnemies.Count;
-    public int RemainingInWave => _remainingInWave;
     #endregion
 }

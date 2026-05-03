@@ -16,10 +16,11 @@ public class GameManager : MonoBehaviour
     public int Essence = 0;
 
     [Header("Run Settings")]
-    public int TotalRooms = 15; // number of rooms in this run (excluding shop/victory)
+    public int TotalRooms = 15; // number of rooms in this run
     [SerializeField] private GameStats _stats;
 
     // Room & wave tracking
+    public int CurrentRoomIndex => _currentRoomIndex;
     private int _currentRoomIndex = -1;
     private int _currentWaveInRoom = 0;
     private int _totalWavesInCurrentRoom = 0;
@@ -45,40 +46,24 @@ public class GameManager : MonoBehaviour
 
     void SubscribeToEvents()
     {
-        GameEvents.OnBallCountChanged += HandleBallCountChanged;
         GameEvents.OnEnemyDied += HandleEnemyDied;
         GameEvents.OnEnemyReachedPaddle += HandleEnemyReachedPaddle;
-        GameEvents.OnWaveCleared += HandleWaveCleared;   // new event
+        GameEvents.OnWaveCleared += HandleWaveCleared;
     }
 
     void UnsubscribeFromEvents()
     {
-        GameEvents.OnBallCountChanged -= HandleBallCountChanged;
         GameEvents.OnEnemyDied -= HandleEnemyDied;
         GameEvents.OnEnemyReachedPaddle -= HandleEnemyReachedPaddle;
         GameEvents.OnWaveCleared -= HandleWaveCleared;
     }
-
-    void HandleBallCountChanged(int remaining)
-    {
-        if (remaining == 0 && State == GameState.Combat && !_roomCompleted)
-        {
-            if (AllEnemiesCleared())
-                CompleteRoom();   // all enemies dead
-            else
-                ChangeState(GameState.GameOver);  // or handle retry? We'll do GameOver
-        }
-    }
-
     void HandleEnemyDied(Enemy enemy, int essenceReward)
     {
         int awarded = Mathf.Max(1, Mathf.RoundToInt(essenceReward * _stats.EssenceGainMultiplier));
         AddEssence(awarded);
 
-        if (AllEnemiesCleared() && State == GameState.Combat && !_roomCompleted)
-            CompleteRoom();
+        if (AllEnemiesCleared() && State == GameState.Combat && _roomCompleted) CompleteRoom();
     }
-
     void HandleEnemyReachedPaddle(Enemy enemy) => TakeDamage(1);
 
     void HandleWaveCleared()
@@ -108,23 +93,18 @@ public class GameManager : MonoBehaviour
         {
             case GameState.Idle:
                 break;
-
             case GameState.RoomTransition:
                 EnterNextRoom();
                 break;
-
             case GameState.Combat:
                 StartCombatRoom();
                 break;
-
             case GameState.Shop:
                 GameEvents.ShopOpened();
                 break;
-
             case GameState.Victory:
                 GameEvents.Victory();
                 break;
-
             case GameState.GameOver:
                 GameEvents.GameOver();
                 break;
@@ -154,19 +134,20 @@ public class GameManager : MonoBehaviour
     }
     void StartCombatRoom()
     {
-        GameEvents.RoomEntered(PathManager.Instance.GetRoomData(_currentRoomIndex));
+        RoomData roomData = PathManager.Instance.GetRoomData(_currentRoomIndex);
+        GameEvents.RoomEntered(roomData);
+        GameEvents.WaveSetup(roomData.Waves[0].WallSize);
     }
     void CompleteRoom()
     {
-        GameEvents.RoomCleared();   // new event for UI to show continue button
+        GameEvents.RoomCleared();
+        StartCoroutine(HandleLevelUps());
     }
     public void LeaveRoom()
     {
         if (State != GameState.Combat && State != GameState.Shop) return;
-
-        StartCoroutine(HandleLevelUpsBetweenRooms());
     }
-    private IEnumerator HandleLevelUpsBetweenRooms()
+    private IEnumerator HandleLevelUps()
     {
         var inv = PlayerInventory.Instance;
         if (inv == null) yield break;
@@ -179,19 +160,12 @@ public class GameManager : MonoBehaviour
         }
         ChangeState(GameState.RoomTransition);
     }
-
-    public void ContinueFromRoom()
-    {
-        if (State != GameState.Combat && State != GameState.Shop) return;
-        LeaveRoom();   // same as leave for now
-    }
-
-    public void OnShopComplete()
+    public void OnShopComplete() //Leave the shop and go to next room
     {
         if (State == GameState.Shop)
         {
             GameEvents.ShopClosed();
-            LeaveRoom();
+            ChangeState(GameState.RoomTransition);
         }
     }
     #endregion

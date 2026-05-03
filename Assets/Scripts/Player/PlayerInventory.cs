@@ -89,8 +89,6 @@ public class PlayerInventory : MonoBehaviour
         EssenceAccumulated += amount;
         if (_stats != null) _stats.TotalEssenceGained += amount;
     }
-
-    // --- Level‑up logic (called by GameManager) ---
     public bool TryGetLevelUpRewards(out List<UpgradeData> rewards)
     {
         rewards = null;

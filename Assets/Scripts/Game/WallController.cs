@@ -36,15 +36,15 @@ public class WallController : MonoBehaviour
         }
         SetWallScaleY(0.2f);
         GameEvents.OnWaveSetup += HandleWaveSetup;
-        GameEvents.OnGameOver  += HandleReset;
-        GameEvents.OnVictory   += HandleReset;
+        GameEvents.OnGameOver += HandleReset;
+        GameEvents.OnVictory += HandleReset;
     }
 
     void OnDestroy()
     {
         GameEvents.OnWaveSetup -= HandleWaveSetup;
-        GameEvents.OnGameOver  -= HandleReset;
-        GameEvents.OnVictory   -= HandleReset;
+        GameEvents.OnGameOver -= HandleReset;
+        GameEvents.OnVictory -= HandleReset;
     }
 
     #endregion

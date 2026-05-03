@@ -190,7 +190,7 @@ public class BallManager : MonoBehaviour
             return;
         }
 
-        if (Input.GetMouseButton(1) || GameManager.Instance.AllEnemiesCleared())
+        if (Input.GetMouseButton(1))
         {
             _breakHoldActive = true;
             _breakHoldTimer += Time.unscaledDeltaTime;

@@ -8,7 +8,7 @@ public class PathManager : MonoBehaviour
     [Header("Room Pools")]
     public List<RoomData> CombatRooms;
     public List<RoomData> ShopRooms;
-    public List<RoomData> EventRooms;   // future use
+    public List<RoomData> EventRooms; //No implementation yet
 
     [Header("Path Generation")]
     public int TotalRooms = 8;

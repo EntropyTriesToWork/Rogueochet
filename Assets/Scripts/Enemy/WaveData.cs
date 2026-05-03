@@ -5,10 +5,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "WaveData", menuName = "RoguelikePong/Wave Data")]
 public class WaveData : SerializedScriptableObject
 {
-    [BoxGroup("Spawn Timing")] [Tooltip("Seconds before the enemy spawns.")] public float InitialSpawnDelay = 0.5f;
+    [BoxGroup("Spawn Timing")] [Tooltip("Seconds before the enemy spawns.")] public float SpawnDelay = 0.5f;
 
     [BoxGroup("Grid Layout")] public Vector2 GridStart = new Vector2(5f, 0f);
     [BoxGroup("Grid Layout")] public Vector2 GridSpacing = new Vector2(1.4f, 1.2f);
+    [BoxGroup("Grid Layout")] public float WallSize = 1f;
     [BoxGroup("Grid Layout")][Button] public void ResetGrid() { Grid = new EnemySpawnInfo[3, 7]; }
 
     [Tooltip("Define enemy placement on a grid. Use +/- buttons to add rows/columns.")]

@@ -39,7 +39,7 @@ public class PathHUD : MonoBehaviour
 
     void OnRoomCleared()
     {
-        UpdateRoomHighlight(EnemyManager.Instance.CurrentWaveNumber - 1); // Move highlight to next room
+        UpdateRoomHighlight(GameManager.Instance.CurrentRoomIndex); // Move highlight to next room
     }
 
     void GenerateUI()

@@ -11,7 +11,7 @@ public class Enemy : MonoBehaviour
     public int EssenceReward { get; protected set; }
     public int Damage { get; protected set; }
     public float MoveDistance { get; protected set; }
-    public int WaveNumber { get; protected set; }
+    public int WaveIndex { get; protected set; }
 
     [Header("UI")]
     [Tooltip("Assign a child TextMeshPro to display current HP above the enemy.")]
@@ -63,20 +63,14 @@ public class Enemy : MonoBehaviour
     #endregion
 
     #region Initialisation
-
-    /// <summary>
-    /// Initialise with a fully-resolved HP value.
-    /// HP is computed by WaveData (BaseHP x entry.HPMultiplier x WaveHPMultiplier),
-    /// then EnemyStats global modifiers are applied on top.
-    /// </summary>
-    public void Initialize(int resolvedHP, int essenceReward, int damage, float moveDistance, int wave)
+    public void Initialize(int resolvedHP, int essenceReward, int damage, float moveDistance, int waveIndex)
     {
         MaxHP = EnemyStats.ComputeMaxHP(resolvedHP);
         CurrentHP = MaxHP;
         EssenceReward = essenceReward;
         Damage = damage;
         MoveDistance = moveDistance;
-        WaveNumber = wave;
+        WaveIndex = waveIndex;
         UpdateHPVisual();
         StartCoroutine(PopIn());
     }
