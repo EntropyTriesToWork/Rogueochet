@@ -11,13 +11,13 @@ public class BallInstance
     public List<UpgradeData> DirectUpgrades = new List<UpgradeData>();
 
     public float ComputedDamageMultiplier { get; private set; } = 1f;
-    public int   ComputedDamageBonus { get; private set; } = 0;
+    public int ComputedDamageBonus { get; private set; } = 0;
     public float ComputedSpeedMultiplier { get; private set; } = 1f;
     public float ComputedSpeedBonus { get; private set; } = 0f;
-    public int   ComputedDurabilityBonus { get; private set; } = 0;
+    public int ComputedDurabilityBonus { get; private set; } = 0;
     public float ComputedSizeMultiplier { get; private set; } = 1f;
     public float ComputedDeflectionBonus { get; private set; } = 0f;
-    public bool  HasBounceBack { get; private set; } = false;
+    public bool HasBounceBack { get; private set; } = false;
 
     public BallInstance(string typeName, GameObject prefab)
     {

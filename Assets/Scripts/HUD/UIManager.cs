@@ -16,6 +16,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI EssenceLabel;
     public TextMeshProUGUI TimerLabel;
     public TextMeshProUGUI StatusLabel;
+    public GameObject continueButton;
 
     [Header("Wave Banner")]
     [Tooltip("CanvasGroup on an overlay panel containing WaveBannerLabel.")]
@@ -67,7 +68,6 @@ public class UIManager : MonoBehaviour
     #endregion
 
     #region Events
-
     public void SubscribeToEvents()
     {
         GameEvents.OnPlayerHealthChanged += OnHealthChanged;
@@ -101,19 +101,16 @@ public class UIManager : MonoBehaviour
     #endregion
 
     #region Event Handlers
-
     void OnHealthChanged(int hp, int maxHP)
     {
         if (HealthLabel != null)
             HealthLabel.text = $"{hp}/{maxHP}";
     }
-
     void OnEssenceChanged(int essence)
     {
         if (EssenceLabel != null)
             EssenceLabel.text = $"{essence}";
     }
-
     void OnWaveStarted(int waveNumber)
     {
         SetOverlay(null);
@@ -129,43 +126,38 @@ public class UIManager : MonoBehaviour
         if (_bannerCoroutine != null) StopCoroutine(_bannerCoroutine);
         _bannerCoroutine = StartCoroutine(ShowWaveBanner(waveNumber));
     }
-
     void OnRoomEntered(RoomData roomData)
     {
         SetStatus("Click or Space to launch!");
         SetOverlay(null);
         if (TimerLabel != null) TimerLabel.color = Color.white;
+        continueButton.SetActive(false);
     }
-
     void OnRoomCleared()
     {
         if (EnemyManager.Instance.ActiveEnemyCount > 0)
             SetStatus("Enemies advancing...");
-    }
 
+        continueButton.SetActive(true);
+    }
     void OnShopOpened()
     {
         if (_shopCoroutine != null) StopCoroutine(_shopCoroutine);
         _shopCoroutine = StartCoroutine(OpenShopDelayed());
     }
-
     void OnShopClosed() => SetOverlay(null);
-
     void OnGameOver() => SetOverlay(GameOverPanel);
     void OnVictory() => SetOverlay(VictoryPanel);
-
     void OnTimerTick(float elapsed)
     {
         if (TimerLabel != null)
             TimerLabel.text = Utils.FormatTimeToMinutes(elapsed);
     }
-
     void OnSpeedRamp()
     {
         if (TimerLabel != null) TimerLabel.color = Color.red;
         SetStatus("SPEED RAMP!");
     }
-
     #endregion
 
     #region Wave Banner
@@ -223,13 +215,11 @@ public class UIManager : MonoBehaviour
     #endregion
 
     #region Helpers
-
     public void SetStatus(string message)
     {
         if (StatusLabel != null)
             StatusLabel.text = message;
     }
-
     void SetOverlay(GameObject panel)
     {
         if (ShopPanel != null) ShopPanel.SetActive(ShopPanel == panel);
@@ -240,4 +230,9 @@ public class UIManager : MonoBehaviour
         if (BallAmmoPanel != null) { BallAmmoPanel.SetActive(panel != ShopPanel); }
     }
     #endregion
+
+    public void ContinueButton()
+    {
+        GameManager.Instance.LeaveRoom();
+    }
 }

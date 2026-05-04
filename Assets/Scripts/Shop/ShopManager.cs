@@ -207,7 +207,7 @@ public class ShopManager : MonoBehaviour
 
         _offerings.RemoveAt(index);
         GameEvents.ShopOfferingsChanged();
-        Debug.Log($"[ShopManager] Purchased '{offering.Upgrade.UpgradeName}'.");
+        //Debug.Log($"[ShopManager] Purchased '{offering.Upgrade.UpgradeName}'.");
         return true;
     }
 
@@ -226,7 +226,7 @@ public class ShopManager : MonoBehaviour
         // Create a button for each choice
         foreach (var choice in choices)
         {
-            Debug.Log($"Showing {choice.Effect} as an option.");
+            //Debug.Log($"Showing {choice.Effect} as an option.");
             GameObject btnObj = Instantiate(levelUpButtonPrefab, levelUpButtonContainer);
             var button = btnObj.GetComponent<UnityEngine.UI.Button>();
             var text = btnObj.GetComponentInChildren<TMPro.TMP_Text>();

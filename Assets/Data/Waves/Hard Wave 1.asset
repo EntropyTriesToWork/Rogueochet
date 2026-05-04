@@ -100,7 +100,7 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-  SpawnDelay: 10
+  SpawnDelay: 6
   GridStart: {x: 5, y: 0}
   GridSpacing: {x: 1.4, y: 1.2}
   WallSize: 1

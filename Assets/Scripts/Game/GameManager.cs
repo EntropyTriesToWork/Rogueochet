@@ -23,7 +23,6 @@ public class GameManager : MonoBehaviour
     public int CurrentRoomIndex => _currentRoomIndex;
     private int _currentRoomIndex = -1;
     private int _currentWaveInRoom = 0;
-    private int _totalWavesInCurrentRoom = 0;
     private bool _roomCompleted = false;
 
     private bool _waitingForLevelUp = false;
@@ -71,7 +70,7 @@ public class GameManager : MonoBehaviour
         if (State != GameState.Combat) return;
 
         _currentWaveInRoom++;
-        if (_currentWaveInRoom < _totalWavesInCurrentRoom)
+        if (_currentWaveInRoom < PathManager.Instance.GetWaveCountForRoom(CurrentRoomIndex))
         {
             GameEvents.WaveStarted(_currentWaveInRoom + 1);
         }
@@ -146,6 +145,7 @@ public class GameManager : MonoBehaviour
     public void LeaveRoom()
     {
         if (State != GameState.Combat && State != GameState.Shop) return;
+        ChangeState(GameState.RoomTransition);
     }
     private IEnumerator HandleLevelUps()
     {
@@ -158,14 +158,12 @@ public class GameManager : MonoBehaviour
             ShopManager.Instance.ShowLevelUpChoices(rewards, () => _waitingForLevelUp = false);
             yield return new WaitUntil(() => !_waitingForLevelUp);
         }
-        ChangeState(GameState.RoomTransition);
     }
     public void OnShopComplete() //Leave the shop and go to next room
     {
         if (State == GameState.Shop)
         {
             GameEvents.ShopClosed();
-            ChangeState(GameState.RoomTransition);
         }
     }
     #endregion
@@ -217,7 +215,6 @@ public class GameManager : MonoBehaviour
         EnemyStats.Reset();
         _currentRoomIndex = -1;
         _currentWaveInRoom = 0;
-        _totalWavesInCurrentRoom = 0;
         _roomCompleted = false;
 
         MaxHealth = _baseMaxHealth;

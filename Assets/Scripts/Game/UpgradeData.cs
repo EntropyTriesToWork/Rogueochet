@@ -16,9 +16,8 @@ public enum UpgradeEffect
     BallDurabilityFlat,
     BallSizeIncrease,
     BallPaddleDeflectionRange,
-    BallBounceBack, // on wall hit, small speed burst
+    BallBounceBack,
 
-    // ── Global ─────────────────────────────────────────────────────
     GlobalDamagePercent,
     GlobalSpeedPercent,
     GlobalDurabilityFlat,
@@ -33,7 +32,6 @@ public enum UpgradeEffect
     BallPierceChance,
     ExtraBounces,
     EssenceOnHitChance,
-    // ── New Ball (effect unused; BallPrefab carries the data) ──────
     None,
 }
 [CreateAssetMenu(fileName = "UpgradeData", menuName = "RoguelikePong/Upgrade Data")]
