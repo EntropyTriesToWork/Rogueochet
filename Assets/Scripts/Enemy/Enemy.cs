@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class Enemy : MonoBehaviour
 {
     #region Inspector
@@ -11,7 +12,9 @@ public class Enemy : MonoBehaviour
     public int EssenceReward { get; protected set; }
     public int Damage { get; protected set; }
     public float MoveDistance { get; protected set; }
+    public float MoveDelay { get; protected set; }
     public int WaveIndex { get; protected set; }
+    public float MoveSpeed = 1f; //How long the movement animation lasts for
 
     [Header("UI")]
     [Tooltip("Assign a child TextMeshPro to display current HP above the enemy.")]
@@ -34,6 +37,12 @@ public class Enemy : MonoBehaviour
     private Vector3 _naturalScale;
     private float _flashTimer;
     private bool  _isFlashing;
+
+    private float _moveDelayRemaining = 0f;
+    private Vector3 _moveStartPos;
+    private Vector3 _moveTargetPos;
+    private bool _isMoving = false;
+    private Rigidbody2D _rb;
     #endregion
 
     #region Lifecycle
@@ -48,33 +57,54 @@ public class Enemy : MonoBehaviour
 
         if (usesLabel)  HPLabel.gameObject.SetActive(true);   else HPLabel.gameObject.SetActive(false);
         if (usesVisual) HPVisual.gameObject.SetActive(true);  else HPVisual.gameObject.SetActive(false);
+
+        _rb = GetComponent<Rigidbody2D>();  
     }
-    void Update()
+    public void Tick(float deltaTime)
     {
-        if (!_isFlashing) return;
-        _flashTimer -= Time.deltaTime;
+        if (_isFlashing) _flashTimer -= deltaTime;
         if (_flashTimer <= 0f)
         {
             _isFlashing = false;
             if (SpriteRenderer != null)
                 SpriteRenderer.color = _originalColor;
         }
+        if (_isMoving)
+        {
+            Vector2 newPosition = Vector2.MoveTowards(_rb.position, _moveTargetPos, MoveSpeed * deltaTime); //Slide
+            _rb.MovePosition(newPosition);
+
+            if (Vector2.Distance(_rb.position, _moveTargetPos) < 0.01f)
+            {
+                _rb.position = _moveTargetPos;
+                _isMoving = false;
+                _moveDelayRemaining = MoveDelay;
+            }
+        }
+        else
+        {
+            _moveDelayRemaining -= deltaTime;
+            if (_moveDelayRemaining <= 0f) StartMove(); 
+        }
     }
     #endregion
 
     #region Initialisation
-    public void Initialize(int resolvedHP, int essenceReward, int damage, float moveDistance, int waveIndex)
+    public void Initialize(int resolvedHP, int essenceReward, int damage, float moveDistance, float moveDelay, int waveIndex)
     {
         MaxHP = EnemyStats.ComputeMaxHP(resolvedHP);
         CurrentHP = MaxHP;
         EssenceReward = essenceReward;
         Damage = damage;
         MoveDistance = moveDistance;
+        MoveDelay = moveDelay;
         WaveIndex = waveIndex;
+
+        _moveDelayRemaining = moveDelay;
+        _isMoving = false;
         UpdateHPVisual();
         StartCoroutine(PopIn());
     }
-
     IEnumerator PopIn()
     {
         float elapsed = 0f;
@@ -94,10 +124,15 @@ public class Enemy : MonoBehaviour
 
         transform.localScale = _naturalScale;
     }
-
     #endregion
 
     #region Combat
+    private void StartMove()
+    {
+        _moveStartPos = transform.position;
+        _moveTargetPos = _moveStartPos + Vector3.left * MoveDistance; // move left towards paddle
+        _isMoving = true;
+    }
     public void TakeDamage(int damage)
     {
         if (CurrentHP <= 0) return;
@@ -113,7 +148,6 @@ public class Enemy : MonoBehaviour
         GameEvents.EnemyDied(this, EssenceReward);
         Destroy(gameObject);
     }
-
     public void OnReachedPaddle()
     {
         Debug.Log("ENEMY DEALS DAMAGE");

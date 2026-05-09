@@ -19,17 +19,23 @@ public class WaveData : SerializedScriptableObject
     public List<(Vector2 position, EnemySpawnInfo enemy)> GetAllSpawnEntries()
     {
         var list = new List<(Vector2, EnemySpawnInfo)>();
-        for (int row = 0; row < Grid.GetLength(0); row++)
+        int cols = Grid.GetLength(0); 
+        int rows = Grid.GetLength(1);
+
+        float topRowY = GridStart.y;
+        float bottomRowY = GridStart.y + (rows - 1) * GridSpacing.y;
+        float centerY = (topRowY + bottomRowY) / 2f; //Calculate to get center
+        float offsetY = -centerY;
+
+        for (int c = 0; c < cols; c++)
         {
-            for (int col = 0; col < Grid.GetLength(1); col++)
+            for (int r = 0; r < rows; r++)
             {
-                var spawn = Grid[row, col];
+                var spawn = Grid[c, r];
                 if (spawn != null && spawn.Prefab != null)
                 {
-                    Vector2 pos = new Vector2(
-                        GridStart.x - col * GridSpacing.x,
-                        GridStart.y + row * GridSpacing.y
-                    );
+                    float yPos = GridStart.y + r * GridSpacing.y + offsetY; //Adding offset
+                    Vector2 pos = new Vector2(GridStart.x - c * -GridSpacing.x, yPos);
                     list.Add((pos, spawn));
                 }
             }

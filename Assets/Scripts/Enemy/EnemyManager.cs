@@ -6,8 +6,8 @@ public class EnemyManager : MonoBehaviour
 {
     public static EnemyManager Instance { get; private set; }
 
-    [Header("Fallback")]
     public GameObject FallbackEnemyPrefab;
+    public Vector2 SpawnDistanceFromZero = new Vector2(18f, 0f);
 
     private List<Enemy> _activeEnemies = new List<Enemy>();
     private RoomData _roomData;
@@ -30,6 +30,7 @@ public class EnemyManager : MonoBehaviour
     void Awake() => Instance = this;
     void Start() => SubscribeToEvents();
     void OnDestroy() => UnsubscribeFromEvents();
+    private void Update() { foreach(Enemy enemy in _activeEnemies) { if(enemy != null) enemy.Tick(Time.deltaTime); } }
 
     #region Events
     void SubscribeToEvents()
@@ -142,13 +143,13 @@ public class EnemyManager : MonoBehaviour
 
     private void SpawnEnemy(Vector2 position, EnemySpawnInfo spawnInfo, int waveIndex)
     {
-        GameObject go = Instantiate(spawnInfo.Prefab, position, Quaternion.identity);
+        GameObject go = Instantiate(spawnInfo.Prefab, position + SpawnDistanceFromZero, Quaternion.identity);
         Enemy enemy = go.GetComponent<Enemy>();
         if (enemy != null)
         {
             int hp = ComputeHP(spawnInfo);
             int essence = WaveData.RollEssenceReward(spawnInfo.Tier);
-            enemy.Initialize(hp, essence, spawnInfo.Damage, spawnInfo.MoveDistance, waveIndex);
+            enemy.Initialize(hp, essence, spawnInfo.Damage, spawnInfo.MoveDistance, spawnInfo.MoveDelay, waveIndex);
             _activeEnemies.Add(enemy);
         }
     }
@@ -166,7 +167,6 @@ public class EnemyManager : MonoBehaviour
         for (int i = 0; i < _waveAliveCount.Length; i++)
             if (_waveAliveCount[i] > 0) return;
 
-        // All waves spawned and no enemies left
         GameEvents.RoomCleared();
         ClearAll();
     }

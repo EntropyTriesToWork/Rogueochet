@@ -23,8 +23,8 @@ public class EnemySpawnInfo : ScriptableObject
 
     [Tooltip("How far enemies move each advance.")]
     public float MoveDistance = 1f;
-
-    // Optional: preview in inspector
+    public float MoveDelay = 2f;
+    
     [ShowInInspector, ReadOnly]
     private string PreviewName => Prefab != null ? Prefab.name : "None";
 }

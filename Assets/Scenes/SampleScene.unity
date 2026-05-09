@@ -2982,6 +2982,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyManager
   FallbackEnemyPrefab: {fileID: 3882468849211464338, guid: 484960dd994c3f044ac039f7134dbf47, type: 3}
+  SpawnDistanceFromZero: {x: 12, y: 0}
 --- !u!114 &1144057501
 MonoBehaviour:
   m_ObjectHideFlags: 0
