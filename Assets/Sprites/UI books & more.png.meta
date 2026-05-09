@@ -1638,8 +1638,8 @@ TextureImporter:
       name: bar_fill
       rect:
         serializedVersion: 2
-        x: 304
-        y: 328
+        x: 360
+        y: 398
         width: 32
         height: 8
       alignment: 0

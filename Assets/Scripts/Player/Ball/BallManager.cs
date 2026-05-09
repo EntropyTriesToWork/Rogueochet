@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,7 +28,15 @@ public class BallManager : MonoBehaviour
     [Header("Ball Selection & Reload")]
     public KeyCode ReloadKey = KeyCode.R;
     public KeyCode NextBallKey = KeyCode.Tab;
+    public float BaseReloadSpeed = 2f;
     public bool AutoReload = true;
+    public UnityEngine.UI.Image ReloadIndicatorFill;
+    [SerializeField] private Canvas _reloadIndicatorCanvas;
+    [SerializeField] private RectTransform _reloadIndicatorRect;
+
+    public float BaseBarWidth = 48f;
+    public float MinBarWidth = 24f;
+    public float MinimumReloadTime = 0.2f;
 
     [HideInInspector] public float BaseSpeedRampDelay;
 
@@ -65,6 +74,7 @@ public class BallManager : MonoBehaviour
         _cam = Camera.main;
     }
 
+    #region Events
     void Start() => SubscribeToEvents();
     void OnDestroy() => UnsubscribeFromEvents();
 
@@ -110,6 +120,7 @@ public class BallManager : MonoBehaviour
         DestroyAllBalls();
         ResetTimeScale();
     }
+    #endregion
 
     void Update()
     {
@@ -161,27 +172,26 @@ public class BallManager : MonoBehaviour
         {
             if (Input.GetKeyDown(ReloadKey) && !_reloading) // Handle manual reload
             {
-                ManualReload();
+                TryReload();
             }
-            if (Input.GetKeyDown(NextBallKey) && !_ballInPlay) // Handle ball selection cycling
+            else if (Input.GetKeyDown(NextBallKey)) // Handle ball selection cycling
             {
                 CycleSelectedBall();
             }
-            if (AutoReload && _launchEnabled && !_ballInPlay) // Check for auto-reload when all balls are launched
+            else if (AutoReload && _launchEnabled) // Check for auto-reload when all balls are launched
             {
                 var inv = PlayerInventory.Instance;
-                bool allLaunched = inv != null
-                    ? _nextLaunchSlot >= inv.UsedBallSlots
-                    : true;
+                bool allLaunched = inv != null ? _nextLaunchSlot >= inv.UsedBallSlots : true;
 
                 if (allLaunched && !_reloading && _nextLaunchSlot > 0)
                 {
-                    AutoReloadBalls();
+                    TryReload();
                 }
             }
         }
     }
 
+    #region Ball Controls
     void HandleBreakHold()
     {
         if (!_ballInPlay)
@@ -199,6 +209,10 @@ public class BallManager : MonoBehaviour
             {
                 BreakChargeIndicator.gameObject.SetActive(true);
                 BreakChargeIndicator.fillAmount = Mathf.Clamp01(_breakHoldTimer / BreakHoldDuration);
+
+                Vector2 mousePos;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(_reloadIndicatorCanvas.transform as RectTransform, Input.mousePosition, _reloadIndicatorCanvas.worldCamera, out mousePos);
+                BreakChargeIndicator.rectTransform.localPosition = mousePos + Vector2.right * 16f;
             }
 
             if (_breakHoldTimer >= BreakHoldDuration)
@@ -214,7 +228,7 @@ public class BallManager : MonoBehaviour
     }
     void CancelBreakHold()
     {
-        _breakHoldTimer  = 0f;
+        _breakHoldTimer = 0f;
         _breakHoldActive = false;
         if (BreakChargeIndicator != null)
         {
@@ -222,36 +236,7 @@ public class BallManager : MonoBehaviour
             BreakChargeIndicator.gameObject.SetActive(false);
         }
     }
-    public void ManualReload()
-    {
-        if (_reloading) return;
-
-        _reloading = true;
-        _nextLaunchSlot = 0;
-        _selectedBallSlot = 0;
-        _ballInPlay = false;
-
-        GameEvents.ReloadTriggered();
-        GameEvents.SelectedBallChanged(0);
-
-        _reloading = false;
-        Debug.Log("[BallManager] Manual reload triggered");
-    }
-    void AutoReloadBalls()
-    {
-        if (_reloading) return;
-
-        _reloading = true;
-        _nextLaunchSlot = 0;
-        _selectedBallSlot = 0;
-        _ballInPlay = false;
-
-        GameEvents.ReloadTriggered();
-        //UpdateSelectedBallDisplay();
-
-        _reloading = false;
-        Debug.Log("[BallManager] Auto-reload triggered");
-    }
+    
     void CycleSelectedBall()
     {
         var inv = PlayerInventory.Instance;
@@ -287,30 +272,28 @@ public class BallManager : MonoBehaviour
             LaunchBall();
         }
     }
-    #region Ball Controls
     void LaunchFromSlot(int slotIndex)
     {
-        var inv      = PlayerInventory.Instance;
+        var inv = PlayerInventory.Instance;
         var instance = inv?.GetBallInstanceForLaunch(slotIndex);
 
         GameObject prefab = (instance?.BallPrefab != null) ? instance.BallPrefab : BallPrefab;
         if (prefab == null) { Debug.LogWarning("[BallManager] No prefab for slot " + slotIndex); return; }
 
-        Vector3 spawnPos = BallSpawnPoint != null
-            ? BallSpawnPoint.position + Vector3.up * (slotIndex * 0.3f)   // slight vertical offset per ball
+        Vector3 spawnPos = BallSpawnPoint != null ? BallSpawnPoint.position + Vector3.up * (slotIndex * 0.3f)   // slight vertical offset per ball
             : Vector3.zero;
 
         GameObject go   = Instantiate(prefab, spawnPos, Quaternion.identity);
-        Ball       ball = go.GetComponent<Ball>();
+        Ball ball = go.GetComponent<Ball>();
         if (ball == null) return;
 
         instance?.ApplyToBall(ball);
 
         if (inv != null)
         {
-            ball.Damage        = Mathf.Max(1, Mathf.RoundToInt(ball.Damage * _stats.GlobalDamageMultiplier));
-            ball.InitialSpeed  *= _stats.GlobalSpeedMultiplier;
-            ball.MaxDurability  = Mathf.Max(1, ball.MaxDurability + _stats.GlobalDurabilityBonus);
+            ball.Damage = Mathf.Max(1, Mathf.RoundToInt(ball.Damage * _stats.GlobalDamageMultiplier));
+            ball.InitialSpeed *= _stats.GlobalSpeedMultiplier;
+            ball.MaxDurability = Mathf.Max(1, ball.MaxDurability + _stats.GlobalDurabilityBonus);
         }
         float baseAngle = Random.Range(-30f, 30f); //Add random angle
         float slotOffset = (slotIndex - (inv.UsedBallSlots - 1) * 0.5f) * 15f;
@@ -344,28 +327,11 @@ public class BallManager : MonoBehaviour
             GameEvents.BallCountChanged(_activeBalls.Count);
         }
     }
-
-    public void SpawnExtraBall(Vector3 position, Vector2 direction)
-    {
-        if (BallPrefab == null) return;
-
-        GameObject go   = Instantiate(BallPrefab, position, Quaternion.identity);
-        Ball       ball = go.GetComponent<Ball>();
-        if (ball != null)
-        {
-            ball.Launch(direction);
-            RegisterBall(ball);
-            GameEvents.BallLaunched(ball);
-            GameEvents.BallCountChanged(_activeBalls.Count);
-        }
-    }
-
     public void RegisterBall(Ball ball)
     {
         if (!_activeBalls.Contains(ball))
             _activeBalls.Add(ball);
     }
-
     public void OnBallLost(Ball ball)
     {
         RemoveBall(ball);
@@ -378,20 +344,16 @@ public class BallManager : MonoBehaviour
         RemoveBall(ball);
         Debug.Log($"[BallManager] Ball destroyed (durability=0). Remaining: {_activeBalls.Count}");
     }
-
     void RemoveBall(Ball ball)
     {
         _activeBalls.Remove(ball);
         Destroy(ball.gameObject);
         GameEvents.BallCountChanged(_activeBalls.Count);
-        if (_activeBalls.Count == 0)
-            _ballInPlay = false;
+        if (_activeBalls.Count == 0) _ballInPlay = false;
     }
-
     public void DestroyAllBalls()
     {
-        foreach (var ball in _activeBalls)
-            if (ball != null) Destroy(ball.gameObject);
+        foreach (var ball in _activeBalls) if (ball != null) Destroy(ball.gameObject);
 
         _activeBalls.Clear();
         _ballInPlay = false;
@@ -402,11 +364,57 @@ public class BallManager : MonoBehaviour
     }
     #endregion
 
+    #region Reload
+    public void TryReload()
+    {
+        if (_reloading) return;
+        _nextLaunchSlot = 0;
+        _selectedBallSlot = 0;
+        _ballInPlay = false;
+        StartCoroutine(ReloadCoroutine(BaseReloadSpeed));
+
+        GameEvents.ReloadTriggered();
+        Debug.Log("[BallManager] Reload triggered");
+    }
+    public float GetReloadBarWidth(float reloadDuration)
+    {
+        if (reloadDuration <= 0.5f) return MinBarWidth;
+        float extraTime = reloadDuration - 0.5f;
+        float extraWidth = extraTime * BaseBarWidth; // e.g., each extra second adds BaseBarWidth
+        return MinBarWidth + extraWidth;
+    }
+    IEnumerator ReloadCoroutine(float reloadTime)
+    {
+        _reloading = true;
+        float barWidth = GetReloadBarWidth(reloadTime);
+        ReloadIndicatorFill.fillAmount = 0f;
+        _reloadIndicatorRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, barWidth);
+        _reloadIndicatorRect.gameObject.SetActive(true);
+
+        float elapsed = 0f;
+        while (elapsed < reloadTime)
+        {
+            elapsed += Time.deltaTime;
+            float fillAmount = elapsed / reloadTime;
+            ReloadIndicatorFill.fillAmount = fillAmount;
+
+            Vector2 mousePos;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(_reloadIndicatorCanvas.transform as RectTransform, Input.mousePosition, _reloadIndicatorCanvas.worldCamera, out mousePos);
+            _reloadIndicatorRect.localPosition = mousePos + Vector2.up * -24f;
+
+            yield return null;
+        }
+        GameEvents.SelectedBallChanged(0);
+        GameEvents.ReloadCompleted();
+        _reloading = false;
+        _reloadIndicatorRect.gameObject.SetActive(false);
+    }
+    #endregion
     void ResetTimeScale()
     {
         Time.timeScale      = 1f;
         Time.fixedDeltaTime = 0.02f;
     }
-    public int   ActiveBallCount => _activeBalls.Count;
-    public float RoundTimer      => _roundTimer;
+    public int ActiveBallCount => _activeBalls.Count;
+    public float RoundTimer => _roundTimer;
 }

@@ -53,6 +53,7 @@ public static class GameEvents
     public static event Action<float> OnRoundTimerTick;
     public static event Action<Ball, int, int> OnBallDurabilityChanged;
     public static event Action OnReloadTriggered;
+    public static event Action OnReloadCompleted;
     public static event Action<int> OnSelectedBallChanged; // int = slot index
 
     public static void BallLost(Ball ball) => OnBallLost?.Invoke(ball);
@@ -62,6 +63,7 @@ public static class GameEvents
     public static void RoundTimerTick(float elapsed) => OnRoundTimerTick?.Invoke(elapsed);
     public static void BallDurabilityChanged(Ball ball, int cur, int max)=> OnBallDurabilityChanged?.Invoke(ball, cur, max);
     public static void ReloadTriggered() => OnReloadTriggered?.Invoke();
+    public static void ReloadCompleted() => OnReloadCompleted?.Invoke();
     public static void SelectedBallChanged(int slotIndex) => OnSelectedBallChanged?.Invoke(slotIndex);
     #endregion
 

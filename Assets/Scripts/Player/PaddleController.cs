@@ -75,7 +75,7 @@ public class PaddleController : MonoBehaviour
     #region Events
     void SubscribeToEvents()
     {
-        GameEvents.OnRoomEntered += (RoomData rm) => _inputEnabled = true;
+        GameEvents.OnWaveStarted += (int v) => _inputEnabled = true;
         //GameEvents.OnRoomCleared += () => _inputEnabled = false;
         GameEvents.OnShopOpened += () => _inputEnabled = false;
         GameEvents.OnGameOver += () => _inputEnabled = false;
